@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block title %}Clientes — Lab. Mezclas{% endblock %}
+{% block page_title %}Clientes{% endblock %}
+{% block topbar_actions %}
+  <a href="{{ url_for('cliente_nuevo') }}" class="btn btn-primary btn-sm">
+    <i class="fa-solid fa-plus me-1"></i>Nuevo Cliente
+  </a>
+{% endblock %}
+
+{% block content %}
+<div class="card-custom mb-4">
+  <div class="card-header-custom d-flex justify-content-between align-items-center">
+    <span><i class="fa-solid fa-building-user me-2"></i>Listado de Clientes ({{ clientes|length }})</span>
+  </div>
+  <div class="p-3 border-bottom">
+    <form method="get" class="d-flex gap-2">
+      <input type="text" name="q" value="{{ q }}" placeholder="Buscar por razón social, localidad, provincia..."
+             class="form-control form-control-sm" style="max-width:400px">
+      <button class="btn btn-sm btn-outline-primary"><i class="fa-solid fa-search me-1"></i>Buscar</button>
+      {% if q %}<a href="{{ url_for('clientes') }}" class="btn btn-sm btn-outline-secondary">Limpiar</a>{% endif %}
+    </form>
+  </div>
+  <div class="table-responsive">
+    <table class="table table-hover mb-0">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Razón Social</th>
+          <th>Técnico</th>
+          <th>Rubro</th>
+          <th>Localidad</th>
+          <th>Provincia</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for c in clientes %}
+        <tr>
+          <td><small class="text-muted">{{ c.id_cliente }}</small></td>
+          <td><strong>{{ c.razon_social }}</strong></td>
+          <td>{{ c.tecnico_responsable or '—' }}</td>
+          <td>{% if c.rubro %}<span class="badge bg-light text-dark border">{{ c.rubro }}</span>{% else %}—{% endif %}</td>
+          <td>{{ c.localidad or '—' }}</td>
+          <td>{{ c.provincia or '—' }}</td>
+          <td class="text-end">
+            <a href="{{ url_for('cliente_detalle', id=c.id_cliente) }}" class="btn btn-sm btn-outline-primary me-1" title="Ver"><i class="fa-solid fa-eye"></i></a>
+            <a href="{{ url_for('cliente_editar', id=c.id_cliente) }}" class="btn btn-sm btn-outline-warning" title="Editar"><i class="fa-solid fa-pen"></i></a>
+          </td>
+        </tr>
+        {% else %}
+        <tr><td colspan="7" class="text-center text-muted py-4">Sin clientes registrados.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

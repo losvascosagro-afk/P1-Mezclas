@@ -1,0 +1,290 @@
+/* ═══════════════════════════════════════════════════
+   Lab. Mezclas — Estilos principales
+   ═══════════════════════════════════════════════════ */
+
+:root {
+  --primary:    #1565C0;
+  --primary-d:  #0D47A1;
+  --green:      #2E7D32;
+  --green-l:    #E8F5E9;
+  --sidebar-w:  240px;
+  --topbar-h:   58px;
+  --red:        #C62828;
+  --gray-bg:    #F4F6F9;
+  --card-radius: 10px;
+}
+
+body {
+  background: var(--gray-bg);
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  font-size: 14px;
+  margin: 0;
+}
+
+/* ── SIDEBAR ── */
+#sidebar {
+  position: fixed;
+  top: 0; left: 0;
+  width: var(--sidebar-w);
+  height: 100vh;
+  background: linear-gradient(180deg, #1a237e 0%, #1565C0 100%);
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  z-index: 1000;
+  transition: width 0.25s ease;
+  overflow: hidden;
+}
+
+#sidebar.collapsed { width: 60px; }
+#sidebar.collapsed .logo-title,
+#sidebar.collapsed .logo-sub,
+#sidebar.collapsed .nav-link span,
+#sidebar.collapsed .sidebar-footer { display: none; }
+#sidebar.collapsed .nav-link { justify-content: center; padding: 12px 0; }
+#sidebar.collapsed .nav-link i { margin: 0 !important; font-size: 18px; }
+#sidebar.collapsed .sidebar-header { padding: 14px 0; justify-content: center; }
+#sidebar.collapsed .logo-icon { margin: 0; }
+
+.sidebar-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 18px 16px 14px;
+  border-bottom: 1px solid rgba(255,255,255,0.15);
+}
+
+.logo-icon {
+  width: 36px; height: 36px;
+  background: rgba(255,255,255,0.2);
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+.logo-title { font-size: 15px; font-weight: 700; line-height: 1.2; }
+.logo-sub   { font-size: 11px; opacity: 0.7; }
+
+#sidebar .nav-link {
+  color: rgba(255,255,255,0.8);
+  padding: 11px 18px;
+  border-radius: 8px;
+  margin: 2px 8px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  transition: background 0.15s, color 0.15s;
+}
+
+#sidebar .nav-link:hover,
+#sidebar .nav-link.active {
+  background: rgba(255,255,255,0.18);
+  color: #fff;
+}
+
+#sidebar .nav-link i { width: 18px; text-align: center; flex-shrink: 0; }
+
+.sidebar-footer {
+  margin-top: auto;
+  padding: 12px 18px;
+  font-size: 11px;
+  opacity: 0.5;
+  border-top: 1px solid rgba(255,255,255,0.1);
+}
+
+/* ── MAIN CONTENT ── */
+#main-content {
+  margin-left: var(--sidebar-w);
+  min-height: 100vh;
+  transition: margin-left 0.25s ease;
+}
+
+#main-content.expanded { margin-left: 60px; }
+
+/* ── TOPBAR ── */
+.topbar {
+  height: var(--topbar-h);
+  background: #fff;
+  border-bottom: 1px solid #e0e0e0;
+  padding: 0 24px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+}
+
+.page-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1a237e;
+}
+
+/* ── PAGE BODY ── */
+.page-body {
+  padding: 20px 24px 40px;
+}
+
+/* ── CARDS ── */
+.card-custom {
+  background: #fff;
+  border-radius: var(--card-radius);
+  box-shadow: 0 1px 4px rgba(0,0,0,0.07);
+  overflow: hidden;
+}
+
+.card-header-custom {
+  background: linear-gradient(90deg, #1a237e, #1565C0);
+  color: #fff;
+  padding: 10px 16px;
+  font-weight: 600;
+  font-size: 13px;
+  letter-spacing: 0.3px;
+}
+
+/* ── STAT CARDS ── */
+.stat-card {
+  background: #fff;
+  border-radius: var(--card-radius);
+  padding: 18px 20px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.07);
+  border-left: 4px solid transparent;
+}
+
+.stat-icon {
+  width: 48px; height: 48px;
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px;
+  color: #fff;
+  flex-shrink: 0;
+}
+
+.stat-num   { font-size: 28px; font-weight: 700; line-height: 1; }
+.stat-label { font-size: 12px; color: #777; margin-top: 2px; }
+
+.border-blue   { border-left-color: var(--primary) !important; }
+.border-green  { border-left-color: var(--green) !important; }
+.border-red    { border-left-color: var(--red) !important; }
+.border-purple { border-left-color: #6a1b9a !important; }
+
+.bg-blue   { background: var(--primary) !important; }
+.bg-green  { background: var(--green) !important; }
+.bg-red    { background: var(--red) !important; }
+.bg-purple { background: #6a1b9a !important; }
+
+.text-green { color: var(--green) !important; }
+.text-red   { color: var(--red) !important; }
+
+/* ── PARAM CARDS (ensayo detalle) ── */
+.param-card {
+  background: var(--gray-bg);
+  border-radius: 8px;
+  padding: 12px 8px;
+}
+
+.param-icon  { font-size: 20px; color: var(--primary); margin-bottom: 6px; }
+.param-val   { font-size: 15px; font-weight: 700; }
+.param-label { font-size: 11px; color: #888; margin-top: 2px; }
+
+/* ── OBS BADGES ── */
+.obs-badge {
+  width: 52px; height: 52px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 24px;
+  margin: 0 auto;
+}
+
+.obs-good { background: #E8F5E9; color: var(--green); }
+.obs-bad  { background: #FFEBEE; color: var(--red); }
+
+/* ── CATEGORY BADGES ── */
+.cat-badge {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 8px;
+}
+
+.cat-herbicida   { background: #FFF9C4 !important; color: #F57F17 !important; border: 1px solid #F9A825; }
+.cat-insecticida { background: #FCE4EC !important; color: #880E4F !important; border: 1px solid #F06292; }
+.cat-fungicida   { background: #E8EAF6 !important; color: #283593 !important; border: 1px solid #7986CB; }
+.cat-adyuvante   { background: #E0F7FA !important; color: #006064 !important; border: 1px solid #4DD0E1; }
+.cat-fertilizante{ background: #F3E5F5 !important; color: #4A148C !important; border: 1px solid #CE93D8; }
+.cat-semilla     { background: #E8F5E9 !important; color: #1B5E20 !important; border: 1px solid #81C784; }
+.cat-acaricida   { background: #FBE9E7 !important; color: #BF360C !important; border: 1px solid #FF7043; }
+
+/* ── FOTOS ── */
+.foto-card {
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #fafafa;
+  padding: 4px;
+}
+
+.foto-thumb {
+  width: 100%;
+  aspect-ratio: 4/3;
+  object-fit: cover;
+  border-radius: 6px;
+  cursor: zoom-in;
+  display: block;
+}
+
+.foto-caption {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 2px 0;
+  color: #333;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.foto-meta {
+  font-size: 10px;
+  color: #aaa;
+  padding: 1px 2px;
+}
+
+/* ── TABLES ── */
+.table thead th {
+  background: #f0f4ff;
+  color: #1a237e;
+  font-size: 12px;
+  font-weight: 600;
+  border-bottom: 2px solid #c5cae9;
+  white-space: nowrap;
+}
+
+.table tbody tr:hover { background: #f5f8ff; }
+
+/* ── BUTTON EXTRAS ── */
+.btn-xs {
+  padding: 2px 6px;
+  font-size: 11px;
+}
+
+/* ── FORM LABELS ── */
+.form-label.fw-semibold { color: #37474F; font-size: 13px; }
+
+/* ── ALERTS ── */
+.alert { border-radius: 8px; font-size: 13px; }
+
+/* ── RESPONSIVE ── */
+@media (max-width: 768px) {
+  #sidebar { width: 60px; }
+  #sidebar .logo-title, #sidebar .logo-sub,
+  #sidebar .sidebar-footer { display: none; }
+  #sidebar .nav-link { justify-content: center; padding: 12px 0; }
+  #sidebar .nav-link i { margin: 0 !important; font-size: 18px; }
+  #sidebar .sidebar-header { padding: 14px 0; justify-content: center; }
+  #main-content { margin-left: 60px; }
+  .page-body { padding: 14px 12px 30px; }
+  .topbar { padding: 0 12px; }
+}

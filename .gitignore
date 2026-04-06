@@ -1,0 +1,39 @@
+# Base de datos local
+mezclas.db
+
+# Entorno virtual
+venv/
+.venv/
+env/
+
+# Variables de entorno
+.env
+.env.local
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.egg-info/
+dist/
+build/
+
+# Uploads (no subir fotos al repo)
+static/uploads/*
+!static/uploads/.gitkeep
+
+# Vercel
+.vercel/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+
+# Excel con datos sensibles (comentar si querés incluirlo)
+# Mezclas_Base.xlsx

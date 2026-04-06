@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Lab. Mezclas{% endblock %}</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+  <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<nav id="sidebar">
+  <div class="sidebar-header">
+    <div class="logo-icon"><i class="fa-solid fa-flask-vial"></i></div>
+    <div>
+      <div class="logo-title">Lab. Mezclas</div>
+      <div class="logo-sub">Compatibilidad</div>
+    </div>
+  </div>
+  <ul class="nav flex-column mt-2">
+    <li class="nav-item">
+      <a class="nav-link {% if request.endpoint=='dashboard' %}active{% endif %}" href="{{ url_for('dashboard') }}">
+        <i class="fa-solid fa-gauge-high"></i> Dashboard
+      </a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link {% if 'ensayo' in (request.endpoint or '') %}active{% endif %}" href="{{ url_for('ensayos') }}">
+        <i class="fa-solid fa-vials"></i> Ensayos
+      </a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link {% if 'cliente' in (request.endpoint or '') %}active{% endif %}" href="{{ url_for('clientes') }}">
+        <i class="fa-solid fa-building-user"></i> Clientes
+      </a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link {% if 'producto' in (request.endpoint or '') %}active{% endif %}" href="{{ url_for('productos') }}">
+        <i class="fa-solid fa-boxes-stacked"></i> Productos
+      </a>
+    </li>
+  </ul>
+  <div class="sidebar-footer">
+    <i class="fa-solid fa-microscope me-1"></i> v1.0
+  </div>
+</nav>
+
+<!-- MAIN CONTENT -->
+<div id="main-content">
+  <!-- TOP BAR -->
+  <div class="topbar d-flex align-items-center justify-content-between">
+    <div class="d-flex align-items-center gap-3">
+      <button class="btn btn-sm btn-outline-secondary" id="sidebarToggle">
+        <i class="fa-solid fa-bars"></i>
+      </button>
+      <h5 class="mb-0 page-title">{% block page_title %}{% endblock %}</h5>
+    </div>
+    <div class="d-flex gap-2">
+      {% block topbar_actions %}{% endblock %}
+    </div>
+  </div>
+
+  <!-- ALERTS -->
+  <div class="px-4 pt-3">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for cat, msg in messages %}
+          <div class="alert alert-{{ cat }} alert-dismissible fade show" role="alert">
+            {{ msg }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+          </div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+  </div>
+
+  <!-- PAGE CONTENT -->
+  <div class="page-body">
+    {% block content %}{% endblock %}
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  document.getElementById('sidebarToggle').addEventListener('click', function() {
+    document.getElementById('sidebar').classList.toggle('collapsed');
+    document.getElementById('main-content').classList.toggle('expanded');
+  });
+</script>
+{% block scripts %}{% endblock %}
+</body>
+</html>

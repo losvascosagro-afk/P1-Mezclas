@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+{% block title %}Ensayos — Lab. Mezclas{% endblock %}
+{% block page_title %}Ensayos{% endblock %}
+{% block topbar_actions %}
+  <a href="{{ url_for('ensayo_nuevo') }}" class="btn btn-primary btn-sm">
+    <i class="fa-solid fa-plus me-1"></i>Nuevo Ensayo
+  </a>
+{% endblock %}
+
+{% block content %}
+<div class="card-custom">
+  <div class="card-header-custom">
+    <i class="fa-solid fa-vials me-2"></i>Registro de Ensayos ({{ ensayos|length }})
+  </div>
+  <div class="p-3 border-bottom">
+    <form method="get" class="d-flex flex-wrap gap-2">
+      <input type="text" name="q" value="{{ q }}" placeholder="Buscar cliente u objetivo..."
+             class="form-control form-control-sm" style="max-width:320px">
+      <select name="resultado" class="form-select form-select-sm" style="max-width:180px">
+        <option value="">Todos los resultados</option>
+        <option value="estable"   {% if res_sel=='estable'   %}selected{% endif %}>✅ Estable</option>
+        <option value="inestable" {% if res_sel=='inestable' %}selected{% endif %}>❌ Inestable</option>
+      </select>
+      <button class="btn btn-sm btn-outline-primary"><i class="fa-solid fa-search me-1"></i>Buscar</button>
+      {% if q or res_sel %}<a href="{{ url_for('ensayos') }}" class="btn btn-sm btn-outline-secondary">Limpiar</a>{% endif %}
+    </form>
+  </div>
+  <div class="table-responsive">
+    <table class="table table-hover mb-0">
+      <thead>
+        <tr>
+          <th>N°</th>
+          <th>Fecha</th>
+          <th>Cliente</th>
+          <th>Objetivo</th>
+          <th>pH / Cond.</th>
+          <th>Resultado</th>
+          <th>Productos</th>
+          <th>Fotos</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for e in ensayos %}
+        <tr>
+          <td><span class="badge bg-secondary">{{ '%04d' % e.id_ensayo }}</span></td>
+          <td><small>{{ e.fecha or '—' }}</small></td>
+          <td>
+            <span class="text-truncate d-block" style="max-width:160px" title="{{ e.razon_social }}">
+              {{ e.razon_social or '—' }}
+            </span>
+          </td>
+          <td class="text-truncate" style="max-width:160px" title="{{ e.objetivo }}">
+            {{ e.objetivo or '—' }}
+          </td>
+          <td>
+            <small class="text-muted">
+              {% if e.ph %}pH {{ e.ph }}{% endif %}
+              {% if e.conductividad %} / {{ e.conductividad }} µS{% endif %}
+            </small>
+          </td>
+          <td>
+            {% if e.resultado_final %}
+              {% if 'inestable' in e.resultado_final|lower %}
+                <span class="badge bg-danger"><i class="fa-solid fa-xmark me-1"></i>{{ e.resultado_final }}</span>
+              {% elif 'estable' in e.resultado_final|lower %}
+                <span class="badge bg-success"><i class="fa-solid fa-check me-1"></i>{{ e.resultado_final }}</span>
+              {% else %}
+                <span class="badge bg-secondary">{{ e.resultado_final }}</span>
+              {% endif %}
+            {% else %}<span class="text-muted">—</span>{% endif %}
+          </td>
+          <td class="text-center">
+            {% if e.nproductos %}
+              <span class="badge bg-light text-dark border">{{ e.nproductos }}</span>
+            {% else %}—{% endif %}
+          </td>
+          <td class="text-center">
+            {% if e.fotos %}
+              <span class="badge bg-info text-dark"><i class="fa-solid fa-camera me-1"></i>{{ e.fotos }}</span>
+            {% else %}<span class="text-muted">—</span>{% endif %}
+          </td>
+          <td class="text-end">
+            <a href="{{ url_for('ensayo_detalle', id=e.id_ensayo) }}" class="btn btn-sm btn-outline-primary me-1" title="Ver">
+              <i class="fa-solid fa-eye"></i>
+            </a>
+            <a href="{{ url_for('ensayo_pdf', id=e.id_ensayo) }}" class="btn btn-sm btn-outline-danger" title="PDF">
+              <i class="fa-solid fa-file-pdf"></i>
+            </a>
+          </td>
+        </tr>
+        {% else %}
+        <tr><td colspan="9" class="text-center text-muted py-4">Sin ensayos registrados.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

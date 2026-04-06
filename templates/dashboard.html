@@ -1,0 +1,118 @@
+{% extends "base.html" %}
+{% block title %}Dashboard — Lab. Mezclas{% endblock %}
+{% block page_title %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="row g-4 mb-4">
+  <!-- Stats cards -->
+  <div class="col-6 col-lg-3">
+    <div class="stat-card border-blue">
+      <div class="stat-icon bg-blue"><i class="fa-solid fa-vials"></i></div>
+      <div class="stat-info">
+        <div class="stat-num">{{ stats.ensayos }}</div>
+        <div class="stat-label">Ensayos</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-6 col-lg-3">
+    <div class="stat-card border-green">
+      <div class="stat-icon bg-green"><i class="fa-solid fa-circle-check"></i></div>
+      <div class="stat-info">
+        <div class="stat-num text-green">{{ stats.estables }}</div>
+        <div class="stat-label">Estables</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-6 col-lg-3">
+    <div class="stat-card border-red">
+      <div class="stat-icon bg-red"><i class="fa-solid fa-circle-xmark"></i></div>
+      <div class="stat-info">
+        <div class="stat-num text-red">{{ stats.inestables }}</div>
+        <div class="stat-label">Inestables</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-6 col-lg-3">
+    <div class="stat-card border-purple">
+      <div class="stat-icon bg-purple"><i class="fa-solid fa-building-user"></i></div>
+      <div class="stat-info">
+        <div class="stat-num">{{ stats.clientes }}</div>
+        <div class="stat-label">Clientes</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Quick actions -->
+<div class="row g-3 mb-4">
+  <div class="col-12">
+    <div class="card-custom p-3 d-flex flex-wrap gap-2 align-items-center">
+      <span class="text-muted me-2"><i class="fa-solid fa-bolt me-1"></i>Acciones rápidas:</span>
+      <a href="{{ url_for('ensayo_nuevo') }}" class="btn btn-primary btn-sm">
+        <i class="fa-solid fa-plus me-1"></i>Nuevo Ensayo
+      </a>
+      <a href="{{ url_for('cliente_nuevo') }}" class="btn btn-outline-primary btn-sm">
+        <i class="fa-solid fa-user-plus me-1"></i>Nuevo Cliente
+      </a>
+      <a href="{{ url_for('producto_nuevo') }}" class="btn btn-outline-secondary btn-sm">
+        <i class="fa-solid fa-box me-1"></i>Nuevo Producto
+      </a>
+    </div>
+  </div>
+</div>
+
+<!-- Recent tests -->
+<div class="card-custom">
+  <div class="card-header-custom">
+    <i class="fa-solid fa-clock-rotate-left me-2"></i>Últimos Ensayos
+  </div>
+  <div class="table-responsive">
+    <table class="table table-hover mb-0">
+      <thead>
+        <tr>
+          <th>N°</th>
+          <th>Fecha</th>
+          <th>Cliente</th>
+          <th>Objetivo</th>
+          <th>Resultado</th>
+          <th>Fotos</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for r in recientes %}
+        <tr>
+          <td><span class="badge bg-secondary">{{ '%04d' % r.id_ensayo }}</span></td>
+          <td>{{ r.fecha or '—' }}</td>
+          <td>{{ r.razon_social or '—' }}</td>
+          <td class="text-truncate" style="max-width:180px">{{ r.objetivo or '—' }}</td>
+          <td>
+            {% if r.resultado_final %}
+              {% if 'inestable' in r.resultado_final|lower %}
+                <span class="badge bg-danger">{{ r.resultado_final }}</span>
+              {% elif 'estable' in r.resultado_final|lower %}
+                <span class="badge bg-success">{{ r.resultado_final }}</span>
+              {% else %}
+                <span class="badge bg-secondary">{{ r.resultado_final }}</span>
+              {% endif %}
+            {% else %}—{% endif %}
+          </td>
+          <td>
+            {% if r.fotos %}
+              <span class="badge bg-info text-dark"><i class="fa-solid fa-camera me-1"></i>{{ r.fotos }}</span>
+            {% else %}—{% endif %}
+          </td>
+          <td>
+            <a href="{{ url_for('ensayo_detalle', id=r.id_ensayo) }}" class="btn btn-sm btn-outline-primary">
+              <i class="fa-solid fa-eye"></i>
+            </a>
+          </td>
+        </tr>
+        {% else %}
+        <tr><td colspan="7" class="text-center text-muted py-4">Sin ensayos registrados.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

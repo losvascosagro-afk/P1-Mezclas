@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+{% block title %}{{ titulo }} — Lab. Mezclas{% endblock %}
+{% block page_title %}{{ titulo }}{% endblock %}
+{% block topbar_actions %}
+  <a href="{{ url_for('clientes') }}" class="btn btn-outline-secondary btn-sm">
+    <i class="fa-solid fa-arrow-left me-1"></i>Volver
+  </a>
+{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-lg-8">
+    <div class="card-custom">
+      <div class="card-header-custom"><i class="fa-solid fa-building-user me-2"></i>{{ titulo }}</div>
+      <div class="p-4">
+        <form method="post">
+          <div class="row g-3">
+            <div class="col-12">
+              <label class="form-label fw-semibold">Razón Social <span class="text-danger">*</span></label>
+              <input type="text" name="razon_social" class="form-control" required
+                     value="{{ c.razon_social if c else '' }}">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">Técnico Responsable</label>
+              <input type="text" name="tecnico_responsable" class="form-control"
+                     value="{{ c.tecnico_responsable if c else '' }}">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">C.U.I.T.</label>
+              <input type="text" name="cuit" class="form-control"
+                     value="{{ c.cuit if c else '' }}" placeholder="XX-XXXXXXXX-X">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">Condición IVA</label>
+              <select name="condicion_iva" class="form-select">
+                <option value="">— Seleccionar —</option>
+                {% for opt in ['Responsable Inscripto','Monotributista','Exento','Consumidor Final'] %}
+                  <option value="{{ opt }}" {% if c and c.condicion_iva == opt %}selected{% endif %}>{{ opt }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">Rubro</label>
+              <input type="text" name="rubro" class="form-control"
+                     value="{{ c.rubro if c else '' }}" placeholder="Ej: Adyuvantes">
+            </div>
+            <div class="col-12">
+              <label class="form-label fw-semibold">Dirección</label>
+              <input type="text" name="direccion" class="form-control"
+                     value="{{ c.direccion if c else '' }}">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">Localidad</label>
+              <input type="text" name="localidad" class="form-control"
+                     value="{{ c.localidad if c else '' }}">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">Provincia</label>
+              <input type="text" name="provincia" class="form-control"
+                     value="{{ c.provincia if c else '' }}">
+            </div>
+          </div>
+          <hr class="my-4">
+          <div class="d-flex gap-2 justify-content-end">
+            <a href="{{ url_for('clientes') }}" class="btn btn-outline-secondary">Cancelar</a>
+            <button type="submit" class="btn btn-primary">
+              <i class="fa-solid fa-floppy-disk me-1"></i>Guardar
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

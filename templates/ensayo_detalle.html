@@ -1,0 +1,253 @@
+{% extends "base.html" %}
+{% block title %}Ensayo {{ '%04d' % e.id_ensayo }} — Lab. Mezclas{% endblock %}
+{% block page_title %}Ensayo N° {{ '%04d' % e.id_ensayo }}{% endblock %}
+{% block topbar_actions %}
+  <a href="{{ url_for('ensayo_pdf', id=e.id_ensayo) }}" class="btn btn-danger btn-sm">
+    <i class="fa-solid fa-file-pdf me-1"></i>Descargar PDF
+  </a>
+  <a href="{{ url_for('ensayo_editar', id=e.id_ensayo) }}" class="btn btn-warning btn-sm">
+    <i class="fa-solid fa-pen me-1"></i>Editar
+  </a>
+  <a href="{{ url_for('ensayos') }}" class="btn btn-outline-secondary btn-sm">
+    <i class="fa-solid fa-arrow-left me-1"></i>Volver
+  </a>
+{% endblock %}
+
+{% block content %}
+<div class="row g-4">
+
+  <!-- ── COLUMNA PRINCIPAL ── -->
+  <div class="col-lg-8">
+
+    <!-- Cliente + Resultado -->
+    <div class="card-custom mb-4">
+      <div class="p-4">
+        <div class="d-flex justify-content-between align-items-start flex-wrap gap-2">
+          <div>
+            <div class="text-muted small mb-1">Cliente</div>
+            <h5 class="mb-0">{{ e.razon_social or '—' }}</h5>
+            {% if e.tecnico_responsable %}
+              <small class="text-muted"><i class="fa-solid fa-user me-1"></i>{{ e.tecnico_responsable }}</small>
+            {% endif %}
+          </div>
+          <div class="text-end">
+            {% if e.resultado_final %}
+              {% if 'inestable' in e.resultado_final|lower %}
+                <span class="badge bg-danger fs-6 px-3 py-2">
+                  <i class="fa-solid fa-circle-xmark me-1"></i>{{ e.resultado_final }}
+                </span>
+              {% elif 'estable' in e.resultado_final|lower %}
+                <span class="badge bg-success fs-6 px-3 py-2">
+                  <i class="fa-solid fa-circle-check me-1"></i>{{ e.resultado_final }}
+                </span>
+              {% else %}
+                <span class="badge bg-secondary fs-6 px-3 py-2">{{ e.resultado_final }}</span>
+              {% endif %}
+            {% endif %}
+            <div class="text-muted small mt-1">{{ e.fecha or '—' }}</div>
+          </div>
+        </div>
+        {% if e.objetivo %}
+          <div class="mt-3 p-2 bg-light rounded">
+            <small class="text-muted">Objetivo:</small><br>
+            <strong>{{ e.objetivo }}</strong>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Condiciones del agua -->
+    <div class="card-custom mb-4">
+      <div class="card-header-custom"><i class="fa-solid fa-droplet me-2"></i>Condiciones del Ensayo</div>
+      <div class="p-3">
+        <div class="row g-2 text-center">
+          {% set params = [
+            ('Tipo de Agua', e.tipo_agua, 'fa-water'),
+            ('pH', e.ph, 'fa-flask'),
+            ('Conductividad', (e.conductividad|string + ' µS/cm') if e.conductividad else None, 'fa-bolt'),
+            ('Dureza', (e.dureza|string + ' mg/L') if e.dureza else None, 'fa-cubes'),
+            ('Volumen', (e.volumen_simulado|string + ' L') if e.volumen_simulado else None, 'fa-fill-drip'),
+            ('Temperatura', (e.temperatura|string + ' °C') if e.temperatura else None, 'fa-temperature-half'),
+            ('Tiempo Obs.', (e.tiempo_observacion|string + ' h') if e.tiempo_observacion else None, 'fa-clock'),
+          ] %}
+          {% for label, val, icon in params %}
+          <div class="col-6 col-md-3">
+            <div class="param-card">
+              <i class="fa-solid {{ icon }} param-icon"></i>
+              <div class="param-val">{{ val or '—' }}</div>
+              <div class="param-label">{{ label }}</div>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+
+    <!-- Composición de la mezcla -->
+    <div class="card-custom mb-4">
+      <div class="card-header-custom"><i class="fa-solid fa-flask me-2"></i>Composición de la Mezcla</div>
+      {% if detalles %}
+      <div class="table-responsive">
+        <table class="table table-sm mb-0">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Producto</th>
+              <th>Categoría</th>
+              <th>Empresa</th>
+              <th>Principio Activo</th>
+              <th>Dosis</th>
+              <th>Ud.</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for d in detalles %}
+            <tr>
+              <td><span class="badge bg-primary rounded-circle">{{ d.orden_carga }}</span></td>
+              <td><strong>{{ d.nombre_comercial or '—' }}</strong></td>
+              <td>{% if d.categoria %}<span class="badge cat-badge cat-{{ d.categoria|lower|replace(' ','_') }}">{{ d.categoria }}</span>{% else %}—{% endif %}</td>
+              <td>{{ d.empresa or '—' }}</td>
+              <td><small class="text-muted">{{ d.principio_activo or '—' }}</small></td>
+              <td><strong>{{ d.dosis or '—' }}</strong></td>
+              <td>{{ d.unidad or 'L' }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+      <div class="p-3 text-muted">Sin productos registrados.</div>
+      {% endif %}
+    </div>
+
+    <!-- Observaciones visuales -->
+    <div class="card-custom mb-4">
+      <div class="card-header-custom"><i class="fa-solid fa-eye me-2"></i>Observaciones Visuales</div>
+      <div class="p-4">
+        <div class="row g-3">
+          {% for campo, label in [('espuma','Espuma'),('precipitado','Precipitado'),('separacion_fases','Separación de Fases'),('redispersion','Redispersión')] %}
+          <div class="col-6 col-md-3 text-center">
+            {% set val = e[campo] %}
+            {% if val in ('Si','Sí') %}
+              <div class="obs-badge obs-bad"><i class="fa-solid fa-circle-xmark"></i></div>
+            {% else %}
+              <div class="obs-badge obs-good"><i class="fa-solid fa-circle-check"></i></div>
+            {% endif %}
+            <div class="mt-1 small fw-semibold">{{ label }}</div>
+            <div class="small text-muted">{{ val or 'No' }}</div>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+
+    <!-- Recomendación -->
+    {% if e.recomendacion %}
+    <div class="card-custom mb-4">
+      <div class="card-header-custom"><i class="fa-solid fa-lightbulb me-2"></i>Recomendación</div>
+      <div class="p-4">
+        <p class="mb-0">{{ e.recomendacion }}</p>
+      </div>
+    </div>
+    {% endif %}
+
+  </div>
+
+  <!-- ── COLUMNA LATERAL ── -->
+  <div class="col-lg-4">
+
+    <!-- Microscopía -->
+    <div class="card-custom mb-4">
+      <div class="card-header-custom"><i class="fa-solid fa-microscope me-2"></i>Observaciones al Microscopio</div>
+      <div class="p-4">
+        {% if e.obs_microscopio %}
+          <p class="mb-0" style="white-space:pre-line">{{ e.obs_microscopio }}</p>
+        {% else %}
+          <p class="text-muted mb-0">Sin observaciones registradas.</p>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Fotos -->
+    <div class="card-custom mb-4">
+      <div class="card-header-custom d-flex justify-content-between align-items-center">
+        <span><i class="fa-solid fa-camera me-2"></i>Imágenes ({{ fotos|length }})</span>
+        <button class="btn btn-sm btn-light" data-bs-toggle="collapse" data-bs-target="#uploadForm">
+          <i class="fa-solid fa-upload me-1"></i>Subir
+        </button>
+      </div>
+
+      <!-- Upload form -->
+      <div class="collapse" id="uploadForm">
+        <div class="p-3 border-bottom bg-light">
+          <form method="post" action="{{ url_for('foto_upload', id=e.id_ensayo) }}" enctype="multipart/form-data">
+            <div class="mb-2">
+              <label class="form-label small fw-semibold">Imagen (JPG, PNG, TIFF)</label>
+              <input type="file" name="foto" class="form-control form-control-sm" accept="image/*" required>
+            </div>
+            <div class="mb-2">
+              <label class="form-label small fw-semibold">Descripción (opcional)</label>
+              <input type="text" name="descripcion" class="form-control form-control-sm"
+                     placeholder="Ej: Vista 40x — cristales">
+            </div>
+            <button type="submit" class="btn btn-primary btn-sm w-100">
+              <i class="fa-solid fa-upload me-1"></i>Subir Foto
+            </button>
+          </form>
+        </div>
+      </div>
+
+      <!-- Galería -->
+      <div class="p-3">
+        {% if fotos %}
+          <div class="row g-2">
+            {% for f in fotos %}
+            <div class="col-6">
+              <div class="foto-card">
+                <a href="{{ url_for('static', filename='uploads/' + f.nombre_archivo) }}" target="_blank">
+                  <img src="{{ url_for('static', filename='uploads/' + f.nombre_archivo) }}"
+                       class="foto-thumb" alt="{{ f.descripcion or 'Foto' }}">
+                </a>
+                {% if f.descripcion %}
+                  <div class="foto-caption">{{ f.descripcion }}</div>
+                {% endif %}
+                <div class="foto-meta">{{ f.fecha_carga }}</div>
+                <form method="post" action="{{ url_for('foto_eliminar', fid=f.id_foto) }}"
+                      onsubmit="return confirm('¿Eliminar esta foto?')">
+                  <button class="btn btn-xs btn-outline-danger w-100 mt-1">
+                    <i class="fa-solid fa-trash me-1"></i>Eliminar
+                  </button>
+                </form>
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+        {% else %}
+          <p class="text-muted text-center py-2 mb-0 small">Sin imágenes. Usá el botón <b>Subir</b> para agregar fotos del microscopio.</p>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Acciones -->
+    <div class="card-custom">
+      <div class="card-header-custom"><i class="fa-solid fa-gear me-2"></i>Acciones</div>
+      <div class="p-3 d-grid gap-2">
+        <a href="{{ url_for('ensayo_pdf', id=e.id_ensayo) }}" class="btn btn-danger">
+          <i class="fa-solid fa-file-pdf me-2"></i>Descargar Informe PDF
+        </a>
+        <a href="{{ url_for('ensayo_editar', id=e.id_ensayo) }}" class="btn btn-warning">
+          <i class="fa-solid fa-pen me-2"></i>Editar Ensayo
+        </a>
+        <hr class="my-1">
+        <form method="post" action="{{ url_for('ensayo_eliminar', id=e.id_ensayo) }}"
+              onsubmit="return confirm('¿Eliminar este ensayo y todas sus fotos?')">
+          <button class="btn btn-outline-danger w-100">
+            <i class="fa-solid fa-trash me-2"></i>Eliminar Ensayo
+          </button>
+        </form>
+      </div>
+    </div>
+
+  </div>
+</div>
+{% endblock %}

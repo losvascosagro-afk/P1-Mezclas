@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+{% block title %}{{ titulo }} — Lab. Mezclas{% endblock %}
+{% block page_title %}{{ titulo }}{% endblock %}
+{% block topbar_actions %}
+  <a href="{{ url_for('productos') }}" class="btn btn-outline-secondary btn-sm">
+    <i class="fa-solid fa-arrow-left me-1"></i>Volver
+  </a>
+{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-lg-8">
+    <div class="card-custom">
+      <div class="card-header-custom"><i class="fa-solid fa-box me-2"></i>{{ titulo }}</div>
+      <div class="p-4">
+        <form method="post">
+          <div class="row g-3">
+            <div class="col-12">
+              <label class="form-label fw-semibold">Nombre Comercial <span class="text-danger">*</span></label>
+              <input type="text" name="nombre_comercial" class="form-control" required
+                     value="{{ p.nombre_comercial if p else '' }}">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">Categoría</label>
+              <select name="categoria" class="form-select">
+                <option value="">— Seleccionar —</option>
+                {% for opt in ['HERBICIDA','INSECTICIDA','FUNGICIDA','ACARICIDA','ADYUVANTE','FERTILIZANTE','SEMILLA','OTRO'] %}
+                  <option value="{{ opt }}" {% if p and p.categoria == opt %}selected{% endif %}>{{ opt }}</option>
+                {% endfor %}
+                {% if p and p.categoria and p.categoria not in ['HERBICIDA','INSECTICIDA','FUNGICIDA','ACARICIDA','ADYUVANTE','FERTILIZANTE','SEMILLA','OTRO'] %}
+                  <option value="{{ p.categoria }}" selected>{{ p.categoria }}</option>
+                {% endif %}
+              </select>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">Empresa</label>
+              <input type="text" name="empresa" class="form-control"
+                     value="{{ p.empresa if p else '' }}">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">Formulación</label>
+              <select name="formulacion" class="form-select">
+                <option value="">— Seleccionar —</option>
+                {% for opt in ['EC','SL','SC','WG','WP','ME','EW','DC','CS','OD','ZC','GRANO'] %}
+                  <option value="{{ opt }}" {% if p and p.formulacion == opt %}selected{% endif %}>{{ opt }}</option>
+                {% endfor %}
+                {% if p and p.formulacion and p.formulacion not in ['EC','SL','SC','WG','WP','ME','EW','DC','CS','OD','ZC','GRANO'] %}
+                  <option value="{{ p.formulacion }}" selected>{{ p.formulacion }}</option>
+                {% endif %}
+              </select>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">Unidad de Medida</label>
+              <select name="unidad_medida" class="form-select">
+                {% for opt in ['L','Kg','ml','g'] %}
+                  <option value="{{ opt }}" {% if p and p.unidad_medida == opt %}selected{% elif not p and opt == 'L' %}selected{% endif %}>{{ opt }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="col-12">
+              <label class="form-label fw-semibold">Principio Activo</label>
+              <input type="text" name="principio_activo" class="form-control"
+                     value="{{ p.principio_activo if p else '' }}">
+            </div>
+            <div class="col-md-8">
+              <label class="form-label fw-semibold">Familia / Modo de Acción</label>
+              <input type="text" name="familia" class="form-control"
+                     value="{{ p.familia if p else '' }}">
+            </div>
+            <div class="col-md-4">
+              <label class="form-label fw-semibold">Precio Unit. (USD)</label>
+              <div class="input-group">
+                <span class="input-group-text">$</span>
+                <input type="number" name="precio_unit_usd" class="form-control" step="0.01" min="0"
+                       value="{{ p.precio_unit_usd if p else '' }}">
+              </div>
+            </div>
+          </div>
+          <hr class="my-4">
+          <div class="d-flex gap-2 justify-content-end">
+            <a href="{{ url_for('productos') }}" class="btn btn-outline-secondary">Cancelar</a>
+            <button type="submit" class="btn btn-primary">
+              <i class="fa-solid fa-floppy-disk me-1"></i>Guardar
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

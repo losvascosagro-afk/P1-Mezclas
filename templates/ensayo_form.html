@@ -1,0 +1,281 @@
+{% extends "base.html" %}
+{% block title %}{{ titulo }} — Lab. Mezclas{% endblock %}
+{% block page_title %}{{ titulo }}{% endblock %}
+{% block topbar_actions %}
+  <a href="{{ url_for('ensayos') }}" class="btn btn-outline-secondary btn-sm">
+    <i class="fa-solid fa-arrow-left me-1"></i>Volver
+  </a>
+{% endblock %}
+
+{% block content %}
+<form method="post" id="ensayoForm">
+<div class="row g-4">
+
+  <!-- Col izquierda -->
+  <div class="col-lg-8">
+
+    <!-- DATOS GENERALES -->
+    <div class="card-custom mb-4">
+      <div class="card-header-custom"><i class="fa-solid fa-clipboard me-2"></i>Datos Generales</div>
+      <div class="p-4">
+        <div class="row g-3">
+          <div class="col-md-4">
+            <label class="form-label fw-semibold">Fecha <span class="text-danger">*</span></label>
+            <input type="date" name="fecha" class="form-control" required
+                   value="{{ e.fecha if e else today }}">
+          </div>
+          <div class="col-md-8">
+            <label class="form-label fw-semibold">Cliente</label>
+            <select name="id_cliente" class="form-select">
+              <option value="">— Sin cliente —</option>
+              {% for c in clientes %}
+                <option value="{{ c.id_cliente }}"
+                  {% if e and e.id_cliente == c.id_cliente %}selected{% endif %}>
+                  {{ c.razon_social }}
+                </option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="col-12">
+            <label class="form-label fw-semibold">Objetivo</label>
+            <input type="text" name="objetivo" class="form-control"
+                   value="{{ e.objetivo if e else 'Prueba de compatibilidad' }}"
+                   placeholder="Ej: Prueba de compatibilidad">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CONDICIONES DEL AGUA -->
+    <div class="card-custom mb-4">
+      <div class="card-header-custom"><i class="fa-solid fa-droplet me-2"></i>Condiciones del Agua</div>
+      <div class="p-4">
+        <div class="row g-3">
+          <div class="col-md-6">
+            <label class="form-label fw-semibold">Tipo de Agua</label>
+            <select name="tipo_agua" class="form-select">
+              <option value="">— Seleccionar —</option>
+              {% for t in ['Estándar laboratorio','Agua de pozo','Agua de red','Agua destilada','Agua de lluvia','Otra'] %}
+                <option value="{{ t }}" {% if e and e.tipo_agua == t %}selected{% endif %}>{{ t }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="col-md-3">
+            <label class="form-label fw-semibold">pH</label>
+            <input type="number" name="ph" class="form-control" step="0.1" min="0" max="14"
+                   value="{{ e.ph if e else '' }}" placeholder="7.0">
+          </div>
+          <div class="col-md-3">
+            <label class="form-label fw-semibold">Conductividad (µS/cm)</label>
+            <input type="number" name="conductividad" class="form-control" step="1"
+                   value="{{ e.conductividad if e else '' }}" placeholder="1300">
+          </div>
+          <div class="col-md-3">
+            <label class="form-label fw-semibold">Dureza (mg/L)</label>
+            <input type="number" name="dureza" class="form-control" step="1"
+                   value="{{ e.dureza if e else '' }}" placeholder="100">
+          </div>
+          <div class="col-md-3">
+            <label class="form-label fw-semibold">Volumen (L)</label>
+            <input type="number" name="volumen_simulado" class="form-control" step="1"
+                   value="{{ e.volumen_simulado if e else '' }}" placeholder="50">
+          </div>
+          <div class="col-md-3">
+            <label class="form-label fw-semibold">Temperatura (°C)</label>
+            <input type="number" name="temperatura" class="form-control" step="1"
+                   value="{{ e.temperatura if e else '' }}" placeholder="24">
+          </div>
+          <div class="col-md-3">
+            <label class="form-label fw-semibold">Tiempo Obs. (h)</label>
+            <input type="number" name="tiempo_observacion" class="form-control" step="0.5"
+                   value="{{ e.tiempo_observacion if e else '' }}" placeholder="5">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- COMPOSICIÓN DE LA MEZCLA -->
+    <div class="card-custom mb-4">
+      <div class="card-header-custom d-flex justify-content-between align-items-center">
+        <span><i class="fa-solid fa-flask me-2"></i>Composición de la Mezcla</span>
+        <button type="button" class="btn btn-sm btn-light" onclick="addProductRow()">
+          <i class="fa-solid fa-plus me-1"></i>Agregar Producto
+        </button>
+      </div>
+      <div class="p-3">
+        <div class="table-responsive">
+          <table class="table table-sm" id="productTable">
+            <thead>
+              <tr>
+                <th style="width:50px">Orden</th>
+                <th>Producto</th>
+                <th style="width:90px">Dosis</th>
+                <th style="width:70px">Unidad</th>
+                <th style="width:150px">Observación</th>
+                <th style="width:40px"></th>
+              </tr>
+            </thead>
+            <tbody id="productBody">
+              {% for d in detalles %}
+              <tr>
+                <td><input type="number" name="orden_carga[]" class="form-control form-control-sm" value="{{ d.orden_carga }}" min="1"></td>
+                <td>
+                  <select name="producto_id[]" class="form-select form-select-sm producto-select">
+                    <option value="">— Seleccionar —</option>
+                    {% for p in productos %}
+                      <option value="{{ p.id_producto }}" {% if p.id_producto == d.id_producto %}selected{% endif %}>
+                        {{ p.nombre_comercial }} {% if p.empresa %}({{ p.empresa }}){% endif %}
+                      </option>
+                    {% endfor %}
+                  </select>
+                </td>
+                <td><input type="number" name="dosis[]" class="form-control form-control-sm" step="0.01" value="{{ d.dosis }}"></td>
+                <td>
+                  <select name="unidad[]" class="form-select form-select-sm">
+                    {% for u in ['L','Kg','ml','g'] %}
+                      <option value="{{ u }}" {% if d.unidad == u %}selected{% endif %}>{{ u }}</option>
+                    {% endfor %}
+                  </select>
+                </td>
+                <td><input type="text" name="det_obs[]" class="form-control form-control-sm" value="{{ d.observacion or '' }}"></td>
+                <td><button type="button" class="btn btn-sm btn-outline-danger" onclick="removeRow(this)"><i class="fa-solid fa-xmark"></i></button></td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        <button type="button" class="btn btn-sm btn-outline-primary mt-1" onclick="addProductRow()">
+          <i class="fa-solid fa-plus me-1"></i>Agregar producto
+        </button>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Col derecha -->
+  <div class="col-lg-4">
+
+    <!-- OBSERVACIONES VISUALES -->
+    <div class="card-custom mb-4">
+      <div class="card-header-custom"><i class="fa-solid fa-eye me-2"></i>Observaciones Visuales</div>
+      <div class="p-4">
+        {% for campo, label in [('espuma','Espuma'),('precipitado','Precipitado'),('separacion_fases','Separación de Fases'),('redispersion','Redispersión')] %}
+        <div class="mb-3">
+          <label class="form-label fw-semibold">{{ label }}</label>
+          <div class="d-flex gap-3">
+            <div class="form-check">
+              <input class="form-check-input" type="radio" name="{{ campo }}" value="No" id="{{ campo }}_no"
+                {% if not e or e[campo] in ('No', None, '') %}checked{% endif %}>
+              <label class="form-check-label text-success fw-semibold" for="{{ campo }}_no">No</label>
+            </div>
+            <div class="form-check">
+              <input class="form-check-input" type="radio" name="{{ campo }}" value="Si" id="{{ campo }}_si"
+                {% if e and e[campo] in ('Si','Sí') %}checked{% endif %}>
+              <label class="form-check-label text-danger fw-semibold" for="{{ campo }}_si">Sí</label>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- RESULTADO -->
+    <div class="card-custom mb-4">
+      <div class="card-header-custom"><i class="fa-solid fa-star me-2"></i>Resultado Final</div>
+      <div class="p-4">
+        <div class="mb-3">
+          <label class="form-label fw-semibold">Resultado</label>
+          <select name="resultado_final" class="form-select">
+            <option value="">— Sin resultado —</option>
+            {% for r in ['Estable','Inestable','Estable con observaciones','Requiere más ensayos'] %}
+              <option value="{{ r }}" {% if e and e.resultado_final == r %}selected{% endif %}>{{ r }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="mb-3">
+          <label class="form-label fw-semibold">Recomendación</label>
+          <textarea name="recomendacion" class="form-control" rows="3"
+                    placeholder="Ej: Mezcla estable. Agregar en el orden indicado.">{{ e.recomendacion if e else '' }}</textarea>
+        </div>
+      </div>
+    </div>
+
+    <!-- MICROSCOPÍA -->
+    <div class="card-custom mb-4">
+      <div class="card-header-custom"><i class="fa-solid fa-microscope me-2"></i>Observaciones al Microscopio</div>
+      <div class="p-4">
+        <textarea name="obs_microscopio" class="form-control" rows="5"
+                  placeholder="Describir lo observado al microscopio: tamaño de gotas, cristales, agregados, etc.">{{ e.obs_microscopio if e else '' }}</textarea>
+      </div>
+    </div>
+
+    <!-- GUARDAR -->
+    <div class="d-grid gap-2">
+      <button type="submit" class="btn btn-primary btn-lg">
+        <i class="fa-solid fa-floppy-disk me-2"></i>Guardar Ensayo
+      </button>
+      <a href="{{ url_for('ensayos') }}" class="btn btn-outline-secondary">Cancelar</a>
+    </div>
+
+  </div>
+</div>
+</form>
+
+<!-- Template row oculta para JS -->
+<template id="productRowTemplate">
+  <tr>
+    <td><input type="number" name="orden_carga[]" class="form-control form-control-sm" value="1" min="1"></td>
+    <td>
+      <select name="producto_id[]" class="form-select form-select-sm producto-select">
+        <option value="">— Seleccionar —</option>
+        {% for p in productos %}
+          <option value="{{ p.id_producto }}">{{ p.nombre_comercial }} {% if p.empresa %}({{ p.empresa }}){% endif %}</option>
+        {% endfor %}
+      </select>
+    </td>
+    <td><input type="number" name="dosis[]" class="form-control form-control-sm" step="0.01" placeholder="0.0"></td>
+    <td>
+      <select name="unidad[]" class="form-select form-select-sm">
+        <option value="L">L</option>
+        <option value="Kg">Kg</option>
+        <option value="ml">ml</option>
+        <option value="g">g</option>
+      </select>
+    </td>
+    <td><input type="text" name="det_obs[]" class="form-control form-control-sm" placeholder="Opcional"></td>
+    <td><button type="button" class="btn btn-sm btn-outline-danger" onclick="removeRow(this)"><i class="fa-solid fa-xmark"></i></button></td>
+  </tr>
+</template>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+const today = new Date().toISOString().split('T')[0];
+document.querySelectorAll('input[name="fecha"]').forEach(el => { if(!el.value) el.value = today; });
+
+function addProductRow() {
+  const tmpl = document.getElementById('productRowTemplate');
+  const clone = tmpl.content.cloneNode(true);
+  const rows = document.getElementById('productBody').children;
+  const nextOrder = rows.length + 1;
+  clone.querySelector('input[name="orden_carga[]"]').value = nextOrder;
+  document.getElementById('productBody').appendChild(clone);
+}
+
+function removeRow(btn) {
+  btn.closest('tr').remove();
+  // Renumber
+  document.querySelectorAll('#productBody tr').forEach((tr, i) => {
+    tr.querySelector('input[name="orden_carga[]"]').value = i + 1;
+  });
+}
+
+// Auto-add first row if empty
+window.addEventListener('DOMContentLoaded', () => {
+  if (document.getElementById('productBody').children.length === 0) {
+    addProductRow();
+  }
+});
+</script>
+{% endblock %}

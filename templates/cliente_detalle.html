@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+{% block title %}{{ c.razon_social }} — Lab. Mezclas{% endblock %}
+{% block page_title %}Cliente{% endblock %}
+{% block topbar_actions %}
+  <a href="{{ url_for('cliente_editar', id=c.id_cliente) }}" class="btn btn-warning btn-sm">
+    <i class="fa-solid fa-pen me-1"></i>Editar
+  </a>
+  <a href="{{ url_for('clientes') }}" class="btn btn-outline-secondary btn-sm">
+    <i class="fa-solid fa-arrow-left me-1"></i>Volver
+  </a>
+{% endblock %}
+
+{% block content %}
+<div class="row g-4">
+  <div class="col-lg-4">
+    <div class="card-custom">
+      <div class="card-header-custom"><i class="fa-solid fa-building-user me-2"></i>Datos del Cliente</div>
+      <div class="p-4">
+        <h5 class="mb-1">{{ c.razon_social }}</h5>
+        {% if c.rubro %}<span class="badge bg-primary mb-3">{{ c.rubro }}</span>{% endif %}
+        <table class="table table-sm table-borderless small">
+          <tr><td class="text-muted">Técnico</td><td>{{ c.tecnico_responsable or '—' }}</td></tr>
+          <tr><td class="text-muted">C.U.I.T.</td><td>{{ c.cuit or '—' }}</td></tr>
+          <tr><td class="text-muted">Cond. IVA</td><td>{{ c.condicion_iva or '—' }}</td></tr>
+          <tr><td class="text-muted">Dirección</td><td>{{ c.direccion or '—' }}</td></tr>
+          <tr><td class="text-muted">Localidad</td><td>{{ c.localidad or '—' }}</td></tr>
+          <tr><td class="text-muted">Provincia</td><td>{{ c.provincia or '—' }}</td></tr>
+        </table>
+        <hr>
+        <form method="post" action="{{ url_for('cliente_eliminar', id=c.id_cliente) }}"
+              onsubmit="return confirm('¿Eliminar este cliente?')">
+          <button class="btn btn-outline-danger btn-sm w-100">
+            <i class="fa-solid fa-trash me-1"></i>Eliminar Cliente
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+  <div class="col-lg-8">
+    <div class="card-custom">
+      <div class="card-header-custom d-flex justify-content-between align-items-center">
+        <span><i class="fa-solid fa-vials me-2"></i>Ensayos ({{ ensayos|length }})</span>
+        <a href="{{ url_for('ensayo_nuevo') }}" class="btn btn-sm btn-primary">
+          <i class="fa-solid fa-plus me-1"></i>Nuevo Ensayo
+        </a>
+      </div>
+      <div class="table-responsive">
+        <table class="table table-hover mb-0">
+          <thead>
+            <tr><th>N°</th><th>Fecha</th><th>Objetivo</th><th>Resultado</th><th></th></tr>
+          </thead>
+          <tbody>
+            {% for e in ensayos %}
+            <tr>
+              <td><span class="badge bg-secondary">{{ '%04d' % e.id_ensayo }}</span></td>
+              <td>{{ e.fecha or '—' }}</td>
+              <td class="text-truncate" style="max-width:200px">{{ e.objetivo or '—' }}</td>
+              <td>
+                {% if e.resultado_final %}
+                  {% if 'inestable' in e.resultado_final|lower %}
+                    <span class="badge bg-danger">{{ e.resultado_final }}</span>
+                  {% elif 'estable' in e.resultado_final|lower %}
+                    <span class="badge bg-success">{{ e.resultado_final }}</span>
+                  {% else %}
+                    <span class="badge bg-secondary">{{ e.resultado_final }}</span>
+                  {% endif %}
+                {% else %}—{% endif %}
+              </td>
+              <td>
+                <a href="{{ url_for('ensayo_detalle', id=e.id_ensayo) }}" class="btn btn-sm btn-outline-primary">
+                  <i class="fa-solid fa-eye"></i>
+                </a>
+              </td>
+            </tr>
+            {% else %}
+            <tr><td colspan="5" class="text-center text-muted py-3">Sin ensayos.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

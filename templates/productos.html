@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+{% block title %}Productos — Lab. Mezclas{% endblock %}
+{% block page_title %}Productos{% endblock %}
+{% block topbar_actions %}
+  <a href="{{ url_for('producto_nuevo') }}" class="btn btn-primary btn-sm">
+    <i class="fa-solid fa-plus me-1"></i>Nuevo Producto
+  </a>
+{% endblock %}
+
+{% block content %}
+<div class="card-custom">
+  <div class="card-header-custom">
+    <i class="fa-solid fa-boxes-stacked me-2"></i>Catálogo de Productos ({{ productos|length }})
+  </div>
+  <div class="p-3 border-bottom">
+    <form method="get" class="d-flex flex-wrap gap-2">
+      <input type="text" name="q" value="{{ q }}" placeholder="Buscar nombre, empresa, principio activo..."
+             class="form-control form-control-sm" style="max-width:350px">
+      <select name="categoria" class="form-select form-select-sm" style="max-width:200px">
+        <option value="">Todas las categorías</option>
+        {% for cat in categorias %}
+          <option value="{{ cat.categoria }}" {% if cat_sel == cat.categoria %}selected{% endif %}>
+            {{ cat.categoria }}
+          </option>
+        {% endfor %}
+      </select>
+      <button class="btn btn-sm btn-outline-primary"><i class="fa-solid fa-search me-1"></i>Buscar</button>
+      {% if q or cat_sel %}<a href="{{ url_for('productos') }}" class="btn btn-sm btn-outline-secondary">Limpiar</a>{% endif %}
+    </form>
+  </div>
+  <div class="table-responsive">
+    <table class="table table-hover mb-0">
+      <thead>
+        <tr>
+          <th>Nombre Comercial</th>
+          <th>Categoría</th>
+          <th>Empresa</th>
+          <th>Principio Activo</th>
+          <th>Formulación</th>
+          <th>Unidad</th>
+          <th>Precio USD</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for p in productos %}
+        <tr>
+          <td><strong>{{ p.nombre_comercial }}</strong></td>
+          <td>
+            {% if p.categoria %}
+              <span class="badge cat-badge cat-{{ p.categoria|lower|replace(' ','_') }}">{{ p.categoria }}</span>
+            {% else %}—{% endif %}
+          </td>
+          <td>{{ p.empresa or '—' }}</td>
+          <td class="text-truncate" style="max-width:180px" title="{{ p.principio_activo }}">
+            {{ p.principio_activo or '—' }}
+          </td>
+          <td>{% if p.formulacion %}<span class="badge bg-light text-dark border">{{ p.formulacion }}</span>{% else %}—{% endif %}</td>
+          <td>{{ p.unidad_medida or '—' }}</td>
+          <td>{% if p.precio_unit_usd %}$ {{ '%.2f'|format(p.precio_unit_usd) }}{% else %}—{% endif %}</td>
+          <td class="text-end">
+            <a href="{{ url_for('producto_editar', id=p.id_producto) }}" class="btn btn-sm btn-outline-warning me-1" title="Editar">
+              <i class="fa-solid fa-pen"></i>
+            </a>
+            <form method="post" action="{{ url_for('producto_eliminar', id=p.id_producto) }}"
+                  style="display:inline" onsubmit="return confirm('¿Eliminar {{ p.nombre_comercial }}?')">
+              <button class="btn btn-sm btn-outline-danger" title="Eliminar">
+                <i class="fa-solid fa-trash"></i>
+              </button>
+            </form>
+          </td>
+        </tr>
+        {% else %}
+        <tr><td colspan="8" class="text-center text-muted py-4">Sin productos registrados.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}
