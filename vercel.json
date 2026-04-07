@@ -3,14 +3,20 @@
   "builds": [
     {
       "src": "api/index.py",
-      "use": "@vercel/python"
+      "use": "@vercel/python",
+      "config": {
+        "maxLambdaSize": "50mb",
+        "includeFiles": [
+          "templates/**",
+          "static/**",
+          "app.py",
+          "db.py",
+          "Mezclas_Base.xlsx"
+        ]
+      }
     }
   ],
   "routes": [
-    {
-      "src": "^/static/(.*)",
-      "dest": "/static/$1"
-    },
     {
       "src": "/(.*)",
       "dest": "api/index.py"
