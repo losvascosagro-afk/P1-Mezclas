@@ -73,14 +73,14 @@ class _PgConn:
         self._conn = raw_conn
 
     def execute(self, sql, params=()):
-        cur = self._conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+        cur = self._conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
         cur.execute(_pg_sql(sql), params or ())
         wrapper = _PgCursor(cur)
         # Si el INSERT tiene RETURNING, capturamos el id generado
         if sql.strip().upper().startswith('INSERT') and 'RETURNING' in sql.upper():
             row = cur.fetchone()
             if row:
-                wrapper.lastrowid = list(row.values())[0]
+                wrapper.lastrowid = row[0]
         return wrapper
 
     def commit(self):
