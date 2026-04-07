@@ -276,15 +276,26 @@ body {
 /* ── ALERTS ── */
 .alert { border-radius: 8px; font-size: 13px; }
 
+/* ── OVERLAY (mobile) ── */
+#sidebar-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  z-index: 999;
+}
+#sidebar-overlay.active { display: block; }
+
 /* ── RESPONSIVE ── */
 @media (max-width: 768px) {
-  #sidebar { width: 60px; }
-  #sidebar .logo-title, #sidebar .logo-sub,
-  #sidebar .sidebar-footer { display: none; }
-  #sidebar .nav-link { justify-content: center; padding: 12px 0; }
-  #sidebar .nav-link i { margin: 0 !important; font-size: 18px; }
-  #sidebar .sidebar-header { padding: 14px 0; justify-content: center; }
-  #main-content { margin-left: 60px; }
+  #sidebar {
+    transform: translateX(-100%);
+    width: var(--sidebar-w);
+    transition: transform 0.25s ease;
+  }
+  #sidebar.mobile-open { transform: translateX(0); }
+
+  #main-content { margin-left: 0; }
   .page-body { padding: 14px 12px 30px; }
   .topbar { padding: 0 12px; }
 }
