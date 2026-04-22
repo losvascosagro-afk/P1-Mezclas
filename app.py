@@ -764,14 +764,27 @@ def _build_pdf(e, detalles, fotos):
 
     # ── FIRMAS ──
     story.append(Spacer(1, 12))
-    sig = Table([[
-        Paragraph('_________________________________\nTécnico Responsable',
-                  sty('center', textColor=colors.gray, leading=14)),
-        Paragraph('_________________________________\nDirector de Laboratorio',
-                  sty('center', textColor=colors.gray, leading=14)),
-    ]], colWidths=[8.7*cm, 8.7*cm])
+    firma_path = os.path.join(BASE_DIR, 'static', 'firma_dma.jpg')
+    def _sig_cell(with_firma):
+        cell = []
+        if with_firma and os.path.exists(firma_path):
+            try:
+                fi = Image(firma_path, width=3.8*cm, height=1.4*cm)
+                fi.hAlign = 'CENTER'
+                cell.append(fi)
+            except Exception:
+                cell.append(Spacer(1, 1.4*cm))
+        else:
+            cell.append(Spacer(1, 1.4*cm))
+        cell.append(HRFlowable(width='85%', thickness=0.5, color=colors.gray, hAlign='CENTER'))
+        cell.append(Paragraph(
+            'Director de Laboratorio' if with_firma else 'Técnico Responsable',
+            sty('center', textColor=colors.gray, fontSize=8)))
+        return cell
+    sig = Table([[_sig_cell(False), _sig_cell(True)]], colWidths=[8.7*cm, 8.7*cm])
     sig.setStyle(TableStyle([
         ('TOPPADDING', (0,0),(-1,-1), 4), ('BOTTOMPADDING', (0,0),(-1,-1), 4),
+        ('VALIGN', (0,0),(-1,-1), 'BOTTOM'),
     ]))
     story.append(sig)
     story.append(Spacer(1, 10))
