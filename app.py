@@ -505,7 +505,12 @@ def ensayo_pdf(id):
     ''', (id,)).fetchall()
     fotos = db.execute(
         'SELECT * FROM fotos_ensayo WHERE id_ensayo=? ORDER BY fecha_carga', (id,)).fetchall()
-    buf = _build_pdf(e, detalles, fotos)
+    try:
+        buf = _build_pdf(e, detalles, fotos)
+    except Exception as exc:
+        import traceback
+        tb = traceback.format_exc()
+        return f"<pre>Error generando PDF:\n{exc}\n\n{tb}</pre>", 500
     fecha_str = (e['fecha'] or 'sin_fecha').replace('-', '')
     fname = f"Informe_Mezcla_{id:04d}_{fecha_str}.pdf"
     return send_file(buf, mimetype='application/pdf', as_attachment=True, download_name=fname)
