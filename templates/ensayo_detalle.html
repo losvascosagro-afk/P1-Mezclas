@@ -204,8 +204,8 @@
             {% for f in fotos %}
             <div class="col-6">
               <div class="foto-card">
-                <a href="{{ url_for('static', filename='uploads/' + f.nombre_archivo) }}" target="_blank">
-                  <img src="{{ url_for('static', filename='uploads/' + f.nombre_archivo) }}"
+                <a href="{{ url_for('foto_serve', fid=f.id_foto) }}" target="_blank">
+                  <img src="{{ url_for('foto_serve', fid=f.id_foto) }}"
                        class="foto-thumb" alt="{{ f.descripcion or 'Foto' }}">
                 </a>
                 {% if f.descripcion %}

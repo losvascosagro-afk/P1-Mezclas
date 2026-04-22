@@ -183,6 +183,7 @@ _SCHEMA_SQLITE = '''
         nombre_archivo TEXT,
         descripcion    TEXT,
         fecha_carga    TEXT,
+        imagen_data    BLOB,
         FOREIGN KEY (id_ensayo) REFERENCES ensayos(id_ensayo)
     );
 '''
@@ -249,6 +250,7 @@ _SCHEMA_PG = [
         nombre_archivo TEXT,
         descripcion    TEXT,
         fecha_carga    TEXT,
+        imagen_data    BYTEA,
         FOREIGN KEY (id_ensayo) REFERENCES ensayos(id_ensayo)
     )''',
 ]
@@ -270,7 +272,11 @@ def _init_sqlite():
     conn.row_factory = _sqlite3.Row
     conn.execute('PRAGMA foreign_keys = ON')
     conn.executescript(_SCHEMA_SQLITE)
-    conn.commit()
+    try:
+        conn.execute('ALTER TABLE fotos_ensayo ADD COLUMN imagen_data BLOB')
+        conn.commit()
+    except Exception:
+        pass
     count = conn.execute('SELECT COUNT(*) FROM clientes').fetchone()[0]
     if count == 0 and os.path.exists(EXCEL_PATH):
         _import_from_excel(conn, 'sqlite')
@@ -308,6 +314,18 @@ def _init_postgres():
                 CREATE SEQUENCE IF NOT EXISTS clientes_id_seq;
                 PERFORM setval('clientes_id_seq', COALESCE((SELECT MAX(id_cliente) FROM clientes), 0) + 1, false);
                 ALTER TABLE clientes ALTER COLUMN id_cliente SET DEFAULT nextval('clientes_id_seq');
+            END IF;
+        END $$;
+    """)
+    # Migración: columna imagen_data en fotos_ensayo
+    cur.execute("""
+        DO $$
+        BEGIN
+            IF NOT EXISTS (
+                SELECT 1 FROM information_schema.columns
+                WHERE table_name='fotos_ensayo' AND column_name='imagen_data'
+            ) THEN
+                ALTER TABLE fotos_ensayo ADD COLUMN imagen_data BYTEA;
             END IF;
         END $$;
     """)

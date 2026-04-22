@@ -453,17 +453,37 @@ def foto_upload(id):
     if file and allowed_file(file.filename):
         ext = file.filename.rsplit('.', 1)[1].lower()
         fname = f"ens{id}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.{ext}"
-        file.save(os.path.join(UPLOAD_FOLDER, fname))
+        img_bytes = file.read()
+        # Guardar en filesystem local (solo funciona localmente)
+        try:
+            with open(os.path.join(UPLOAD_FOLDER, fname), 'wb') as fh:
+                fh.write(img_bytes)
+        except Exception:
+            pass
         db.execute(
-            'INSERT INTO fotos_ensayo (id_ensayo,nombre_archivo,descripcion,fecha_carga)'
-            ' VALUES (?,?,?,?)',
+            'INSERT INTO fotos_ensayo (id_ensayo,nombre_archivo,descripcion,fecha_carga,imagen_data)'
+            ' VALUES (?,?,?,?,?)',
             (id, fname, request.form.get('descripcion', ''),
-             datetime.now().strftime('%Y-%m-%d %H:%M')))
+             datetime.now().strftime('%Y-%m-%d %H:%M'),
+             img_bytes))
         db.commit()
         flash('Foto agregada.', 'success')
     else:
         flash('Formato no permitido. Use JPG, PNG, TIFF o BMP.', 'danger')
     return redirect(url_for('ensayo_detalle', id=id))
+
+
+@app.route('/fotos/<int:fid>')
+def foto_serve(fid):
+    db = get_db()
+    f = db.execute('SELECT nombre_archivo, imagen_data FROM fotos_ensayo WHERE id_foto=?', (fid,)).fetchone()
+    if not f or not f['imagen_data']:
+        return '', 404
+    ext = (f['nombre_archivo'] or 'img.jpg').rsplit('.', 1)[-1].lower()
+    mime = {'jpg': 'image/jpeg', 'jpeg': 'image/jpeg', 'png': 'image/png',
+            'tiff': 'image/tiff', 'tif': 'image/tiff', 'bmp': 'image/bmp'}.get(ext, 'image/jpeg')
+    data = bytes(f['imagen_data']) if not isinstance(f['imagen_data'], bytes) else f['imagen_data']
+    return send_file(io.BytesIO(data), mimetype=mime)
 
 
 @app.route('/fotos/<int:fid>/eliminar', methods=['POST'])
@@ -734,17 +754,27 @@ def _build_pdf(e, detalles, fotos):
         for pair in foto_pairs:
             cells = []
             for foto in pair:
-                fp = os.path.join(UPLOAD_FOLDER, foto['nombre_archivo'])
                 cell = []
-                if os.path.exists(fp):
+                img_data = foto['imagen_data']
+                if img_data:
                     try:
-                        img = Image(fp, width=7.8*cm, height=5.8*cm)
+                        raw = bytes(img_data) if not isinstance(img_data, bytes) else img_data
+                        img = Image(io.BytesIO(raw), width=7.8*cm, height=5.8*cm)
                         img.hAlign = 'CENTER'
                         cell.append(img)
-                    except:
+                    except Exception:
                         cell.append(Paragraph('[Imagen no disponible]', sty()))
                 else:
-                    cell.append(Paragraph('[Imagen no disponible]', sty()))
+                    fp = os.path.join(UPLOAD_FOLDER, foto['nombre_archivo'])
+                    if os.path.exists(fp):
+                        try:
+                            img = Image(fp, width=7.8*cm, height=5.8*cm)
+                            img.hAlign = 'CENTER'
+                            cell.append(img)
+                        except Exception:
+                            cell.append(Paragraph('[Imagen no disponible]', sty()))
+                    else:
+                        cell.append(Paragraph('[Imagen no disponible]', sty()))
                 if foto['descripcion']:
                     cell.append(Paragraph(foto['descripcion'], sty('caption')))
                 cells.append(cell)
