@@ -189,7 +189,7 @@ _SCHEMA_SQLITE = '''
 
 _SCHEMA_PG = [
     '''CREATE TABLE IF NOT EXISTS clientes (
-        id_cliente          INTEGER PRIMARY KEY,
+        id_cliente          SERIAL PRIMARY KEY,
         razon_social        TEXT NOT NULL,
         tecnico_responsable TEXT,
         cuit                TEXT,
@@ -201,7 +201,7 @@ _SCHEMA_PG = [
         provincia           TEXT
     )''',
     '''CREATE TABLE IF NOT EXISTS productos (
-        id_producto      INTEGER PRIMARY KEY,
+        id_producto      SERIAL PRIMARY KEY,
         nombre_comercial TEXT NOT NULL,
         categoria        TEXT,
         empresa          TEXT,
@@ -282,19 +282,51 @@ def _init_postgres():
     cur = conn.cursor()
     for stmt in _SCHEMA_PG:
         cur.execute(stmt)
+    # Migración: agregar secuencias a columnas que quedaron como INTEGER PRIMARY KEY sin default
+    cur.execute("""
+        DO $$
+        BEGIN
+            IF NOT EXISTS (
+                SELECT 1 FROM information_schema.columns
+                WHERE table_name='productos' AND column_name='id_producto'
+                AND column_default LIKE 'nextval%%'
+            ) THEN
+                CREATE SEQUENCE IF NOT EXISTS productos_id_seq;
+                PERFORM setval('productos_id_seq', COALESCE((SELECT MAX(id_producto) FROM productos), 0) + 1, false);
+                ALTER TABLE productos ALTER COLUMN id_producto SET DEFAULT nextval('productos_id_seq');
+            END IF;
+        END $$;
+    """)
+    cur.execute("""
+        DO $$
+        BEGIN
+            IF NOT EXISTS (
+                SELECT 1 FROM information_schema.columns
+                WHERE table_name='clientes' AND column_name='id_cliente'
+                AND column_default LIKE 'nextval%%'
+            ) THEN
+                CREATE SEQUENCE IF NOT EXISTS clientes_id_seq;
+                PERFORM setval('clientes_id_seq', COALESCE((SELECT MAX(id_cliente) FROM clientes), 0) + 1, false);
+                ALTER TABLE clientes ALTER COLUMN id_cliente SET DEFAULT nextval('clientes_id_seq');
+            END IF;
+        END $$;
+    """)
     conn.commit()
     cur.execute('SELECT COUNT(*) FROM clientes')
     count = cur.fetchone()[0]
     cur.close()
     if count == 0 and os.path.exists(EXCEL_PATH):
         _import_from_excel(conn, 'postgres')
-        # Actualizar secuencias SERIAL para que no choquen con los IDs importados
         cur2 = conn.cursor()
-        for tbl, col in [('ensayos', 'id_ensayo'), ('detalle_mezcla', 'id_detalle'), ('fotos_ensayo', 'id_foto')]:
-            cur2.execute(
-                f"SELECT setval(pg_get_serial_sequence('{tbl}', '{col}'), "
-                f"COALESCE((SELECT MAX({col}) FROM {tbl}), 0) + 1, false)"
-            )
+        for tbl, col in [('ensayos', 'id_ensayo'), ('detalle_mezcla', 'id_detalle'), ('fotos_ensayo', 'id_foto'),
+                         ('productos', 'id_producto'), ('clientes', 'id_cliente')]:
+            try:
+                cur2.execute(
+                    f"SELECT setval(pg_get_serial_sequence('{tbl}', '{col}'), "
+                    f"COALESCE((SELECT MAX({col}) FROM {tbl}), 0) + 1, false)"
+                )
+            except Exception:
+                pass
         conn.commit()
         cur2.close()
     conn.close()
