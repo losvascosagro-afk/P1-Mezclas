@@ -120,14 +120,12 @@
               <tr>
                 <td><input type="number" name="orden_carga[]" class="form-control form-control-sm" value="{{ d.orden_carga }}" min="1"></td>
                 <td>
-                  <select name="producto_id[]" class="form-select form-select-sm producto-select">
-                    <option value="">— Seleccionar —</option>
-                    {% for p in productos %}
-                      <option value="{{ p.id_producto }}" {% if p.id_producto == d.id_producto %}selected{% endif %}>
-                        {{ p.nombre_comercial }} {% if p.empresa %}({{ p.empresa }}){% endif %}
-                      </option>
-                    {% endfor %}
-                  </select>
+                  <div class="position-relative">
+                    <input type="text" class="form-control form-control-sm prod-search" autocomplete="off"
+                           placeholder="Buscar producto..." value="{{ d.nombre_comercial or '' }}">
+                    <input type="hidden" name="producto_id[]" class="prod-id" value="{{ d.id_producto or '' }}">
+                    <div class="prod-dropdown list-group position-absolute w-100" style="display:none;z-index:999;max-height:200px;overflow-y:auto"></div>
+                  </div>
                 </td>
                 <td><input type="number" name="dosis[]" class="form-control form-control-sm" step="0.01" value="{{ d.dosis }}"></td>
                 <td>
@@ -226,12 +224,11 @@
   <tr>
     <td><input type="number" name="orden_carga[]" class="form-control form-control-sm" value="1" min="1"></td>
     <td>
-      <select name="producto_id[]" class="form-select form-select-sm producto-select">
-        <option value="">— Seleccionar —</option>
-        {% for p in productos %}
-          <option value="{{ p.id_producto }}">{{ p.nombre_comercial }} {% if p.empresa %}({{ p.empresa }}){% endif %}</option>
-        {% endfor %}
-      </select>
+      <div class="position-relative">
+        <input type="text" class="form-control form-control-sm prod-search" autocomplete="off" placeholder="Buscar producto...">
+        <input type="hidden" name="producto_id[]" class="prod-id" value="">
+        <div class="prod-dropdown list-group position-absolute w-100" style="display:none;z-index:999;max-height:200px;overflow-y:auto"></div>
+      </div>
     </td>
     <td><input type="number" name="dosis[]" class="form-control form-control-sm" step="0.01" placeholder="0.0"></td>
     <td>
@@ -265,16 +262,59 @@ function addProductRow() {
 
 function removeRow(btn) {
   btn.closest('tr').remove();
-  // Renumber
   document.querySelectorAll('#productBody tr').forEach((tr, i) => {
     tr.querySelector('input[name="orden_carga[]"]').value = i + 1;
   });
 }
 
-// Auto-add first row if empty
 window.addEventListener('DOMContentLoaded', () => {
   if (document.getElementById('productBody').children.length === 0) {
     addProductRow();
+  }
+});
+
+// ── Autocomplete de productos ──
+let _acTimer;
+
+document.addEventListener('input', e => {
+  if (!e.target.classList.contains('prod-search')) return;
+  clearTimeout(_acTimer);
+  const inp = e.target;
+  const wrap = inp.closest('.position-relative');
+  const drop = wrap.querySelector('.prod-dropdown');
+  const hiddenId = wrap.querySelector('.prod-id');
+  hiddenId.value = '';
+  const q = inp.value.trim();
+  if (q.length < 1) { drop.style.display = 'none'; return; }
+  _acTimer = setTimeout(async () => {
+    try {
+      const res = await fetch('/api/productos?q=' + encodeURIComponent(q));
+      const prods = await res.json();
+      if (!prods.length) { drop.style.display = 'none'; return; }
+      drop.innerHTML = prods.map(p =>
+        `<button type="button" class="list-group-item list-group-item-action py-1 px-2 prod-option"
+                 data-id="${p.id_producto}" data-name="${p.nombre_comercial}">
+           <strong class="small">${p.nombre_comercial}</strong>
+           ${p.empresa ? `<span class="text-muted small ms-2">${p.empresa}</span>` : ''}
+           ${p.categoria ? `<span class="badge bg-secondary ms-1" style="font-size:.65rem">${p.categoria}</span>` : ''}
+         </button>`
+      ).join('');
+      drop.style.display = 'block';
+    } catch(err) { drop.style.display = 'none'; }
+  }, 200);
+});
+
+document.addEventListener('click', e => {
+  const opt = e.target.closest('.prod-option');
+  if (opt) {
+    const wrap = opt.closest('.position-relative');
+    wrap.querySelector('.prod-search').value = opt.dataset.name;
+    wrap.querySelector('.prod-id').value = opt.dataset.id;
+    wrap.querySelector('.prod-dropdown').style.display = 'none';
+    return;
+  }
+  if (!e.target.closest('.position-relative')) {
+    document.querySelectorAll('.prod-dropdown').forEach(d => d.style.display = 'none');
   }
 });
 </script>

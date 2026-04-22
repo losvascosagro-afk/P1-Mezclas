@@ -13,10 +13,10 @@
     <i class="fa-solid fa-boxes-stacked me-2"></i>Catálogo de Productos ({{ productos|length }})
   </div>
   <div class="p-3 border-bottom">
-    <form method="get" class="d-flex flex-wrap gap-2">
-      <input type="text" name="q" value="{{ q }}" placeholder="Buscar nombre, empresa, principio activo..."
-             class="form-control form-control-sm" style="max-width:350px">
-      <select name="categoria" class="form-select form-select-sm" style="max-width:200px">
+    <form method="get" id="searchForm" class="d-flex flex-wrap gap-2">
+      <input type="text" name="q" id="searchQ" value="{{ q }}" placeholder="Buscar nombre, empresa, principio activo..."
+             class="form-control form-control-sm" style="max-width:350px" autocomplete="off">
+      <select name="categoria" id="searchCat" class="form-select form-select-sm" style="max-width:200px">
         <option value="">Todas las categorías</option>
         {% for cat in categorias %}
           <option value="{{ cat.categoria }}" {% if cat_sel == cat.categoria %}selected{% endif %}>
@@ -77,4 +77,43 @@
     </table>
   </div>
 </div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+(function() {
+  const inp = document.getElementById('searchQ');
+  const sel = document.getElementById('searchCat');
+  const tbody = document.querySelector('tbody');
+  const allRows = [...tbody.querySelectorAll('tr')].filter(r => !r.querySelector('td[colspan]'));
+  const emptyRow = tbody.querySelector('td[colspan]')?.closest('tr');
+  const header = document.querySelector('.card-header-custom');
+
+  function filterRows() {
+    const q = inp.value.toLowerCase().trim();
+    const cat = sel.value.toLowerCase().trim();
+    let count = 0;
+    allRows.forEach(row => {
+      const cells = row.querySelectorAll('td');
+      const nombre  = (cells[0]?.textContent || '').toLowerCase();
+      const empresa = (cells[2]?.textContent || '').toLowerCase();
+      const pa      = (cells[3]?.textContent || '').toLowerCase();
+      const rowCat  = (cells[1]?.textContent || '').trim().toLowerCase();
+      const matchQ  = !q || nombre.includes(q) || empresa.includes(q) || pa.includes(q);
+      const matchC  = !cat || rowCat === cat;
+      const show    = matchQ && matchC;
+      row.style.display = show ? '' : 'none';
+      if (show) count++;
+    });
+    if (emptyRow) emptyRow.style.display = count === 0 ? '' : 'none';
+    if (header) header.innerHTML =
+      '<i class="fa-solid fa-boxes-stacked me-2"></i>Catálogo de Productos (' + count + ')';
+  }
+
+  let debounce;
+  inp.addEventListener('input', () => { clearTimeout(debounce); debounce = setTimeout(filterRows, 150); });
+  sel.addEventListener('change', filterRows);
+  filterRows();
+})();
+</script>
 {% endblock %}
