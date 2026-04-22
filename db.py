@@ -101,7 +101,7 @@ def get_db():
     """Devuelve la conexión activa para el request actual (Flask g)."""
     if 'db' not in g:
         if BACKEND == 'postgres':
-            conn = psycopg2.connect(DATABASE_URL)
+            conn = psycopg2.connect(DATABASE_URL, connect_timeout=5)
             g.db = _PgConn(conn)
         else:
             conn = _sqlite3.connect(DB_PATH)
@@ -278,7 +278,7 @@ def _init_sqlite():
 
 
 def _init_postgres():
-    conn = psycopg2.connect(DATABASE_URL)
+    conn = psycopg2.connect(DATABASE_URL, connect_timeout=5)
     cur = conn.cursor()
     for stmt in _SCHEMA_PG:
         cur.execute(stmt)
