@@ -581,7 +581,7 @@ def _build_pdf(e, detalles, fotos):
 
     story = []
 
-    # ── HEADER: logo derecha + títulos izquierda ──
+    # ── HEADER: teal izquierda (texto) + blanco derecha (logo) ──
     title_col = [
         Paragraph(LAB_NAME.upper(), sty('title')),
         Spacer(1, 4),
@@ -595,19 +595,21 @@ def _build_pdf(e, detalles, fotos):
             logo_w = 3.8 * cm
             logo_h = logo_w * ih / iw
             logo_img = Image(LOGO_PATH, width=logo_w, height=logo_h)
-            logo_img.hAlign = 'RIGHT'
+            logo_img.hAlign = 'CENTER'
             logo_cell = logo_img
         except Exception:
             pass
 
-    hdr = Table([[title_col, logo_cell]], colWidths=[12.8*cm, 4.6*cm])
+    hdr = Table([[title_col, logo_cell]], colWidths=[12.4*cm, 5.0*cm])
     hdr.setStyle(TableStyle([
-        ('BACKGROUND', (0,0),(-1,-1), C_TEAL),
+        ('BACKGROUND', (0,0),(0,-1), C_TEAL),
+        ('BACKGROUND', (1,0),(1,-1), C_WHITE),
         ('TOPPADDING', (0,0),(-1,-1), 12),
         ('BOTTOMPADDING', (0,0),(-1,-1), 10),
         ('LEFTPADDING', (0,0),(0,-1), 10),
         ('RIGHTPADDING', (-1,0),(-1,-1), 8),
         ('VALIGN', (0,0),(-1,-1), 'MIDDLE'),
+        ('BOX', (0,0),(-1,-1), 0.5, C_TEAL),
     ]))
     story += [hdr, Spacer(1, 8)]
 
@@ -826,7 +828,7 @@ def _build_pdf(e, detalles, fotos):
             try:
                 ir = ImageReader(firma_path)
                 fw, fh = ir.getSize()
-                target_w = 4.0 * cm
+                target_w = 2.5 * cm
                 target_h = target_w * fh / fw
                 fi = Image(firma_path, width=target_w, height=target_h)
                 fi.hAlign = 'CENTER'
