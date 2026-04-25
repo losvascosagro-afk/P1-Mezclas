@@ -36,8 +36,11 @@ if BACKEND == 'postgres':
 # ──────────────────────────────────────────────────────────
 
 def _pg_sql(sql):
-    """Convierte placeholders ? de SQLite a %s de PostgreSQL."""
-    return sql.replace('?', '%s')
+    """Convierte placeholders ? → %s y LIKE → ILIKE para PostgreSQL."""
+    import re
+    sql = sql.replace('?', '%s')
+    sql = re.sub(r'\bLIKE\b', 'ILIKE', sql)
+    return sql
 
 
 class _PgCursor:
