@@ -820,7 +820,9 @@ def _build_pdf(e, detalles, fotos):
 
     # ── FIRMAS ──
     story.append(Spacer(1, 12))
-    firma_path = os.path.join(BASE_DIR, 'static', 'firma_dma.jpg')
+    firma_path = os.path.join(BASE_DIR, 'Firma_DMA_SinFondo-ok.jpg')
+    if not os.path.exists(firma_path):
+        firma_path = os.path.join(BASE_DIR, 'static', 'firma_dma.jpg')
 
     def _sig_cell(with_firma):
         cell = []
@@ -828,7 +830,7 @@ def _build_pdf(e, detalles, fotos):
             try:
                 ir = ImageReader(firma_path)
                 fw, fh = ir.getSize()
-                target_w = 2.5 * cm
+                target_w = 1.8 * cm
                 target_h = target_w * fh / fw
                 fi = Image(firma_path, width=target_w, height=target_h)
                 fi.hAlign = 'CENTER'
