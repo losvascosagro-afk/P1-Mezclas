@@ -849,6 +849,7 @@ def _build_pdf(e, detalles, fotos):
     sig.setStyle(TableStyle([
         ('TOPPADDING', (0,0),(-1,-1), 4), ('BOTTOMPADDING', (0,0),(-1,-1), 4),
         ('VALIGN', (0,0),(-1,-1), 'BOTTOM'),
+        ('ALIGN', (0,0),(-1,-1), 'CENTER'),
     ]))
     story.append(sig)
     story.append(Spacer(1, 10))
