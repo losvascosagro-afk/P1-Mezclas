@@ -11,6 +11,7 @@ from reportlab.lib.units import cm
 from reportlab.platypus import (SimpleDocTemplate, Table, TableStyle,
                                 Paragraph, Spacer, Image, HRFlowable)
 from reportlab.lib.enums import TA_CENTER, TA_LEFT, TA_RIGHT
+from reportlab.lib.utils import ImageReader
 
 from db import get_db, close_db, init_db, BACKEND, BASE_DIR
 
@@ -537,36 +538,39 @@ def _build_pdf(e, detalles, fotos):
                             rightMargin=1.8*cm, leftMargin=1.8*cm,
                             topMargin=1.8*cm, bottomMargin=1.8*cm)
 
-    C_BLUE    = colors.HexColor('#1565C0')
-    C_GREEN   = colors.HexColor('#2E7D32')
-    C_LGREEN  = colors.HexColor('#E8F5E9')
-    C_LBLUE   = colors.HexColor('#E3F2FD')
-    C_DGRAY   = colors.HexColor('#37474F')
+    C_TEAL    = colors.HexColor('#1A7A7A')   # verde DMA Agro
+    C_TEAL_LT = colors.HexColor('#E6F5F5')   # teal muy claro para fondos alternos
+    C_DARK    = colors.HexColor('#2D2D2D')   # casi negro para encabezados de tabla
     C_LGRAY   = colors.HexColor('#F5F5F5')
-    C_RED     = colors.HexColor('#C62828')
     C_WHITE   = colors.white
+    C_RED     = colors.HexColor('#C62828')
+    C_BLACK   = colors.black
+
+    LAB_NAME  = 'Laboratorio de Análisis de Compatibilidad de Agroquímicos y Calidad de Agua'
+    LOGO_PATH = os.path.join(BASE_DIR, 'LOGO ORIGINAL.png')
 
     resultado = str(e['resultado_final'] or '').strip()
     estable = 'inestable' not in resultado.lower() and 'estable' in resultado.lower()
-    C_RESULT = C_GREEN if estable else C_RED
+    C_RESULT = C_TEAL if estable else C_RED
 
     def sty(name='body', **kw):
         base = {
-            'body':    dict(fontName='Helvetica', fontSize=9, textColor=colors.black, spaceAfter=2),
-            'label':   dict(fontName='Helvetica-Bold', fontSize=9, textColor=C_DGRAY),
+            'body':    dict(fontName='Helvetica', fontSize=9, textColor=C_BLACK, spaceAfter=2),
+            'label':   dict(fontName='Helvetica-Bold', fontSize=9, textColor=C_DARK),
             'th':      dict(fontName='Helvetica-Bold', fontSize=9, textColor=C_WHITE),
             'thc':     dict(fontName='Helvetica-Bold', fontSize=9, textColor=C_WHITE, alignment=TA_CENTER),
             'center':  dict(fontName='Helvetica', fontSize=9, alignment=TA_CENTER),
-            'title':   dict(fontName='Helvetica-Bold', fontSize=18, textColor=C_WHITE, alignment=TA_CENTER),
-            'sub':     dict(fontName='Helvetica', fontSize=11, textColor=C_WHITE, alignment=TA_CENTER),
+            'title':   dict(fontName='Helvetica-Bold', fontSize=13, textColor=C_WHITE, alignment=TA_LEFT),
+            'sub':     dict(fontName='Helvetica', fontSize=10, textColor=C_WHITE, alignment=TA_LEFT),
             'footer':  dict(fontName='Helvetica', fontSize=7, textColor=colors.gray, alignment=TA_CENTER),
             'caption': dict(fontName='Helvetica', fontSize=8, textColor=colors.gray, alignment=TA_CENTER),
-            'obs':     dict(fontName='Helvetica', fontSize=9, textColor=colors.black, leading=14),
+            'obs':     dict(fontName='Helvetica', fontSize=9, textColor=C_BLACK, leading=14),
         }
         d = {**base.get(name, base['body']), **kw}
         return ParagraphStyle(f'S_{name}_{id(kw)}', **d)
 
-    def sec(text, bg=C_GREEN):
+    def sec(text, bg=None):
+        bg = bg or C_TEAL
         t = Table([[Paragraph(text, sty('label', textColor=C_WHITE, fontSize=10, leftIndent=6))]], colWidths=[17.4*cm])
         t.setStyle(TableStyle([
             ('BACKGROUND', (0,0),(-1,-1), bg),
@@ -577,15 +581,33 @@ def _build_pdf(e, detalles, fotos):
 
     story = []
 
-    # ── HEADER ──
-    hdr = Table([
-        [Paragraph('LABORATORIO DE COMPATIBILIDAD DE MEZCLAS', sty('title'))],
-        [Paragraph(f'INFORME DE ENSAYO  N° {e["id_ensayo"]:04d}', sty('sub'))],
-    ], colWidths=[17.4*cm])
+    # ── HEADER: logo derecha + títulos izquierda ──
+    title_col = [
+        Paragraph(LAB_NAME.upper(), sty('title')),
+        Spacer(1, 4),
+        Paragraph(f'INFORME DE ENSAYO  N° {e["id_ensayo"]:04d}', sty('sub')),
+    ]
+    logo_cell = Spacer(1, 1)
+    if os.path.exists(LOGO_PATH):
+        try:
+            ir = ImageReader(LOGO_PATH)
+            iw, ih = ir.getSize()
+            logo_w = 3.8 * cm
+            logo_h = logo_w * ih / iw
+            logo_img = Image(LOGO_PATH, width=logo_w, height=logo_h)
+            logo_img.hAlign = 'RIGHT'
+            logo_cell = logo_img
+        except Exception:
+            pass
+
+    hdr = Table([[title_col, logo_cell]], colWidths=[12.8*cm, 4.6*cm])
     hdr.setStyle(TableStyle([
-        ('BACKGROUND', (0,0),(-1,-1), C_BLUE),
-        ('TOPPADDING', (0,0),(-1,0), 14),
+        ('BACKGROUND', (0,0),(-1,-1), C_TEAL),
+        ('TOPPADDING', (0,0),(-1,-1), 12),
         ('BOTTOMPADDING', (0,0),(-1,-1), 10),
+        ('LEFTPADDING', (0,0),(0,-1), 10),
+        ('RIGHTPADDING', (-1,0),(-1,-1), 8),
+        ('VALIGN', (0,0),(-1,-1), 'MIDDLE'),
     ]))
     story += [hdr, Spacer(1, 8)]
 
@@ -597,7 +619,7 @@ def _build_pdf(e, detalles, fotos):
                   sty('center', textColor=C_WHITE)),
     ]], colWidths=[4*cm, 9.4*cm, 4*cm])
     bar.setStyle(TableStyle([
-        ('BACKGROUND', (0,0),(1,0), C_LGREEN),
+        ('BACKGROUND', (0,0),(1,0), C_TEAL_LT),
         ('BACKGROUND', (2,0),(2,0), C_RESULT),
         ('VALIGN', (0,0),(-1,-1), 'MIDDLE'),
         ('TOPPADDING', (0,0),(-1,-1), 7), ('BOTTOMPADDING', (0,0),(-1,-1), 7),
@@ -664,7 +686,7 @@ def _build_pdf(e, detalles, fotos):
             ])
         mt = Table(mrows, colWidths=[1*cm, 3.7*cm, 2.5*cm, 2.5*cm, 4.2*cm, 1.8*cm, 1.7*cm])
         ms = [
-            ('BACKGROUND', (0,0),(-1,0), C_DGRAY),
+            ('BACKGROUND', (0,0),(-1,0), C_DARK),
             ('TOPPADDING', (0,0),(-1,-1), 4), ('BOTTOMPADDING', (0,0),(-1,-1), 4),
             ('LEFTPADDING', (0,0),(-1,-1), 5), ('RIGHTPADDING', (0,0),(-1,-1), 5),
             ('BOX', (0,0),(-1,-1), 0.5, colors.lightgrey),
@@ -673,7 +695,7 @@ def _build_pdf(e, detalles, fotos):
         ]
         for i in range(1, len(mrows)):
             if i % 2 == 0:
-                ms.append(('BACKGROUND', (0,i),(-1,i), C_LGRAY))
+                ms.append(('BACKGROUND', (0,i),(-1,i), C_TEAL_LT))
         mt.setStyle(TableStyle(ms))
         story.append(mt)
     else:
@@ -685,7 +707,7 @@ def _build_pdf(e, detalles, fotos):
 
     def ind(val):
         v = str(val or 'No').strip()
-        bg = C_RED if v.lower() in ('si', 'sí') else C_GREEN
+        bg = C_RED if v.lower() in ('si', 'sí') else C_TEAL
         return Paragraph(f'<font color="white"><b> {v.upper()} </b></font>',
                          sty('center', textColor=C_WHITE, fontName='Helvetica-Bold', fontSize=9))
 
@@ -698,20 +720,22 @@ def _build_pdf(e, detalles, fotos):
          Paragraph('Redispersión', sty('label')), ind(e['redispersion'])],
     ], colWidths=[5*cm, 3.7*cm, 5*cm, 3.7*cm])
 
-    ov_style = [
-        ('BACKGROUND', (0,0),(-1,0), C_DGRAY),
+    def _obs_bg(val):
+        return C_RED if str(val or '').lower() in ('si', 'sí') else C_TEAL
+
+    ov.setStyle(TableStyle([
+        ('BACKGROUND', (0,0),(-1,0), C_DARK),
         ('ROWBACKGROUNDS', (0,1),(-1,-1), [C_WHITE, C_LGRAY]),
-        ('BACKGROUND', (1,1),(1,1), C_RED if str(e['espuma'] or '').lower() in ('si','sí') else C_GREEN),
-        ('BACKGROUND', (3,1),(3,1), C_RED if str(e['precipitado'] or '').lower() in ('si','sí') else C_GREEN),
-        ('BACKGROUND', (1,2),(1,2), C_RED if str(e['separacion_fases'] or '').lower() in ('si','sí') else C_GREEN),
-        ('BACKGROUND', (3,2),(3,2), C_RED if str(e['redispersion'] or '').lower() in ('si','sí') else C_GREEN),
+        ('BACKGROUND', (1,1),(1,1), _obs_bg(e['espuma'])),
+        ('BACKGROUND', (3,1),(3,1), _obs_bg(e['precipitado'])),
+        ('BACKGROUND', (1,2),(1,2), _obs_bg(e['separacion_fases'])),
+        ('BACKGROUND', (3,2),(3,2), _obs_bg(e['redispersion'])),
         ('TOPPADDING', (0,0),(-1,-1), 6), ('BOTTOMPADDING', (0,0),(-1,-1), 6),
         ('LEFTPADDING', (0,0),(-1,-1), 8), ('RIGHTPADDING', (0,0),(-1,-1), 8),
         ('BOX', (0,0),(-1,-1), 0.5, colors.lightgrey),
         ('INNERGRID', (0,0),(-1,-1), 0.3, colors.lightgrey),
         ('VALIGN', (0,0),(-1,-1), 'MIDDLE'),
-    ]
-    ov.setStyle(TableStyle(ov_style))
+    ]))
     story += [ov, Spacer(1, 7)]
 
     # ── CONCLUSIÓN ──
@@ -725,7 +749,7 @@ def _build_pdf(e, detalles, fotos):
     ], colWidths=[3.5*cm, 13.9*cm])
     conc.setStyle(TableStyle([
         ('BACKGROUND', (1,0),(1,0), C_RESULT),
-        ('ROWBACKGROUNDS', (0,0),(0,-1), [C_LGREEN, C_WHITE]),
+        ('ROWBACKGROUNDS', (0,0),(0,-1), [C_TEAL_LT, C_WHITE]),
         ('ROWBACKGROUNDS', (1,1),(1,1), [C_WHITE]),
         ('TOPPADDING', (0,0),(-1,-1), 7), ('BOTTOMPADDING', (0,0),(-1,-1), 7),
         ('LEFTPADDING', (0,0),(-1,-1), 8), ('RIGHTPADDING', (0,0),(-1,-1), 8),
@@ -737,10 +761,10 @@ def _build_pdf(e, detalles, fotos):
 
     # ── MICROSCOPÍA ──
     if e['obs_microscopio']:
-        story.append(sec('OBSERVACIONES AL MICROSCOPIO', bg=C_BLUE))
+        story.append(sec('OBSERVACIONES AL MICROSCOPIO'))
         mic = Table([[Paragraph(e['obs_microscopio'], sty('obs'))]], colWidths=[17.4*cm])
         mic.setStyle(TableStyle([
-            ('BACKGROUND', (0,0),(-1,-1), C_LBLUE),
+            ('BACKGROUND', (0,0),(-1,-1), C_TEAL_LT),
             ('TOPPADDING', (0,0),(-1,-1), 8), ('BOTTOMPADDING', (0,0),(-1,-1), 8),
             ('LEFTPADDING', (0,0),(-1,-1), 10), ('RIGHTPADDING', (0,0),(-1,-1), 10),
             ('BOX', (0,0),(-1,-1), 0.5, colors.lightgrey),
@@ -749,7 +773,7 @@ def _build_pdf(e, detalles, fotos):
 
     # ── FOTOS ──
     if fotos:
-        story.append(sec('IMÁGENES DE MICROSCOPÍA', bg=C_BLUE))
+        story.append(sec('IMÁGENES DE MICROSCOPÍA'))
         foto_pairs = [fotos[i:i+2] for i in range(0, len(fotos), 2)]
         for pair in foto_pairs:
             cells = []
@@ -795,22 +819,28 @@ def _build_pdf(e, detalles, fotos):
     # ── FIRMAS ──
     story.append(Spacer(1, 12))
     firma_path = os.path.join(BASE_DIR, 'static', 'firma_dma.jpg')
+
     def _sig_cell(with_firma):
         cell = []
         if with_firma and os.path.exists(firma_path):
             try:
-                fi = Image(firma_path, width=3.8*cm, height=1.4*cm)
+                ir = ImageReader(firma_path)
+                fw, fh = ir.getSize()
+                target_w = 4.0 * cm
+                target_h = target_w * fh / fw
+                fi = Image(firma_path, width=target_w, height=target_h)
                 fi.hAlign = 'CENTER'
                 cell.append(fi)
             except Exception:
-                cell.append(Spacer(1, 1.4*cm))
+                cell.append(Spacer(1, 1.8*cm))
         else:
-            cell.append(Spacer(1, 1.4*cm))
+            cell.append(Spacer(1, 1.8*cm))
         cell.append(HRFlowable(width='85%', thickness=0.5, color=colors.gray, hAlign='CENTER'))
         cell.append(Paragraph(
             'Director de Laboratorio' if with_firma else 'Técnico Responsable',
             sty('center', textColor=colors.gray, fontSize=8)))
         return cell
+
     sig = Table([[_sig_cell(False), _sig_cell(True)]], colWidths=[8.7*cm, 8.7*cm])
     sig.setStyle(TableStyle([
         ('TOPPADDING', (0,0),(-1,-1), 4), ('BOTTOMPADDING', (0,0),(-1,-1), 4),
@@ -820,11 +850,11 @@ def _build_pdf(e, detalles, fotos):
     story.append(Spacer(1, 10))
 
     # ── FOOTER ──
-    story.append(HRFlowable(width='100%', thickness=0.5, color=colors.lightgrey))
+    story.append(HRFlowable(width='100%', thickness=0.5, color=C_TEAL))
     story.append(Spacer(1, 4))
     story.append(Paragraph(
         f'Informe generado el {datetime.now().strftime("%d/%m/%Y a las %H:%M")}  ·  '
-        f'Laboratorio de Compatibilidad de Mezclas  ·  Informe N° {e["id_ensayo"]:04d}',
+        f'{LAB_NAME}  ·  Informe N° {e["id_ensayo"]:04d}',
         sty('footer')))
 
     doc.build(story)
@@ -836,7 +866,7 @@ if __name__ == '__main__':
     init_db()
     print()
     print("=" * 55)
-    print("  Laboratorio de Compatibilidad de Mezclas")
+    print("  Laboratorio de Análisis de Compatibilidad de Agroquímicos")
     print("  Abrir en el navegador: http://localhost:5000")
     print("=" * 55)
     print()
