@@ -120,12 +120,9 @@
               <tr>
                 <td><input type="number" name="orden_carga[]" class="form-control form-control-sm" value="{{ d.orden_carga }}" min="1"></td>
                 <td>
-                  <div class="position-relative">
-                    <input type="text" class="form-control form-control-sm prod-search" autocomplete="off"
-                           placeholder="Buscar producto..." value="{{ d.nombre_comercial or '' }}">
-                    <input type="hidden" name="producto_id[]" class="prod-id" value="{{ d.id_producto or '' }}">
-                    <div class="prod-dropdown list-group position-absolute w-100" style="display:none;z-index:999;max-height:200px;overflow-y:auto"></div>
-                  </div>
+                  <input type="text" class="form-control form-control-sm prod-search" autocomplete="off"
+                         placeholder="Buscar por nombre, empresa, principio..." value="{{ d.nombre_comercial or '' }}">
+                  <input type="hidden" name="producto_id[]" class="prod-id" value="{{ d.id_producto or '' }}">
                 </td>
                 <td><input type="number" name="dosis[]" class="form-control form-control-sm" step="0.01" value="{{ d.dosis }}"></td>
                 <td>
@@ -219,16 +216,74 @@
 </div>
 </form>
 
+<!-- Dropdown global de productos (fixed, nunca cortado por overflow) -->
+<div id="prodDropdown" style="display:none;position:fixed;z-index:9999;background:#fff;border:1px solid #dee2e6;border-radius:6px;box-shadow:0 4px 20px rgba(0,0,0,.15);max-height:260px;overflow-y:auto;min-width:280px"></div>
+
+<!-- Modal creación rápida de producto -->
+<div class="modal fade" id="modalNuevoProducto" tabindex="-1" aria-labelledby="modalNuevoProductoLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="modalNuevoProductoLabel"><i class="fa-solid fa-box me-2"></i>Nuevo Producto</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <div class="mb-3">
+          <label class="form-label fw-semibold">Nombre Comercial <span class="text-danger">*</span></label>
+          <input type="text" id="mpNombre" class="form-control" placeholder="Ej: Roundup Max">
+        </div>
+        <div class="row g-2">
+          <div class="col-6">
+            <label class="form-label fw-semibold">Categoría</label>
+            <select id="mpCategoria" class="form-select">
+              <option value="">— Seleccionar —</option>
+              {% for opt in ['HERBICIDA','INSECTICIDA','FUNGICIDA','ACARICIDA','ADYUVANTE','FERTILIZANTE','SEMILLA','OTRO'] %}
+                <option value="{{ opt }}">{{ opt }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="col-6">
+            <label class="form-label fw-semibold">Empresa</label>
+            <input type="text" id="mpEmpresa" class="form-control" placeholder="Ej: Monsanto">
+          </div>
+          <div class="col-6">
+            <label class="form-label fw-semibold">Formulación</label>
+            <select id="mpFormulacion" class="form-select">
+              <option value="">— Seleccionar —</option>
+              {% for opt in ['EC','SL','SC','WG','WP','ME','EW','DC','CS','OD','ZC','GRANO'] %}
+                <option value="{{ opt }}">{{ opt }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="col-6">
+            <label class="form-label fw-semibold">Unidad de Medida</label>
+            <select id="mpUnidad" class="form-select">
+              {% for opt in ['L','Kg','ml','g'] %}
+                <option value="{{ opt }}" {% if opt == 'L' %}selected{% endif %}>{{ opt }}</option>
+              {% endfor %}
+            </select>
+          </div>
+        </div>
+        <div id="mpError" class="text-danger small mt-2" style="display:none"></div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <button type="button" class="btn btn-primary" id="mpGuardar">
+          <i class="fa-solid fa-floppy-disk me-1"></i>Guardar y usar
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- Template row oculta para JS -->
 <template id="productRowTemplate">
   <tr>
     <td><input type="number" name="orden_carga[]" class="form-control form-control-sm" value="1" min="1"></td>
     <td>
       <div class="position-relative">
-        <input type="text" class="form-control form-control-sm prod-search" autocomplete="off" placeholder="Buscar producto...">
+        <input type="text" class="form-control form-control-sm prod-search" autocomplete="off" placeholder="Buscar por nombre, empresa, principio...">
         <input type="hidden" name="producto_id[]" class="prod-id" value="">
-        <div class="prod-dropdown list-group position-absolute w-100" style="display:none;z-index:999;max-height:200px;overflow-y:auto"></div>
-      </div>
     </td>
     <td><input type="number" name="dosis[]" class="form-control form-control-sm" step="0.01" placeholder="0.0"></td>
     <td>
@@ -273,48 +328,156 @@ window.addEventListener('DOMContentLoaded', () => {
   }
 });
 
-// ── Autocomplete de productos ──
+// ── Autocomplete de productos (dropdown global fixed) ──
 let _acTimer;
+let _activeInp = null;   // input que está buscando actualmente
+let _activeModalInp = null; // input que abrió el modal
+
+const DROP = document.getElementById('prodDropdown');
+
+function positionDrop(inp) {
+  const r = inp.getBoundingClientRect();
+  DROP.style.top  = (r.bottom + 2) + 'px';
+  DROP.style.left = r.left + 'px';
+  DROP.style.width = Math.max(r.width, 300) + 'px';
+}
+
+function closeDrop() {
+  DROP.style.display = 'none';
+  _activeInp = null;
+}
+
+function buildDropdown(prods, q) {
+  const items = prods.map(p =>
+    `<button type="button"
+             class="prod-option d-flex align-items-center gap-2 px-3 py-2 border-0 w-100 text-start"
+             style="background:none;cursor:pointer"
+             data-id="${p.id_producto}" data-name="${p.nombre_comercial.replace(/"/g,'&quot;')}">
+       <span class="flex-grow-1">
+         <span class="fw-semibold">${p.nombre_comercial}</span>
+         ${p.empresa ? `<span class="text-muted small ms-2">${p.empresa}</span>` : ''}
+       </span>
+       ${p.categoria ? `<span class="badge bg-secondary" style="font-size:.65rem;white-space:nowrap">${p.categoria}</span>` : ''}
+     </button>`
+  ).join('');
+
+  const sep = items ? `<div style="border-top:1px solid #e9ecef"></div>` : '';
+  const crear =
+    `<button type="button"
+             class="prod-crear d-flex align-items-center gap-2 px-3 py-2 border-0 w-100 text-start"
+             style="background:#f0f4ff;cursor:pointer;color:#0d6efd;font-size:.875rem"
+             data-q="${q.replace(/"/g,'&quot;')}">
+       <i class="fa-solid fa-circle-plus"></i>
+       <span>Crear "<strong>${q}</strong>" como nuevo producto</span>
+     </button>`;
+
+  DROP.innerHTML = items + sep + crear;
+  DROP.style.display = 'block';
+}
 
 document.addEventListener('input', e => {
   if (!e.target.classList.contains('prod-search')) return;
   clearTimeout(_acTimer);
-  const inp = e.target;
-  const wrap = inp.closest('.position-relative');
-  const drop = wrap.querySelector('.prod-dropdown');
-  const hiddenId = wrap.querySelector('.prod-id');
+  _activeInp = e.target;
+  const hiddenId = _activeInp.closest('td').querySelector('.prod-id');
   hiddenId.value = '';
-  const q = inp.value.trim();
-  if (q.length < 1) { drop.style.display = 'none'; return; }
+  const q = _activeInp.value.trim();
+  if (q.length < 1) { closeDrop(); return; }
   _acTimer = setTimeout(async () => {
     try {
       const res = await fetch('/api/productos?q=' + encodeURIComponent(q));
       const prods = await res.json();
-      if (!prods.length) { drop.style.display = 'none'; return; }
-      drop.innerHTML = prods.map(p =>
-        `<button type="button" class="list-group-item list-group-item-action py-1 px-2 prod-option"
-                 data-id="${p.id_producto}" data-name="${p.nombre_comercial}">
-           <strong class="small">${p.nombre_comercial}</strong>
-           ${p.empresa ? `<span class="text-muted small ms-2">${p.empresa}</span>` : ''}
-           ${p.categoria ? `<span class="badge bg-secondary ms-1" style="font-size:.65rem">${p.categoria}</span>` : ''}
-         </button>`
-      ).join('');
-      drop.style.display = 'block';
-    } catch(err) { drop.style.display = 'none'; }
+      positionDrop(_activeInp);
+      buildDropdown(prods, q);
+    } catch(err) { closeDrop(); }
   }, 200);
 });
 
+// Reposicionar al hacer scroll o resize
+window.addEventListener('scroll', () => { if (_activeInp) positionDrop(_activeInp); }, true);
+window.addEventListener('resize', () => { if (_activeInp) positionDrop(_activeInp); });
+
 document.addEventListener('click', e => {
+  // Seleccionar producto existente
   const opt = e.target.closest('.prod-option');
   if (opt) {
-    const wrap = opt.closest('.position-relative');
-    wrap.querySelector('.prod-search').value = opt.dataset.name;
-    wrap.querySelector('.prod-id').value = opt.dataset.id;
-    wrap.querySelector('.prod-dropdown').style.display = 'none';
+    if (_activeInp) {
+      _activeInp.value = opt.dataset.name;
+      _activeInp.closest('td').querySelector('.prod-id').value = opt.dataset.id;
+    }
+    closeDrop();
     return;
   }
-  if (!e.target.closest('.position-relative')) {
-    document.querySelectorAll('.prod-dropdown').forEach(d => d.style.display = 'none');
+
+  // Abrir modal para crear nuevo
+  const crear = e.target.closest('.prod-crear');
+  if (crear) {
+    _activeModalInp = _activeInp;
+    const q = crear.dataset.q || '';
+    document.getElementById('mpNombre').value = q;
+    document.getElementById('mpCategoria').value = '';
+    document.getElementById('mpEmpresa').value = '';
+    document.getElementById('mpFormulacion').value = '';
+    document.getElementById('mpUnidad').value = 'L';
+    document.getElementById('mpError').style.display = 'none';
+    closeDrop();
+    new bootstrap.Modal(document.getElementById('modalNuevoProducto')).show();
+    return;
+  }
+
+  // Cerrar si se hace click fuera
+  if (!e.target.closest('#prodDropdown') && !e.target.classList.contains('prod-search')) {
+    closeDrop();
+  }
+});
+
+// Hover visual
+DROP.addEventListener('mouseover', e => {
+  const opt = e.target.closest('.prod-option');
+  if (opt) opt.style.background = '#f0f4ff';
+});
+DROP.addEventListener('mouseout', e => {
+  const opt = e.target.closest('.prod-option');
+  if (opt) opt.style.background = 'none';
+});
+
+// ── Modal: guardar nuevo producto ──
+document.getElementById('mpGuardar').addEventListener('click', async () => {
+  const nombre = document.getElementById('mpNombre').value.trim();
+  const errEl = document.getElementById('mpError');
+  if (!nombre) { errEl.textContent = 'El nombre es obligatorio.'; errEl.style.display = 'block'; return; }
+  errEl.style.display = 'none';
+
+  const btn = document.getElementById('mpGuardar');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Guardando...';
+
+  try {
+    const res = await fetch('/api/productos/nuevo', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({
+        nombre_comercial: nombre,
+        categoria: document.getElementById('mpCategoria').value || null,
+        empresa: document.getElementById('mpEmpresa').value.trim() || null,
+        formulacion: document.getElementById('mpFormulacion').value || null,
+        unidad_medida: document.getElementById('mpUnidad').value
+      })
+    });
+    const data = await res.json();
+    if (!res.ok) { errEl.textContent = data.error || 'Error al guardar.'; errEl.style.display = 'block'; return; }
+
+    if (_activeModalInp) {
+      _activeModalInp.value = data.nombre_comercial;
+      _activeModalInp.closest('td').querySelector('.prod-id').value = data.id_producto;
+    }
+    bootstrap.Modal.getInstance(document.getElementById('modalNuevoProducto')).hide();
+  } catch(err) {
+    errEl.textContent = 'Error de red. Intente nuevamente.';
+    errEl.style.display = 'block';
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '<i class="fa-solid fa-floppy-disk me-1"></i>Guardar y usar';
   }
 });
 </script>

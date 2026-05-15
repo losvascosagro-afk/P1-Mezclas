@@ -256,12 +256,45 @@ def producto_eliminar(id):
 @app.route('/api/productos')
 def api_productos():
     db = get_db()
-    q = request.args.get('q', '')
-    rows = db.execute(
-        'SELECT id_producto,nombre_comercial,categoria,empresa,unidad_medida '
-        'FROM productos WHERE nombre_comercial LIKE ? ORDER BY nombre_comercial LIMIT 30',
-        (f'%{q}%',)).fetchall()
+    q = request.args.get('q', '').strip()
+    if not q:
+        rows = db.execute(
+            'SELECT id_producto,nombre_comercial,categoria,empresa,unidad_medida '
+            'FROM productos ORDER BY nombre_comercial LIMIT 30'
+        ).fetchall()
+    else:
+        words = q.split()
+        conditions = ' AND '.join(
+            '(nombre_comercial LIKE ? OR empresa LIKE ? OR principio_activo LIKE ?)'
+            for _ in words
+        )
+        params = [p for w in words for p in (f'%{w}%', f'%{w}%', f'%{w}%')]
+        rows = db.execute(
+            f'SELECT id_producto,nombre_comercial,categoria,empresa,unidad_medida '
+            f'FROM productos WHERE {conditions} ORDER BY nombre_comercial LIMIT 30',
+            params
+        ).fetchall()
     return jsonify([dict(r) for r in rows])
+
+
+@app.route('/api/productos/nuevo', methods=['POST'])
+def api_producto_nuevo():
+    db = get_db()
+    data = request.get_json() or {}
+    nombre = (data.get('nombre_comercial') or '').strip()
+    if not nombre:
+        return jsonify({'error': 'Nombre requerido'}), 400
+    cur = db.execute(
+        'INSERT INTO productos (nombre_comercial,categoria,empresa,formulacion,unidad_medida) '
+        'VALUES (?,?,?,?,?)',
+        (nombre,
+         data.get('categoria') or None,
+         data.get('empresa') or None,
+         data.get('formulacion') or None,
+         data.get('unidad_medida') or 'L')
+    )
+    db.commit()
+    return jsonify({'id_producto': cur.lastrowid, 'nombre_comercial': nombre})
 
 
 # ──────────────────────────────────────────────────────────
