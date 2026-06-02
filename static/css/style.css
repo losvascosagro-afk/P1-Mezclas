@@ -63,8 +63,8 @@ body {
   flex-shrink: 0;
 }
 
-.logo-title { font-size: 15px; font-weight: 700; line-height: 1.2; }
-.logo-sub   { font-size: 11px; opacity: 0.7; }
+.logo-title { font-size: 11.5px; font-weight: 700; line-height: 1.3; }
+.logo-sub   { font-size: 10px; opacity: 0.75; margin-top: 3px; line-height: 1.3; }
 
 #sidebar .nav-link {
   color: rgba(255,255,255,0.8);
@@ -92,7 +92,7 @@ body {
   justify-content: center;
 }
 .sidebar-logo-img {
-  width: 130px;
+  width: 170px;
   opacity: 0.82;
   filter: brightness(0) invert(1);  /* fuerza blanco para que quede sobre el fondo azul */
   transition: opacity 0.2s;
