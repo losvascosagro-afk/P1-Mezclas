@@ -13,12 +13,14 @@
     <span><i class="fa-solid fa-building-user me-2"></i>Listado de Clientes ({{ clientes|length }})</span>
   </div>
   <div class="p-3 border-bottom">
-    <form method="get" class="d-flex gap-2">
-      <input type="text" name="q" value="{{ q }}" placeholder="Buscar por razón social, localidad, provincia..."
-             class="form-control form-control-sm" style="max-width:400px">
-      <button class="btn btn-sm btn-outline-primary"><i class="fa-solid fa-search me-1"></i>Buscar</button>
-      {% if q %}<a href="{{ url_for('clientes') }}" class="btn btn-sm btn-outline-secondary">Limpiar</a>{% endif %}
-    </form>
+    <div class="d-flex gap-2 align-items-center">
+      <div class="position-relative" style="max-width:400px; width:100%">
+        <i class="fa-solid fa-search position-absolute" style="left:10px;top:50%;transform:translateY(-50%);color:#6c757d;pointer-events:none"></i>
+        <input id="clienteSearch" type="text" value="{{ q }}" placeholder="Buscar por razón social, localidad, provincia..."
+               class="form-control form-control-sm ps-4" autocomplete="off">
+      </div>
+      <small id="searchCount" class="text-muted"></small>
+    </div>
   </div>
   <div class="table-responsive">
     <table class="table table-hover mb-0">
@@ -54,4 +56,32 @@
     </table>
   </div>
 </div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+(function() {
+  const input = document.getElementById('clienteSearch');
+  const count = document.getElementById('searchCount');
+  const tbody = document.querySelector('table tbody');
+
+  tbody.querySelectorAll('tr').forEach(tr => {
+    tr.setAttribute('data-search', tr.textContent.toLowerCase());
+  });
+
+  function filter() {
+    const q = input.value.toLowerCase().trim();
+    let visible = 0;
+    tbody.querySelectorAll('tr').forEach(tr => {
+      const match = !q || tr.getAttribute('data-search').includes(q);
+      tr.style.display = match ? '' : 'none';
+      if (match && tr.cells.length > 1) visible++;
+    });
+    count.textContent = q ? `${visible} resultado${visible !== 1 ? 's' : ''}` : '';
+  }
+
+  input.addEventListener('input', filter);
+  if (input.value) filter();
+})();
+</script>
 {% endblock %}

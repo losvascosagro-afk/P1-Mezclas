@@ -285,13 +285,16 @@ def api_producto_nuevo():
     if not nombre:
         return jsonify({'error': 'Nombre requerido'}), 400
     cur = db.execute(
-        'INSERT INTO productos (nombre_comercial,categoria,empresa,formulacion,unidad_medida) '
-        'VALUES (?,?,?,?,?)',
+        'INSERT INTO productos (nombre_comercial,categoria,empresa,formulacion,unidad_medida,principio_activo,familia,precio_unit_usd) '
+        'VALUES (?,?,?,?,?,?,?,?)',
         (nombre,
          data.get('categoria') or None,
          data.get('empresa') or None,
          data.get('formulacion') or None,
-         data.get('unidad_medida') or 'L')
+         data.get('unidad_medida') or 'L',
+         data.get('principio_activo') or None,
+         data.get('familia') or None,
+         data.get('precio_unit_usd') or None)
     )
     db.commit()
     return jsonify({'id_producto': cur.lastrowid, 'nombre_comercial': nombre})
@@ -571,10 +574,10 @@ def _build_pdf(e, detalles, fotos):
                             rightMargin=1.8*cm, leftMargin=1.8*cm,
                             topMargin=1.8*cm, bottomMargin=1.8*cm)
 
-    C_TEAL    = colors.HexColor('#1A7A7A')   # verde DMA Agro
-    C_TEAL_LT = colors.HexColor('#E6F5F5')   # teal muy claro para fondos alternos
-    C_DARK    = colors.HexColor('#2D2D2D')   # casi negro para encabezados de tabla
-    C_LGRAY   = colors.HexColor('#F5F5F5')
+    C_TEAL    = colors.HexColor('#1A7A7A')   # verde DMA Agro (solo header y footer)
+    C_DARK    = colors.HexColor('#2D2D2D')   # encabezados de sección y tabla
+    C_LGRAY   = colors.HexColor('#F2F2F2')   # filas alternas neutras
+    C_BORDER  = colors.HexColor('#CCCCCC')   # bordes de tabla
     C_WHITE   = colors.white
     C_RED     = colors.HexColor('#C62828')
     C_BLACK   = colors.black
@@ -602,9 +605,17 @@ def _build_pdf(e, detalles, fotos):
         d = {**base.get(name, base['body']), **kw}
         return ParagraphStyle(f'S_{name}_{id(kw)}', **d)
 
+    def _fit_image(src, max_w=7.5*cm, max_h=5.5*cm):
+        ir = ImageReader(src)
+        iw, ih = ir.getSize()
+        scale = min(max_w / iw, max_h / ih)
+        img = Image(src, width=iw * scale, height=ih * scale)
+        img.hAlign = 'CENTER'
+        return img
+
     def sec(text, bg=None):
-        bg = bg or C_TEAL
-        t = Table([[Paragraph(text, sty('label', textColor=C_WHITE, fontSize=10, leftIndent=6))]], colWidths=[17.4*cm])
+        bg = bg or C_DARK
+        t = Table([[Paragraph(text, sty('label', textColor=C_WHITE, fontSize=9, leftIndent=6))]], colWidths=[17.4*cm])
         t.setStyle(TableStyle([
             ('BACKGROUND', (0,0),(-1,-1), bg),
             ('TOPPADDING', (0,0),(-1,-1), 5),
@@ -654,13 +665,13 @@ def _build_pdf(e, detalles, fotos):
                   sty('center', textColor=C_WHITE)),
     ]], colWidths=[4*cm, 9.4*cm, 4*cm])
     bar.setStyle(TableStyle([
-        ('BACKGROUND', (0,0),(1,0), C_TEAL_LT),
+        ('BACKGROUND', (0,0),(1,0), C_WHITE),
         ('BACKGROUND', (2,0),(2,0), C_RESULT),
         ('VALIGN', (0,0),(-1,-1), 'MIDDLE'),
         ('TOPPADDING', (0,0),(-1,-1), 7), ('BOTTOMPADDING', (0,0),(-1,-1), 7),
         ('LEFTPADDING', (0,0),(-1,-1), 8), ('RIGHTPADDING', (0,0),(-1,-1), 8),
-        ('BOX', (0,0),(-1,-1), 0.5, colors.lightgrey),
-        ('INNERGRID', (0,0),(-1,-1), 0.5, colors.lightgrey),
+        ('BOX', (0,0),(-1,-1), 0.5, C_BORDER),
+        ('INNERGRID', (0,0),(-1,-1), 0.5, C_BORDER),
     ]))
     story += [bar, Spacer(1, 8)]
 
@@ -677,8 +688,8 @@ def _build_pdf(e, detalles, fotos):
         ('ROWBACKGROUNDS', (0,0),(-1,-1), [C_WHITE, C_LGRAY]),
         ('TOPPADDING', (0,0),(-1,-1), 5), ('BOTTOMPADDING', (0,0),(-1,-1), 5),
         ('LEFTPADDING', (0,0),(-1,-1), 6), ('RIGHTPADDING', (0,0),(-1,-1), 6),
-        ('BOX', (0,0),(-1,-1), 0.5, colors.lightgrey),
-        ('INNERGRID', (0,0),(-1,-1), 0.3, colors.lightgrey),
+        ('BOX', (0,0),(-1,-1), 0.5, C_BORDER),
+        ('INNERGRID', (0,0),(-1,-1), 0.3, C_BORDER),
     ]))
     story += [cli, Spacer(1, 7)]
 
@@ -699,8 +710,8 @@ def _build_pdf(e, detalles, fotos):
         ('ROWBACKGROUNDS', (0,0),(-1,-1), [C_WHITE, C_LGRAY, C_WHITE]),
         ('TOPPADDING', (0,0),(-1,-1), 5), ('BOTTOMPADDING', (0,0),(-1,-1), 5),
         ('LEFTPADDING', (0,0),(-1,-1), 6), ('RIGHTPADDING', (0,0),(-1,-1), 6),
-        ('BOX', (0,0),(-1,-1), 0.5, colors.lightgrey),
-        ('INNERGRID', (0,0),(-1,-1), 0.3, colors.lightgrey),
+        ('BOX', (0,0),(-1,-1), 0.5, C_BORDER),
+        ('INNERGRID', (0,0),(-1,-1), 0.3, C_BORDER),
     ]))
     story += [cond, Spacer(1, 7)]
 
@@ -724,13 +735,13 @@ def _build_pdf(e, detalles, fotos):
             ('BACKGROUND', (0,0),(-1,0), C_DARK),
             ('TOPPADDING', (0,0),(-1,-1), 4), ('BOTTOMPADDING', (0,0),(-1,-1), 4),
             ('LEFTPADDING', (0,0),(-1,-1), 5), ('RIGHTPADDING', (0,0),(-1,-1), 5),
-            ('BOX', (0,0),(-1,-1), 0.5, colors.lightgrey),
-            ('INNERGRID', (0,0),(-1,-1), 0.3, colors.lightgrey),
+            ('BOX', (0,0),(-1,-1), 0.5, C_BORDER),
+            ('INNERGRID', (0,0),(-1,-1), 0.3, C_BORDER),
             ('VALIGN', (0,0),(-1,-1), 'MIDDLE'),
         ]
         for i in range(1, len(mrows)):
             if i % 2 == 0:
-                ms.append(('BACKGROUND', (0,i),(-1,i), C_TEAL_LT))
+                ms.append(('BACKGROUND', (0,i),(-1,i), C_LGRAY))
         mt.setStyle(TableStyle(ms))
         story.append(mt)
     else:
@@ -767,8 +778,8 @@ def _build_pdf(e, detalles, fotos):
         ('BACKGROUND', (3,2),(3,2), _obs_bg(e['redispersion'])),
         ('TOPPADDING', (0,0),(-1,-1), 6), ('BOTTOMPADDING', (0,0),(-1,-1), 6),
         ('LEFTPADDING', (0,0),(-1,-1), 8), ('RIGHTPADDING', (0,0),(-1,-1), 8),
-        ('BOX', (0,0),(-1,-1), 0.5, colors.lightgrey),
-        ('INNERGRID', (0,0),(-1,-1), 0.3, colors.lightgrey),
+        ('BOX', (0,0),(-1,-1), 0.5, C_BORDER),
+        ('INNERGRID', (0,0),(-1,-1), 0.3, C_BORDER),
         ('VALIGN', (0,0),(-1,-1), 'MIDDLE'),
     ]))
     story += [ov, Spacer(1, 7)]
@@ -784,12 +795,11 @@ def _build_pdf(e, detalles, fotos):
     ], colWidths=[3.5*cm, 13.9*cm])
     conc.setStyle(TableStyle([
         ('BACKGROUND', (1,0),(1,0), C_RESULT),
-        ('ROWBACKGROUNDS', (0,0),(0,-1), [C_TEAL_LT, C_WHITE]),
-        ('ROWBACKGROUNDS', (1,1),(1,1), [C_WHITE]),
+        ('ROWBACKGROUNDS', (0,0),(-1,-1), [C_WHITE, C_LGRAY]),
         ('TOPPADDING', (0,0),(-1,-1), 7), ('BOTTOMPADDING', (0,0),(-1,-1), 7),
         ('LEFTPADDING', (0,0),(-1,-1), 8), ('RIGHTPADDING', (0,0),(-1,-1), 8),
-        ('BOX', (0,0),(-1,-1), 0.5, colors.lightgrey),
-        ('INNERGRID', (0,0),(-1,-1), 0.3, colors.lightgrey),
+        ('BOX', (0,0),(-1,-1), 0.5, C_BORDER),
+        ('INNERGRID', (0,0),(-1,-1), 0.3, C_BORDER),
         ('VALIGN', (0,0),(-1,-1), 'TOP'),
     ]))
     story += [conc, Spacer(1, 7)]
@@ -799,10 +809,10 @@ def _build_pdf(e, detalles, fotos):
         story.append(sec('OBSERVACIONES AL MICROSCOPIO'))
         mic = Table([[Paragraph(e['obs_microscopio'], sty('obs'))]], colWidths=[17.4*cm])
         mic.setStyle(TableStyle([
-            ('BACKGROUND', (0,0),(-1,-1), C_TEAL_LT),
+            ('BACKGROUND', (0,0),(-1,-1), C_LGRAY),
             ('TOPPADDING', (0,0),(-1,-1), 8), ('BOTTOMPADDING', (0,0),(-1,-1), 8),
             ('LEFTPADDING', (0,0),(-1,-1), 10), ('RIGHTPADDING', (0,0),(-1,-1), 10),
-            ('BOX', (0,0),(-1,-1), 0.5, colors.lightgrey),
+            ('BOX', (0,0),(-1,-1), 0.5, C_BORDER),
         ]))
         story += [mic, Spacer(1, 7)]
 
@@ -818,8 +828,7 @@ def _build_pdf(e, detalles, fotos):
                 if img_data:
                     try:
                         raw = bytes(img_data) if not isinstance(img_data, bytes) else img_data
-                        img = Image(io.BytesIO(raw), width=7.8*cm, height=5.8*cm)
-                        img.hAlign = 'CENTER'
+                        img = _fit_image(io.BytesIO(raw))
                         cell.append(img)
                     except Exception:
                         cell.append(Paragraph('[Imagen no disponible]', sty()))
@@ -827,8 +836,7 @@ def _build_pdf(e, detalles, fotos):
                     fp = os.path.join(UPLOAD_FOLDER, foto['nombre_archivo'])
                     if os.path.exists(fp):
                         try:
-                            img = Image(fp, width=7.8*cm, height=5.8*cm)
-                            img.hAlign = 'CENTER'
+                            img = _fit_image(fp)
                             cell.append(img)
                         except Exception:
                             cell.append(Paragraph('[Imagen no disponible]', sty()))
@@ -888,7 +896,7 @@ def _build_pdf(e, detalles, fotos):
     story.append(Spacer(1, 10))
 
     # ── FOOTER ──
-    story.append(HRFlowable(width='100%', thickness=0.5, color=C_TEAL))
+    story.append(HRFlowable(width='100%', thickness=0.5, color=C_BORDER))
     story.append(Spacer(1, 4))
     story.append(Paragraph(
         f'Informe generado el {datetime.now().strftime("%d/%m/%Y a las %H:%M")}  ·  '

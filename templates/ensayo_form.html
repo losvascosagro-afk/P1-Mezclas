@@ -263,6 +263,21 @@
               {% endfor %}
             </select>
           </div>
+          <div class="col-12">
+            <label class="form-label fw-semibold">Principio Activo</label>
+            <input type="text" id="mpPrincipioActivo" class="form-control" placeholder="Ej: Glifosato 48%">
+          </div>
+          <div class="col-8">
+            <label class="form-label fw-semibold">Familia / Modo de Acción</label>
+            <input type="text" id="mpFamilia" class="form-control" placeholder="Ej: Organofosforado">
+          </div>
+          <div class="col-4">
+            <label class="form-label fw-semibold">Precio (USD)</label>
+            <div class="input-group">
+              <span class="input-group-text">$</span>
+              <input type="number" id="mpPrecio" class="form-control" step="0.01" min="0" placeholder="0.00">
+            </div>
+          </div>
         </div>
         <div id="mpError" class="text-danger small mt-2" style="display:none"></div>
       </div>
@@ -419,6 +434,9 @@ document.addEventListener('click', e => {
     document.getElementById('mpEmpresa').value = '';
     document.getElementById('mpFormulacion').value = '';
     document.getElementById('mpUnidad').value = 'L';
+    document.getElementById('mpPrincipioActivo').value = '';
+    document.getElementById('mpFamilia').value = '';
+    document.getElementById('mpPrecio').value = '';
     document.getElementById('mpError').style.display = 'none';
     closeDrop();
     new bootstrap.Modal(document.getElementById('modalNuevoProducto')).show();
@@ -461,7 +479,10 @@ document.getElementById('mpGuardar').addEventListener('click', async () => {
         categoria: document.getElementById('mpCategoria').value || null,
         empresa: document.getElementById('mpEmpresa').value.trim() || null,
         formulacion: document.getElementById('mpFormulacion').value || null,
-        unidad_medida: document.getElementById('mpUnidad').value
+        unidad_medida: document.getElementById('mpUnidad').value,
+        principio_activo: document.getElementById('mpPrincipioActivo').value.trim() || null,
+        familia: document.getElementById('mpFamilia').value.trim() || null,
+        precio_unit_usd: parseFloat(document.getElementById('mpPrecio').value) || null
       })
     });
     const data = await res.json();
