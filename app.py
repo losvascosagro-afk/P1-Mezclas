@@ -333,10 +333,10 @@ def ensayo_nuevo():
     db = get_db()
     if request.method == 'POST':
         _insert_sql = (
-            'INSERT INTO ensayos (fecha,id_cliente,objetivo,tipo_agua,ph,conductividad,'
-            'dureza,volumen_simulado,temperatura,tiempo_observacion,resultado_final,'
+            'INSERT INTO ensayos (fecha,id_cliente,objetivo,tipo_agua,ph,'
+            'dureza,temperatura,volumenes,tiempos_obs,resultado_final,'
             'recomendacion,espuma,precipitado,separacion_fases,redispersion,obs_microscopio)'
-            ' VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)'
+            ' VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)'
         )
         if BACKEND == 'postgres':
             _insert_sql += ' RETURNING id_ensayo'
@@ -347,11 +347,10 @@ def ensayo_nuevo():
              request.form.get('objetivo') or None,
              request.form.get('tipo_agua') or None,
              _float_or_none(request.form.get('ph')),
-             _float_or_none(request.form.get('conductividad')),
              _float_or_none(request.form.get('dureza')),
-             _float_or_none(request.form.get('volumen_simulado')),
              _float_or_none(request.form.get('temperatura')),
-             _float_or_none(request.form.get('tiempo_observacion')),
+             request.form.get('volumenes') or None,
+             request.form.get('tiempos_obs') or None,
              request.form.get('resultado_final') or None,
              request.form.get('recomendacion') or None,
              request.form.get('espuma') or 'No',
@@ -404,7 +403,7 @@ def ensayo_editar(id):
     if request.method == 'POST':
         db.execute(
             'UPDATE ensayos SET fecha=?,id_cliente=?,objetivo=?,tipo_agua=?,ph=?,'
-            'conductividad=?,dureza=?,volumen_simulado=?,temperatura=?,tiempo_observacion=?,'
+            'dureza=?,temperatura=?,volumenes=?,tiempos_obs=?,'
             'resultado_final=?,recomendacion=?,espuma=?,precipitado=?,'
             'separacion_fases=?,redispersion=?,obs_microscopio=? WHERE id_ensayo=?',
             (request.form.get('fecha'),
@@ -412,11 +411,10 @@ def ensayo_editar(id):
              request.form.get('objetivo') or None,
              request.form.get('tipo_agua') or None,
              _float_or_none(request.form.get('ph')),
-             _float_or_none(request.form.get('conductividad')),
              _float_or_none(request.form.get('dureza')),
-             _float_or_none(request.form.get('volumen_simulado')),
              _float_or_none(request.form.get('temperatura')),
-             _float_or_none(request.form.get('tiempo_observacion')),
+             request.form.get('volumenes') or None,
+             request.form.get('tiempos_obs') or None,
              request.form.get('resultado_final') or None,
              request.form.get('recomendacion') or None,
              request.form.get('espuma') or 'No',
@@ -695,19 +693,18 @@ def _build_pdf(e, detalles, fotos):
 
     # ── CONDICIONES ──
     story.append(sec('CONDICIONES DEL ENSAYO'))
+    _vols = ' / '.join(f'{v} L' for v in (e['volumenes'] or '').split(',') if v.strip()) or '—'
+    _tobs = ' / '.join(f'{t} min' for t in (e['tiempos_obs'] or '').split(',') if t.strip()) or '—'
     cond = Table([
         [Paragraph('Tipo de Agua', sty('label')), Paragraph(e['tipo_agua'] or '—', sty()),
          Paragraph('pH', sty('label')), Paragraph(str(e['ph'] or '—'), sty()),
-         Paragraph('Conductividad (µS/cm)', sty('label')), Paragraph(str(e['conductividad'] or '—'), sty())],
-        [Paragraph('Dureza (mg/L CaCO₃)', sty('label')), Paragraph(str(e['dureza'] or '—'), sty()),
-         Paragraph('Volumen (L)', sty('label')), Paragraph(str(e['volumen_simulado'] or '—'), sty()),
          Paragraph('Temperatura (°C)', sty('label')), Paragraph(str(e['temperatura'] or '—'), sty())],
-        [Paragraph('Tiempo Obs. (h)', sty('label')), Paragraph(str(e['tiempo_observacion'] or '—'), sty()),
-         Paragraph('', sty()), Paragraph('', sty()),
-         Paragraph('', sty()), Paragraph('', sty())],
-    ], colWidths=[3.8*cm, 2.4*cm, 1.4*cm, 1.8*cm, 4*cm, 4*cm])
+        [Paragraph('Dureza (mg/L CaCO₃)', sty('label')), Paragraph(str(e['dureza'] or '—'), sty()),
+         Paragraph('Volúmenes (L)', sty('label')), Paragraph(_vols, sty()),
+         Paragraph('Tiempos obs. (min)', sty('label')), Paragraph(_tobs, sty())],
+    ], colWidths=[3.8*cm, 2.4*cm, 1.8*cm, 3.4*cm, 3*cm, 3*cm])
     cond.setStyle(TableStyle([
-        ('ROWBACKGROUNDS', (0,0),(-1,-1), [C_WHITE, C_LGRAY, C_WHITE]),
+        ('ROWBACKGROUNDS', (0,0),(-1,-1), [C_WHITE, C_LGRAY]),
         ('TOPPADDING', (0,0),(-1,-1), 5), ('BOTTOMPADDING', (0,0),(-1,-1), 5),
         ('LEFTPADDING', (0,0),(-1,-1), 6), ('RIGHTPADDING', (0,0),(-1,-1), 6),
         ('BOX', (0,0),(-1,-1), 0.5, C_BORDER),

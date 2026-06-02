@@ -280,6 +280,14 @@ def _init_sqlite():
         conn.commit()
     except Exception:
         pass
+    # Migración: columnas multi-valor para volumenes y tiempos de observación
+    for col, old_col in [('volumenes', 'volumen_simulado'), ('tiempos_obs', 'tiempo_observacion')]:
+        try:
+            conn.execute(f'ALTER TABLE ensayos ADD COLUMN {col} TEXT')
+            conn.execute(f"UPDATE ensayos SET {col} = CAST({old_col} AS TEXT) WHERE {old_col} IS NOT NULL AND ({col} IS NULL OR {col} = '')")
+            conn.commit()
+        except Exception:
+            pass
     count = conn.execute('SELECT COUNT(*) FROM clientes').fetchone()[0]
     if count == 0 and os.path.exists(EXCEL_PATH):
         _import_from_excel(conn, 'sqlite')

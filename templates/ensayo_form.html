@@ -51,45 +51,61 @@
       <div class="card-header-custom"><i class="fa-solid fa-droplet me-2"></i>Condiciones del Agua</div>
       <div class="p-4">
         <div class="row g-3">
-          <div class="col-md-6">
+          <div class="col-md-5">
             <label class="form-label fw-semibold">Tipo de Agua</label>
-            <select name="tipo_agua" class="form-select">
+            <select id="tipoAgua" name="tipo_agua" class="form-select">
               <option value="">— Seleccionar —</option>
               {% for t in ['Estándar laboratorio','Agua de pozo','Agua de red','Agua destilada','Agua de lluvia','Otra'] %}
                 <option value="{{ t }}" {% if e and e.tipo_agua == t %}selected{% endif %}>{{ t }}</option>
               {% endfor %}
             </select>
           </div>
-          <div class="col-md-3">
+          <div class="col-md-2">
             <label class="form-label fw-semibold">pH</label>
-            <input type="number" name="ph" class="form-control" step="0.1" min="0" max="14"
+            <input type="number" id="fieldPh" name="ph" class="form-control" step="0.1" min="0" max="14"
                    value="{{ e.ph if e else '' }}" placeholder="7.0">
           </div>
           <div class="col-md-3">
-            <label class="form-label fw-semibold">Conductividad (µS/cm)</label>
-            <input type="number" name="conductividad" class="form-control" step="1"
-                   value="{{ e.conductividad if e else '' }}" placeholder="1300">
+            <label class="form-label fw-semibold">Dureza (mg/L CaCO₃)</label>
+            <input type="number" id="fieldDureza" name="dureza" class="form-control" step="1"
+                   value="{{ e.dureza if e else '' }}" placeholder="75">
           </div>
-          <div class="col-md-3">
-            <label class="form-label fw-semibold">Dureza (mg/L)</label>
-            <input type="number" name="dureza" class="form-control" step="1"
-                   value="{{ e.dureza if e else '' }}" placeholder="100">
-          </div>
-          <div class="col-md-3">
-            <label class="form-label fw-semibold">Volumen (L)</label>
-            <input type="number" name="volumen_simulado" class="form-control" step="1"
-                   value="{{ e.volumen_simulado if e else '' }}" placeholder="50">
-          </div>
-          <div class="col-md-3">
+          <div class="col-md-2">
             <label class="form-label fw-semibold">Temperatura (°C)</label>
-            <input type="number" name="temperatura" class="form-control" step="1"
-                   value="{{ e.temperatura if e else '' }}" placeholder="24">
+            <input type="number" id="fieldTemp" name="temperatura" class="form-control" step="1"
+                   value="{{ e.temperatura if e else '' }}" placeholder="25">
           </div>
-          <div class="col-md-3">
-            <label class="form-label fw-semibold">Tiempo Obs. (h)</label>
-            <input type="number" name="tiempo_observacion" class="form-control" step="0.5"
-                   value="{{ e.tiempo_observacion if e else '' }}" placeholder="5">
+
+          <!-- Volúmenes de caldo (multi) -->
+          <div class="col-md-6">
+            <label class="form-label fw-semibold">Volúmenes de caldo (L)</label>
+            <input type="hidden" name="volumenes" id="volumenesHidden"
+                   value="{{ e.volumenes if e else '' }}">
+            <div class="d-flex gap-2 align-items-center flex-wrap" id="volChips"></div>
+            <div class="d-flex gap-2 mt-2">
+              <input type="number" id="volInput" class="form-control form-control-sm" style="max-width:100px"
+                     step="1" min="1" placeholder="50">
+              <button type="button" class="btn btn-sm btn-outline-secondary" onclick="addChip('vol')">
+                <i class="fa-solid fa-plus"></i> Agregar
+              </button>
+            </div>
           </div>
+
+          <!-- Tiempos de observación (multi) -->
+          <div class="col-md-6">
+            <label class="form-label fw-semibold">Tiempos de observación (min)</label>
+            <input type="hidden" name="tiempos_obs" id="tiemposHidden"
+                   value="{{ e.tiempos_obs if e else '' }}">
+            <div class="d-flex gap-2 align-items-center flex-wrap" id="tObsChips"></div>
+            <div class="d-flex gap-2 mt-2">
+              <input type="number" id="tObsInput" class="form-control form-control-sm" style="max-width:100px"
+                     step="1" min="1" placeholder="5">
+              <button type="button" class="btn btn-sm btn-outline-secondary" onclick="addChip('tobs')">
+                <i class="fa-solid fa-plus"></i> Agregar
+              </button>
+            </div>
+          </div>
+
         </div>
       </div>
     </div>
@@ -320,6 +336,69 @@
 <script>
 const today = new Date().toISOString().split('T')[0];
 document.querySelectorAll('input[name="fecha"]').forEach(el => { if(!el.value) el.value = today; });
+
+// ── Autocompletado Estándar laboratorio ──
+document.getElementById('tipoAgua').addEventListener('change', function() {
+  if (this.value === 'Estándar laboratorio') {
+    const ph = document.getElementById('fieldPh');
+    const dur = document.getElementById('fieldDureza');
+    const tmp = document.getElementById('fieldTemp');
+    if (!ph.value)  ph.value  = '7.8';
+    if (!dur.value) dur.value = '75';
+    if (!tmp.value) tmp.value = '25';
+  }
+});
+
+// ── Chips multi-valor (volúmenes y tiempos) ──
+function renderChips(type) {
+  const isVol = type === 'vol';
+  const hidden  = document.getElementById(isVol ? 'volumenesHidden' : 'tiemposHidden');
+  const container = document.getElementById(isVol ? 'volChips' : 'tObsChips');
+  const unit    = isVol ? 'L' : 'min';
+  const vals = hidden.value ? hidden.value.split(',').map(v => v.trim()).filter(Boolean) : [];
+  container.innerHTML = '';
+  vals.forEach((v, i) => {
+    const chip = document.createElement('span');
+    chip.className = 'badge bg-light text-dark border d-flex align-items-center gap-1';
+    chip.style.fontSize = '0.85rem';
+    chip.innerHTML = `${v} ${unit} <button type="button" class="btn-close btn-close-sm" style="font-size:0.6rem" aria-label="Quitar"></button>`;
+    chip.querySelector('button').addEventListener('click', () => {
+      vals.splice(i, 1);
+      hidden.value = vals.join(',');
+      renderChips(type);
+    });
+    container.appendChild(chip);
+  });
+}
+
+function addChip(type) {
+  const isVol = type === 'vol';
+  const input  = document.getElementById(isVol ? 'volInput' : 'tObsInput');
+  const hidden = document.getElementById(isVol ? 'volumenesHidden' : 'tiemposHidden');
+  const val = input.value.trim();
+  if (!val || isNaN(val)) return;
+  const vals = hidden.value ? hidden.value.split(',').map(v => v.trim()).filter(Boolean) : [];
+  if (!vals.includes(val)) {
+    vals.push(val);
+    hidden.value = vals.join(',');
+    renderChips(type);
+  }
+  input.value = '';
+  input.focus();
+}
+
+// Enter en input agrega chip
+['volInput','tObsInput'].forEach(id => {
+  document.getElementById(id).addEventListener('keydown', e => {
+    if (e.key === 'Enter') { e.preventDefault(); addChip(id === 'volInput' ? 'vol' : 'tobs'); }
+  });
+});
+
+// Renderizar chips con valores existentes al cargar
+window.addEventListener('DOMContentLoaded', () => {
+  renderChips('vol');
+  renderChips('tobs');
+});
 
 function addProductRow() {
   const tmpl = document.getElementById('productRowTemplate');
