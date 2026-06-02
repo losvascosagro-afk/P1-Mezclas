@@ -160,6 +160,8 @@ _SCHEMA_SQLITE = '''
         volumen_simulado   REAL,
         temperatura        REAL,
         tiempo_observacion REAL,
+        volumenes          TEXT,
+        tiempos_obs        TEXT,
         resultado_final    TEXT,
         recomendacion      TEXT,
         espuma             TEXT,
@@ -227,6 +229,8 @@ _SCHEMA_PG = [
         volumen_simulado   REAL,
         temperatura        REAL,
         tiempo_observacion REAL,
+        volumenes          TEXT,
+        tiempos_obs        TEXT,
         resultado_final    TEXT,
         recomendacion      TEXT,
         espuma             TEXT,
@@ -337,6 +341,31 @@ def _init_postgres():
                 WHERE table_name='fotos_ensayo' AND column_name='imagen_data'
             ) THEN
                 ALTER TABLE fotos_ensayo ADD COLUMN imagen_data BYTEA;
+            END IF;
+        END $$;
+    """)
+    # Migración: columnas multi-valor volumenes y tiempos_obs
+    cur.execute("""
+        DO $$
+        BEGIN
+            IF NOT EXISTS (
+                SELECT 1 FROM information_schema.columns
+                WHERE table_name='ensayos' AND column_name='volumenes'
+            ) THEN
+                ALTER TABLE ensayos ADD COLUMN volumenes TEXT;
+                UPDATE ensayos SET volumenes = CAST(volumen_simulado AS TEXT) WHERE volumen_simulado IS NOT NULL;
+            END IF;
+        END $$;
+    """)
+    cur.execute("""
+        DO $$
+        BEGIN
+            IF NOT EXISTS (
+                SELECT 1 FROM information_schema.columns
+                WHERE table_name='ensayos' AND column_name='tiempos_obs'
+            ) THEN
+                ALTER TABLE ensayos ADD COLUMN tiempos_obs TEXT;
+                UPDATE ensayos SET tiempos_obs = CAST(tiempo_observacion AS TEXT) WHERE tiempo_observacion IS NOT NULL;
             END IF;
         END $$;
     """)
