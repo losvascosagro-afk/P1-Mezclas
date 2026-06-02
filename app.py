@@ -911,7 +911,27 @@ def _build_pdf(e, detalles, fotos):
         f'{LAB_NAME}  ·  Informe N° {e["id_ensayo"]:04d}',
         sty('footer')))
 
-    doc.build(story)
+    # ── WATERMARK callback ──
+    def _watermark(canvas, doc):
+        if not os.path.exists(LOGO_PATH):
+            return
+        try:
+            canvas.saveState()
+            canvas.setFillAlpha(0.06)          # 6% de opacidad — muy sutil
+            ir = ImageReader(LOGO_PATH)
+            iw, ih = ir.getSize()
+            pw, ph = A4
+            target_w = pw * 0.55              # 55% del ancho de página
+            target_h = target_w * ih / iw
+            x = (pw - target_w) / 2
+            y = (ph - target_h) / 2
+            canvas.drawImage(LOGO_PATH, x, y, width=target_w, height=target_h,
+                             mask='auto', preserveAspectRatio=True)
+            canvas.restoreState()
+        except Exception:
+            pass
+
+    doc.build(story, onFirstPage=_watermark, onLaterPages=_watermark)
     buf.seek(0)
     return buf
 
