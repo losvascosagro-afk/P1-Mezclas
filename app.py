@@ -673,14 +673,23 @@ def _build_pdf(e, detalles, fotos):
     ]))
     story += [bar, Spacer(1, 8)]
 
+    def _val(v):
+        """Valor limpio: None/vacío → '—', y uppercase."""
+        s = str(v).strip() if v not in (None, '', 'None') else ''
+        return s.upper() if s else '—'
+
+    def _loc(loc, prov):
+        parts = [p.strip().upper() for p in [loc or '', prov or ''] if p and p.strip() and p.strip() != 'None']
+        return ', '.join(parts) if parts else '—'
+
     # ── CLIENTE ──
     story.append(sec('DATOS DEL CLIENTE'))
     cli = Table([
-        [Paragraph('Razón Social:', sty('label')), Paragraph(e['razon_social'] or '—', sty()),
-         Paragraph('Técnico:', sty('label')), Paragraph(e['tecnico_responsable'] or '—', sty())],
-        [Paragraph('C.U.I.T.:', sty('label')), Paragraph(e['cuit'] or '—', sty()),
+        [Paragraph('Razón Social:', sty('label')), Paragraph(_val(e['razon_social']), sty()),
+         Paragraph('Técnico:', sty('label')), Paragraph(_val(e['tecnico_responsable']), sty())],
+        [Paragraph('C.U.I.T.:', sty('label')), Paragraph(_val(e['cuit']), sty()),
          Paragraph('Localidad:', sty('label')),
-         Paragraph(f"{e['localidad'] or '—'}, {e['provincia'] or ''}", sty())],
+         Paragraph(_loc(e['localidad'], e['provincia']), sty())],
     ], colWidths=[3*cm, 5.7*cm, 2.7*cm, 6*cm])
     cli.setStyle(TableStyle([
         ('ROWBACKGROUNDS', (0,0),(-1,-1), [C_WHITE, C_LGRAY]),
@@ -715,19 +724,21 @@ def _build_pdf(e, detalles, fotos):
     # ── COMPOSICIÓN DE LA MEZCLA ──
     story.append(sec('COMPOSICIÓN DE LA MEZCLA'))
     if detalles:
-        mhdr = [Paragraph(t, sty('thc')) for t in ['#', 'Producto', 'Categoría', 'Empresa', 'Principio Activo', 'Dosis', 'Ud.']]
+        sc = sty('center', fontSize=8, leading=10)
+        sb = sty('body',   fontSize=8, leading=10)
+        mhdr = [Paragraph(t, sty('thc', fontSize=8)) for t in ['#', 'Producto', 'Categoría', 'Empresa', 'Principio Activo', 'Dosis', 'Ud.']]
         mrows = [mhdr]
         for i, d in enumerate(detalles):
             mrows.append([
-                Paragraph(str(d['orden_carga'] or i+1), sty('center')),
-                Paragraph(d['nombre_comercial'] or '—', sty()),
-                Paragraph(d['categoria'] or '—', sty()),
-                Paragraph(d['empresa'] or '—', sty()),
-                Paragraph(d['principio_activo'] or '—', sty()),
-                Paragraph(str(d['dosis'] or '—'), sty('center')),
-                Paragraph(d['unidad'] or 'L', sty('center')),
+                Paragraph(str(d['orden_carga'] or i+1), sc),
+                Paragraph((d['nombre_comercial'] or '—').upper(), sb),
+                Paragraph((d['categoria'] or '—').upper(), sb),
+                Paragraph((d['empresa'] or '—').upper(), sb),
+                Paragraph((d['principio_activo'] or '—').upper(), sb),
+                Paragraph(str(d['dosis'] or '—'), sc),
+                Paragraph((d['unidad'] or 'L').upper(), sc),
             ])
-        mt = Table(mrows, colWidths=[1*cm, 3.7*cm, 2.5*cm, 2.5*cm, 4.2*cm, 1.8*cm, 1.7*cm])
+        mt = Table(mrows, colWidths=[0.8*cm, 3.5*cm, 2.3*cm, 3*cm, 4.6*cm, 1.6*cm, 1.6*cm])
         ms = [
             ('BACKGROUND', (0,0),(-1,0), C_DARK),
             ('TOPPADDING', (0,0),(-1,-1), 4), ('BOTTOMPADDING', (0,0),(-1,-1), 4),
