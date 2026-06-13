@@ -692,7 +692,21 @@ def _build_pdf(e, detalles, fotos):
         ('BOX', (0,0),(-1,-1), 0.5, C_BORDER),
         ('INNERGRID', (0,0),(-1,-1), 0.5, C_BORDER),
     ]))
-    story += [bar, Spacer(1, 8)]
+    story += [bar, Spacer(1, 4)]
+
+    if e['obs_mezcla']:
+        obs_bar = Table([[
+            Paragraph(f'<b>Observaciones de la mezcla:</b>  {e["obs_mezcla"]}', sty()),
+        ]], colWidths=[17.4*cm])
+        obs_bar.setStyle(TableStyle([
+            ('BACKGROUND', (0,0),(-1,-1), colors.HexColor('#FFFBE6')),
+            ('LEFTPADDING', (0,0),(-1,-1), 8), ('RIGHTPADDING', (0,0),(-1,-1), 8),
+            ('TOPPADDING', (0,0),(-1,-1), 5), ('BOTTOMPADDING', (0,0),(-1,-1), 5),
+            ('BOX', (0,0),(-1,-1), 0.5, colors.HexColor('#F0A500')),
+        ]))
+        story += [obs_bar, Spacer(1, 6)]
+    else:
+        story.append(Spacer(1, 4))
 
     def _val(v):
         """Valor limpio: None/vacío → '—', y uppercase."""
