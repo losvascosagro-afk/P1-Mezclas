@@ -61,10 +61,15 @@
           </td>
           <td>
             {% if e.resultado_final %}
-              {% if 'inestable' in e.resultado_final|lower %}
-                <span class="badge bg-danger"><i class="fa-solid fa-xmark me-1"></i>{{ e.resultado_final }}</span>
-              {% elif 'estable' in e.resultado_final|lower %}
-                <span class="badge bg-success"><i class="fa-solid fa-check me-1"></i>{{ e.resultado_final }}</span>
+              {% set r = e.resultado_final|lower %}
+              {% if 'inestable' in r %}
+                <span class="badge" style="background:#C62828"><i class="fa-solid fa-circle-xmark me-1"></i>{{ e.resultado_final }}</span>
+              {% elif 'observaci' in r %}
+                <span class="badge" style="background:#E67E00"><i class="fa-solid fa-triangle-exclamation me-1"></i>{{ e.resultado_final }}</span>
+              {% elif 'estable' in r %}
+                <span class="badge" style="background:#2E7D32"><i class="fa-solid fa-circle-check me-1"></i>{{ e.resultado_final }}</span>
+              {% elif 'ensayo' in r %}
+                <span class="badge" style="background:#1565C0"><i class="fa-solid fa-flask me-1"></i>{{ e.resultado_final }}</span>
               {% else %}
                 <span class="badge bg-secondary">{{ e.resultado_final }}</span>
               {% endif %}
