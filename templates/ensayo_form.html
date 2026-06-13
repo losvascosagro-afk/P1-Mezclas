@@ -26,15 +26,12 @@
           </div>
           <div class="col-md-8">
             <label class="form-label fw-semibold">Cliente</label>
-            <select name="id_cliente" class="form-select">
-              <option value="">— Sin cliente —</option>
-              {% for c in clientes %}
-                <option value="{{ c.id_cliente }}"
-                  {% if e and e.id_cliente == c.id_cliente %}selected{% endif %}>
-                  {{ c.razon_social }}
-                </option>
-              {% endfor %}
-            </select>
+            <input type="hidden" name="id_cliente" id="clienteId"
+                   value="{{ e.id_cliente if e else '' }}">
+            <input type="text" id="clienteSearch" class="form-control" autocomplete="off"
+                   placeholder="Buscar por nombre..."
+                   value="{{ e.razon_social if e else '' }}">
+            <div id="clienteDrop" style="display:none;position:fixed;z-index:9999;background:#fff;border:1px solid #dee2e6;border-radius:6px;box-shadow:0 4px 20px rgba(0,0,0,.15);max-height:260px;overflow-y:auto;min-width:280px"></div>
           </div>
           <div class="col-12">
             <label class="form-label fw-semibold">Objetivo</label>
@@ -342,6 +339,68 @@
 <script>
 const today = new Date().toISOString().split('T')[0];
 document.querySelectorAll('input[name="fecha"]').forEach(el => { if(!el.value) el.value = today; });
+
+// ── Autocomplete Clientes ──
+(function() {
+  const inp = document.getElementById('clienteSearch');
+  const hiddenId = document.getElementById('clienteId');
+  const drop = document.getElementById('clienteDrop');
+  let timer;
+
+  function posDrop() {
+    const r = inp.getBoundingClientRect();
+    drop.style.top  = (r.bottom + 2) + 'px';
+    drop.style.left = r.left + 'px';
+    drop.style.width = Math.max(r.width, 260) + 'px';
+  }
+
+  function closeDrop() { drop.style.display = 'none'; }
+
+  inp.addEventListener('input', () => {
+    clearTimeout(timer);
+    hiddenId.value = '';
+    const q = inp.value.trim();
+    timer = setTimeout(async () => {
+      const res = await fetch('/api/clientes?q=' + encodeURIComponent(q));
+      const clientes = await res.json();
+      if (!clientes.length) { closeDrop(); return; }
+      drop.innerHTML = clientes.map(c =>
+        `<button type="button" class="cli-opt d-flex align-items-center px-3 py-2 border-0 w-100 text-start"
+                 style="background:none;cursor:pointer"
+                 data-id="${c.id_cliente}" data-name="${c.razon_social.replace(/"/g,'&quot;')}">
+           ${c.razon_social}
+         </button>`
+      ).join('');
+      posDrop();
+      drop.style.display = 'block';
+    }, 200);
+  });
+
+  inp.addEventListener('focus', () => { if (!inp.value.trim()) inp.dispatchEvent(new Event('input')); });
+
+  drop.addEventListener('click', e => {
+    const opt = e.target.closest('.cli-opt');
+    if (!opt) return;
+    inp.value = opt.dataset.name;
+    hiddenId.value = opt.dataset.id;
+    closeDrop();
+  });
+
+  drop.addEventListener('mouseover', e => {
+    const opt = e.target.closest('.cli-opt');
+    if (opt) opt.style.background = '#f0f4ff';
+  });
+  drop.addEventListener('mouseout', e => {
+    const opt = e.target.closest('.cli-opt');
+    if (opt) opt.style.background = 'none';
+  });
+
+  document.addEventListener('click', e => {
+    if (!e.target.closest('#clienteDrop') && e.target !== inp) closeDrop();
+  });
+  window.addEventListener('scroll', () => { if (drop.style.display !== 'none') posDrop(); }, true);
+  window.addEventListener('resize', () => { if (drop.style.display !== 'none') posDrop(); });
+})();
 
 // ── Autocompletado Estándar laboratorio ──
 document.getElementById('tipoAgua').addEventListener('change', function() {

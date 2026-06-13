@@ -253,6 +253,25 @@ def producto_eliminar(id):
     return redirect(url_for('productos'))
 
 
+@app.route('/api/clientes')
+def api_clientes():
+    db = get_db()
+    q = request.args.get('q', '').strip()
+    if not q:
+        rows = db.execute(
+            'SELECT id_cliente, razon_social FROM clientes ORDER BY razon_social LIMIT 30'
+        ).fetchall()
+    else:
+        words = q.split()
+        conditions = ' AND '.join('razon_social LIKE ?' for _ in words)
+        params = [f'%{w}%' for w in words]
+        rows = db.execute(
+            f'SELECT id_cliente, razon_social FROM clientes WHERE {conditions} ORDER BY razon_social LIMIT 30',
+            params
+        ).fetchall()
+    return jsonify([dict(r) for r in rows])
+
+
 @app.route('/api/productos')
 def api_productos():
     db = get_db()
