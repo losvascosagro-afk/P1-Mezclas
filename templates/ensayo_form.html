@@ -42,6 +42,12 @@
                    value="{{ e.objetivo if e else 'Prueba de compatibilidad' }}"
                    placeholder="Ej: Prueba de compatibilidad">
           </div>
+          <div class="col-12">
+            <label class="form-label fw-semibold">Observaciones de la mezcla</label>
+            <input type="text" name="obs_mezcla" class="form-control"
+                   value="{{ e.obs_mezcla if e else '' }}"
+                   placeholder="Ej: Chalares, Aplicación tardía, Mezcla en campo">
+          </div>
         </div>
       </div>
     </div>
@@ -140,7 +146,7 @@
                          placeholder="Buscar por nombre, empresa, principio..." value="{{ d.nombre_comercial or '' }}">
                   <input type="hidden" name="producto_id[]" class="prod-id" value="{{ d.id_producto or '' }}">
                 </td>
-                <td><input type="number" name="dosis[]" class="form-control form-control-sm" step="0.01" value="{{ d.dosis }}"></td>
+                <td><input type="number" name="dosis[]" class="form-control form-control-sm" step="0.001" value="{{ d.dosis }}"></td>
                 <td>
                   <select name="unidad[]" class="form-select form-select-sm">
                     {% for u in ['L','Kg','ml','g'] %}
@@ -316,7 +322,7 @@
         <input type="text" class="form-control form-control-sm prod-search" autocomplete="off" placeholder="Buscar por nombre, empresa, principio...">
         <input type="hidden" name="producto_id[]" class="prod-id" value="">
     </td>
-    <td><input type="number" name="dosis[]" class="form-control form-control-sm" step="0.01" placeholder="0.0"></td>
+    <td><input type="number" name="dosis[]" class="form-control form-control-sm" step="0.001" placeholder="0.0"></td>
     <td>
       <select name="unidad[]" class="form-select form-select-sm">
         <option value="L">L</option>

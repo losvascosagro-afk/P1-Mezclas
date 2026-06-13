@@ -292,6 +292,11 @@ def _init_sqlite():
             conn.commit()
         except Exception:
             pass
+    try:
+        conn.execute('ALTER TABLE ensayos ADD COLUMN obs_mezcla TEXT')
+        conn.commit()
+    except Exception:
+        pass
     count = conn.execute('SELECT COUNT(*) FROM clientes').fetchone()[0]
     if count == 0 and os.path.exists(EXCEL_PATH):
         _import_from_excel(conn, 'sqlite')
@@ -366,6 +371,17 @@ def _init_postgres():
             ) THEN
                 ALTER TABLE ensayos ADD COLUMN tiempos_obs TEXT;
                 UPDATE ensayos SET tiempos_obs = CAST(tiempo_observacion AS TEXT) WHERE tiempo_observacion IS NOT NULL;
+            END IF;
+        END $$;
+    """)
+    cur.execute("""
+        DO $$
+        BEGIN
+            IF NOT EXISTS (
+                SELECT 1 FROM information_schema.columns
+                WHERE table_name='ensayos' AND column_name='obs_mezcla'
+            ) THEN
+                ALTER TABLE ensayos ADD COLUMN obs_mezcla TEXT;
             END IF;
         END $$;
     """)

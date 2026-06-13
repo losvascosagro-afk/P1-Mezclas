@@ -333,10 +333,10 @@ def ensayo_nuevo():
     db = get_db()
     if request.method == 'POST':
         _insert_sql = (
-            'INSERT INTO ensayos (fecha,id_cliente,objetivo,tipo_agua,ph,'
+            'INSERT INTO ensayos (fecha,id_cliente,objetivo,obs_mezcla,tipo_agua,ph,'
             'dureza,temperatura,volumenes,tiempos_obs,resultado_final,'
             'recomendacion,espuma,precipitado,separacion_fases,redispersion,obs_microscopio)'
-            ' VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)'
+            ' VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)'
         )
         if BACKEND == 'postgres':
             _insert_sql += ' RETURNING id_ensayo'
@@ -345,6 +345,7 @@ def ensayo_nuevo():
             (request.form.get('fecha') or datetime.now().strftime('%Y-%m-%d'),
              request.form.get('id_cliente') or None,
              request.form.get('objetivo') or None,
+             request.form.get('obs_mezcla') or None,
              request.form.get('tipo_agua') or None,
              _float_or_none(request.form.get('ph')),
              _float_or_none(request.form.get('dureza')),
@@ -402,13 +403,14 @@ def ensayo_editar(id):
         return redirect(url_for('ensayos'))
     if request.method == 'POST':
         db.execute(
-            'UPDATE ensayos SET fecha=?,id_cliente=?,objetivo=?,tipo_agua=?,ph=?,'
+            'UPDATE ensayos SET fecha=?,id_cliente=?,objetivo=?,obs_mezcla=?,tipo_agua=?,ph=?,'
             'dureza=?,temperatura=?,volumenes=?,tiempos_obs=?,'
             'resultado_final=?,recomendacion=?,espuma=?,precipitado=?,'
             'separacion_fases=?,redispersion=?,obs_microscopio=? WHERE id_ensayo=?',
             (request.form.get('fecha'),
              request.form.get('id_cliente') or None,
              request.form.get('objetivo') or None,
+             request.form.get('obs_mezcla') or None,
              request.form.get('tipo_agua') or None,
              _float_or_none(request.form.get('ph')),
              _float_or_none(request.form.get('dureza')),

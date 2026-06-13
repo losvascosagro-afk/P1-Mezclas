@@ -53,6 +53,12 @@
             <strong>{{ e.objetivo }}</strong>
           </div>
         {% endif %}
+        {% if e.obs_mezcla %}
+          <div class="mt-2 p-2 rounded" style="background:#fffbe6;border-left:3px solid #f0a500">
+            <small class="text-muted">Observaciones de la mezcla:</small><br>
+            <span>{{ e.obs_mezcla }}</span>
+          </div>
+        {% endif %}
       </div>
     </div>
 
