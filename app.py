@@ -499,36 +499,32 @@ def _save_detalles(db, eid, form):
 @app.route('/ensayos/<int:id>/foto', methods=['POST'])
 def foto_upload(id):
     db = get_db()
-    files = request.files.getlist('foto')
-    if not files or all(f.filename == '' for f in files):
+    if 'foto' not in request.files:
         flash('No se seleccionó archivo.', 'danger')
         return redirect(url_for('ensayo_detalle', id=id))
-    desc = request.form.get('descripcion', '')
-    agregadas = 0
-    for file in files:
-        if file.filename == '':
-            continue
-        if file and allowed_file(file.filename):
-            ext = file.filename.rsplit('.', 1)[1].lower()
-            fname = f"ens{id}_{datetime.now().strftime('%Y%m%d_%H%M%S%f')}.{ext}"
-            img_bytes = file.read()
-            try:
-                with open(os.path.join(UPLOAD_FOLDER, fname), 'wb') as fh:
-                    fh.write(img_bytes)
-            except Exception:
-                pass
-            db.execute(
-                'INSERT INTO fotos_ensayo (id_ensayo,nombre_archivo,descripcion,fecha_carga,imagen_data)'
-                ' VALUES (?,?,?,?,?)',
-                (id, fname, desc,
-                 datetime.now().strftime('%Y-%m-%d %H:%M'),
-                 img_bytes))
-            agregadas += 1
-        else:
-            flash(f'Formato no permitido: {file.filename}. Use JPG, PNG, TIFF o BMP.', 'danger')
-    if agregadas:
+    file = request.files['foto']
+    if file.filename == '':
+        flash('No se seleccionó archivo.', 'danger')
+        return redirect(url_for('ensayo_detalle', id=id))
+    if file and allowed_file(file.filename):
+        ext = file.filename.rsplit('.', 1)[1].lower()
+        fname = f"ens{id}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.{ext}"
+        img_bytes = file.read()
+        try:
+            with open(os.path.join(UPLOAD_FOLDER, fname), 'wb') as fh:
+                fh.write(img_bytes)
+        except Exception:
+            pass
+        db.execute(
+            'INSERT INTO fotos_ensayo (id_ensayo,nombre_archivo,descripcion,fecha_carga,imagen_data)'
+            ' VALUES (?,?,?,?,?)',
+            (id, fname, request.form.get('descripcion', ''),
+             datetime.now().strftime('%Y-%m-%d %H:%M'),
+             img_bytes))
         db.commit()
-        flash(f'{"Foto agregada" if agregadas == 1 else f"{agregadas} fotos agregadas"}.', 'success')
+        flash('Foto agregada.', 'success')
+    else:
+        flash('Formato no permitido. Use JPG, PNG, TIFF o BMP.', 'danger')
     return redirect(url_for('ensayo_detalle', id=id))
 
 
