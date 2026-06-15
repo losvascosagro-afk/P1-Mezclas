@@ -499,33 +499,36 @@ def _save_detalles(db, eid, form):
 @app.route('/ensayos/<int:id>/foto', methods=['POST'])
 def foto_upload(id):
     db = get_db()
-    if 'foto' not in request.files:
+    files = request.files.getlist('foto')
+    if not files or all(f.filename == '' for f in files):
         flash('No se seleccionó archivo.', 'danger')
         return redirect(url_for('ensayo_detalle', id=id))
-    file = request.files['foto']
-    if file.filename == '':
-        flash('No se seleccionó archivo.', 'danger')
-        return redirect(url_for('ensayo_detalle', id=id))
-    if file and allowed_file(file.filename):
-        ext = file.filename.rsplit('.', 1)[1].lower()
-        fname = f"ens{id}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.{ext}"
-        img_bytes = file.read()
-        # Guardar en filesystem local (solo funciona localmente)
-        try:
-            with open(os.path.join(UPLOAD_FOLDER, fname), 'wb') as fh:
-                fh.write(img_bytes)
-        except Exception:
-            pass
-        db.execute(
-            'INSERT INTO fotos_ensayo (id_ensayo,nombre_archivo,descripcion,fecha_carga,imagen_data)'
-            ' VALUES (?,?,?,?,?)',
-            (id, fname, request.form.get('descripcion', ''),
-             datetime.now().strftime('%Y-%m-%d %H:%M'),
-             img_bytes))
+    desc = request.form.get('descripcion', '')
+    agregadas = 0
+    for file in files:
+        if file.filename == '':
+            continue
+        if file and allowed_file(file.filename):
+            ext = file.filename.rsplit('.', 1)[1].lower()
+            fname = f"ens{id}_{datetime.now().strftime('%Y%m%d_%H%M%S%f')}.{ext}"
+            img_bytes = file.read()
+            try:
+                with open(os.path.join(UPLOAD_FOLDER, fname), 'wb') as fh:
+                    fh.write(img_bytes)
+            except Exception:
+                pass
+            db.execute(
+                'INSERT INTO fotos_ensayo (id_ensayo,nombre_archivo,descripcion,fecha_carga,imagen_data)'
+                ' VALUES (?,?,?,?,?)',
+                (id, fname, desc,
+                 datetime.now().strftime('%Y-%m-%d %H:%M'),
+                 img_bytes))
+            agregadas += 1
+        else:
+            flash(f'Formato no permitido: {file.filename}. Use JPG, PNG, TIFF o BMP.', 'danger')
+    if agregadas:
         db.commit()
-        flash('Foto agregada.', 'success')
-    else:
-        flash('Formato no permitido. Use JPG, PNG, TIFF o BMP.', 'danger')
+        flash(f'{"Foto agregada" if agregadas == 1 else f"{agregadas} fotos agregadas"}.', 'success')
     return redirect(url_for('ensayo_detalle', id=id))
 
 
@@ -763,6 +766,8 @@ def _build_pdf(e, detalles, fotos):
         sb = sty('body',   fontSize=8, leading=10)
         mhdr = [Paragraph(t, sty('thc', fontSize=8)) for t in ['#', 'Producto', 'Categoría', 'Empresa', 'Principio Activo', 'Dosis', 'Ud.']]
         mrows = [mhdr]
+        obs_row_indices = set()
+        prod_row_indices = []
         for i, d in enumerate(detalles):
             mrows.append([
                 Paragraph(str(d['orden_carga'] or i+1), sc),
@@ -773,6 +778,15 @@ def _build_pdf(e, detalles, fotos):
                 Paragraph(str(d['dosis'] or '—'), sc),
                 Paragraph((d['unidad'] or 'L').upper(), sc),
             ])
+            prod_row_indices.append(len(mrows) - 1)
+            if d['observacion'] and str(d['observacion']).strip():
+                mrows.append([
+                    Paragraph('', sc),
+                    Paragraph(f'<i>Obs: {d["observacion"].strip()}</i>',
+                              sty('body', fontSize=7, leading=9, textColor=colors.HexColor('#555555'))),
+                    '', '', '', '', '',
+                ])
+                obs_row_indices.add(len(mrows) - 1)
         mt = Table(mrows, colWidths=[0.8*cm, 3.5*cm, 2.3*cm, 3*cm, 4.6*cm, 1.6*cm, 1.6*cm])
         ms = [
             ('BACKGROUND', (0,0),(-1,0), C_DARK),
@@ -782,9 +796,16 @@ def _build_pdf(e, detalles, fotos):
             ('INNERGRID', (0,0),(-1,-1), 0.3, C_BORDER),
             ('VALIGN', (0,0),(-1,-1), 'MIDDLE'),
         ]
-        for i in range(1, len(mrows)):
+        for r in obs_row_indices:
+            ms += [
+                ('SPAN', (1, r), (6, r)),
+                ('TOPPADDING', (0, r), (-1, r), 2),
+                ('BOTTOMPADDING', (0, r), (-1, r), 3),
+                ('BACKGROUND', (0, r), (-1, r), colors.HexColor('#FFFDE7')),
+            ]
+        for i, r in enumerate(prod_row_indices):
             if i % 2 == 0:
-                ms.append(('BACKGROUND', (0,i),(-1,i), C_LGRAY))
+                ms.append(('BACKGROUND', (0, r), (-1, r), C_LGRAY))
         mt.setStyle(TableStyle(ms))
         story.append(mt)
     else:
