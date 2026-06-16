@@ -83,7 +83,8 @@ def backup_excel():
             cur = db.execute(sql)
             rows = cur.fetchall()
             cols = [d[0] for d in cur.description] if cur.description else []
-            df = pd.DataFrame([dict(r) for r in rows], columns=cols)
+            data = [dict(zip(cols, r)) for r in rows]
+            df = pd.DataFrame(data, columns=cols)
             df.to_excel(writer, sheet_name=nombre, index=False)
     buffer.seek(0)
     ts = datetime.now().strftime('%Y%m%d_%H%M%S')

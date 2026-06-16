@@ -50,6 +50,10 @@ class _PgCursor:
         self._cur = raw_cur
         self.lastrowid = None
 
+    @property
+    def description(self):
+        return self._cur.description
+
     def fetchone(self):
         try:
             return self._cur.fetchone()
