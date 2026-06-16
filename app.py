@@ -59,6 +59,43 @@ def serve_upload(filename):
 
 
 # ──────────────────────────────────────────────────────────
+# BACKUP A EXCEL
+# ──────────────────────────────────────────────────────────
+@app.route('/backup/excel')
+def backup_excel():
+    """Genera un Excel con copia de todos los datos (clientes, productos,
+    ensayos y detalle_mezcla) para archivo/seguridad. Las fotos no se
+    incluyen (son binarios), pero sus nombres/descripciones sí."""
+    import pandas as pd
+    db = get_db()
+    tablas = {
+        'clientes': 'SELECT * FROM clientes',
+        'productos': 'SELECT * FROM productos',
+        'ensayos': 'SELECT * FROM ensayos',
+        'detalle_mezcla': 'SELECT * FROM detalle_mezcla',
+        'fotos_ensayo': '''SELECT id_foto, id_ensayo, nombre_archivo,
+                                  descripcion, fecha_carga
+                           FROM fotos_ensayo''',
+    }
+    buffer = io.BytesIO()
+    with pd.ExcelWriter(buffer, engine='openpyxl') as writer:
+        for nombre, sql in tablas.items():
+            cur = db.execute(sql)
+            rows = cur.fetchall()
+            cols = [d[0] for d in cur.description] if cur.description else []
+            df = pd.DataFrame([dict(r) for r in rows], columns=cols)
+            df.to_excel(writer, sheet_name=nombre, index=False)
+    buffer.seek(0)
+    ts = datetime.now().strftime('%Y%m%d_%H%M%S')
+    return send_file(
+        buffer,
+        as_attachment=True,
+        download_name=f'backup_mezclas_{ts}.xlsx',
+        mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    )
+
+
+# ──────────────────────────────────────────────────────────
 # DASHBOARD
 # ──────────────────────────────────────────────────────────
 @app.route('/')
