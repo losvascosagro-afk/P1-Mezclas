@@ -33,6 +33,7 @@ Thumbs.db
 # IDEs
 .vscode/
 .idea/
+.claude/
 *.swp
 
 # Excel con datos sensibles (comentar si querés incluirlo)
