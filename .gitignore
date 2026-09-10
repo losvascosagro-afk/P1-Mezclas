@@ -38,3 +38,6 @@ Thumbs.db
 
 # Excel con datos sensibles (comentar si querés incluirlo)
 # Mezclas_Base.xlsx
+
+.vercel
+.env*
