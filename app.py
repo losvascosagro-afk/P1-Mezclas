@@ -733,13 +733,15 @@ def _build_pdf(e, detalles, fotos):
 
     if e['obs_mezcla']:
         obs_bar = Table([[
-            Paragraph(f'<b>Observaciones de la mezcla:</b>  {e["obs_mezcla"]}', sty()),
+            Paragraph(f'<b><font color="#1A7A7A">OBSERVACIONES DE LA MEZCLA</font></b><br/>{e["obs_mezcla"]}',
+                      sty('obs')),
         ]], colWidths=[17.4*cm])
         obs_bar.setStyle(TableStyle([
-            ('BACKGROUND', (0,0),(-1,-1), colors.HexColor('#FFFBE6')),
-            ('LEFTPADDING', (0,0),(-1,-1), 8), ('RIGHTPADDING', (0,0),(-1,-1), 8),
-            ('TOPPADDING', (0,0),(-1,-1), 5), ('BOTTOMPADDING', (0,0),(-1,-1), 5),
-            ('BOX', (0,0),(-1,-1), 0.5, colors.HexColor('#F0A500')),
+            ('BACKGROUND', (0,0),(-1,-1), C_WHITE),
+            ('LINEBEFORE', (0,0),(0,-1), 2.5, C_TEAL),
+            ('LEFTPADDING', (0,0),(-1,-1), 10), ('RIGHTPADDING', (0,0),(-1,-1), 8),
+            ('TOPPADDING', (0,0),(-1,-1), 6), ('BOTTOMPADDING', (0,0),(-1,-1), 6),
+            ('BOX', (0,0),(-1,-1), 0.5, C_BORDER),
         ]))
         story += [obs_bar, Spacer(1, 6)]
     else:
@@ -816,7 +818,7 @@ def _build_pdf(e, detalles, fotos):
             if d['observacion'] and str(d['observacion']).strip():
                 mrows.append([
                     Paragraph('', sc),
-                    Paragraph(f'<i>Obs: {d["observacion"].strip()}</i>',
+                    Paragraph(f'<i><font color="#1A7A7A">Obs:</font> {d["observacion"].strip()}</i>',
                               sty('body', fontSize=7, leading=9, textColor=colors.HexColor('#555555'))),
                     '', '', '', '', '',
                 ])
@@ -835,7 +837,8 @@ def _build_pdf(e, detalles, fotos):
                 ('SPAN', (1, r), (6, r)),
                 ('TOPPADDING', (0, r), (-1, r), 2),
                 ('BOTTOMPADDING', (0, r), (-1, r), 3),
-                ('BACKGROUND', (0, r), (-1, r), colors.HexColor('#FFFDE7')),
+                ('BACKGROUND', (0, r), (-1, r), C_WHITE),
+                ('LINEBEFORE', (1, r), (1, r), 2, C_TEAL),
             ]
         for i, r in enumerate(prod_row_indices):
             if i % 2 == 0:
@@ -907,7 +910,8 @@ def _build_pdf(e, detalles, fotos):
         story.append(sec('OBSERVACIONES AL MICROSCOPIO'))
         mic = Table([[Paragraph(e['obs_microscopio'], sty('obs'))]], colWidths=[17.4*cm])
         mic.setStyle(TableStyle([
-            ('BACKGROUND', (0,0),(-1,-1), C_LGRAY),
+            ('BACKGROUND', (0,0),(-1,-1), C_WHITE),
+            ('LINEBEFORE', (0,0),(0,-1), 2.5, C_TEAL),
             ('TOPPADDING', (0,0),(-1,-1), 8), ('BOTTOMPADDING', (0,0),(-1,-1), 8),
             ('LEFTPADDING', (0,0),(-1,-1), 10), ('RIGHTPADDING', (0,0),(-1,-1), 10),
             ('BOX', (0,0),(-1,-1), 0.5, C_BORDER),
