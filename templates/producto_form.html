@@ -41,10 +41,10 @@
               <label class="form-label fw-semibold">Formulación</label>
               <select name="formulacion" class="form-select">
                 <option value="">— Seleccionar —</option>
-                {% for opt in ['EC','SL','SC','WG','WP','ME','EW','DC','CS','OD','ZC','GRANO'] %}
+                {% for opt in ['EC','SL','SC','WG','WP','SG','ME','EW','DC','CS','OD','ZC','GRANO'] %}
                   <option value="{{ opt }}" {% if p and p.formulacion == opt %}selected{% endif %}>{{ opt }}</option>
                 {% endfor %}
-                {% if p and p.formulacion and p.formulacion not in ['EC','SL','SC','WG','WP','ME','EW','DC','CS','OD','ZC','GRANO'] %}
+                {% if p and p.formulacion and p.formulacion not in ['EC','SL','SC','WG','WP','SG','ME','EW','DC','CS','OD','ZC','GRANO'] %}
                   <option value="{{ p.formulacion }}" selected>{{ p.formulacion }}</option>
                 {% endif %}
               </select>
