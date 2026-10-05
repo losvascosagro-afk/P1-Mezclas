@@ -110,6 +110,7 @@
               <th>Producto</th>
               <th>Categoría</th>
               <th>Empresa</th>
+              <th>Form.</th>
               <th>Principio Activo</th>
               <th>Dosis</th>
               <th>Ud.</th>
@@ -122,6 +123,7 @@
               <td><strong>{{ d.nombre_comercial or '—' }}</strong></td>
               <td>{% if d.categoria %}<span class="badge cat-badge cat-{{ d.categoria|lower|replace(' ','_') }}">{{ d.categoria }}</span>{% else %}—{% endif %}</td>
               <td>{{ d.empresa or '—' }}</td>
+              <td>{% if d.formulacion %}<span class="badge cat-badge form-badge">{{ d.formulacion }}</span>{% else %}—{% endif %}</td>
               <td><small class="text-muted">{{ d.principio_activo or '—' }}</small></td>
               <td><strong>{{ d.dosis or '—' }}</strong></td>
               <td>{{ d.unidad or 'L' }}</td>

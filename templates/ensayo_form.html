@@ -269,8 +269,8 @@
             <label class="form-label fw-semibold">Formulación</label>
             <select id="mpFormulacion" class="form-select">
               <option value="">— Seleccionar —</option>
-              {% for opt in ['EC','SL','SC','WG','WP','SG','ME','EW','DC','CS','OD','ZC','GRANO'] %}
-                <option value="{{ opt }}">{{ opt }}</option>
+              {% for code, desc in FORMULACIONES %}
+                <option value="{{ code }}">{{ code }} — {{ desc }}</option>
               {% endfor %}
             </select>
           </div>

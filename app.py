@@ -9,7 +9,7 @@ from reportlab.lib.pagesizes import A4
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.units import cm
 from reportlab.platypus import (SimpleDocTemplate, Table, TableStyle,
-                                Paragraph, Spacer, Image, HRFlowable)
+                                Paragraph, Spacer, Image, HRFlowable, KeepTogether)
 from reportlab.lib.enums import TA_CENTER, TA_LEFT, TA_RIGHT
 from reportlab.lib.utils import ImageReader
 
@@ -31,6 +31,29 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config['MAX_CONTENT_LENGTH'] = 32 * 1024 * 1024  # 32MB max
 
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+
+# Tipos de formulación (códigos CropLife / GCPF)
+FORMULACIONES = [
+    ('SL', 'Concentrado soluble'),
+    ('EC', 'Concentrado emulsionable'),
+    ('SC', 'Suspensión concentrada'),
+    ('OD', 'Dispersión en aceite'),
+    ('EW', 'Emulsión aceite en agua'),
+    ('ME', 'Microemulsión'),
+    ('CS', 'Suspensión de cápsulas'),
+    ('SE', 'Suspo-emulsión'),
+    ('WG', 'Gránulos dispersables'),
+    ('WP', 'Polvo mojable'),
+    ('SG', 'Gránulos solubles'),
+    ('DC', 'Concentrado dispersable'),
+    ('OTRO', 'Otro/Adyuvante'),
+]
+FORMULACION_CODES = [c for c, _ in FORMULACIONES]
+
+
+@app.context_processor
+def inject_formulaciones():
+    return {'FORMULACIONES': FORMULACIONES, 'FORMULACION_CODES': FORMULACION_CODES}
 
 
 @app.teardown_appcontext
@@ -757,7 +780,6 @@ def _build_pdf(e, detalles, fotos):
         return ', '.join(parts) if parts else '—'
 
     # ── CLIENTE ──
-    story.append(sec('DATOS DEL CLIENTE'))
     cli = Table([
         [Paragraph('Razón Social:', sty('label')), Paragraph(_val(e['razon_social']), sty()),
          Paragraph('Técnico:', sty('label')), Paragraph(_val(e['tecnico_responsable']), sty())],
@@ -772,10 +794,9 @@ def _build_pdf(e, detalles, fotos):
         ('BOX', (0,0),(-1,-1), 0.5, C_BORDER),
         ('INNERGRID', (0,0),(-1,-1), 0.3, C_BORDER),
     ]))
-    story += [cli, Spacer(1, 7)]
+    story += [KeepTogether([sec('DATOS DEL CLIENTE'), cli]), Spacer(1, 7)]
 
     # ── CONDICIONES ──
-    story.append(sec('CONDICIONES DEL ENSAYO'))
     _vols = ' / '.join(f'{v} L' for v in (e['volumenes'] or '').split(',') if v.strip()) or '—'
     _tobs = ' / '.join(f'{t} min' for t in (e['tiempos_obs'] or '').split(',') if t.strip()) or '—'
     cond = Table([
@@ -793,14 +814,32 @@ def _build_pdf(e, detalles, fotos):
         ('BOX', (0,0),(-1,-1), 0.5, C_BORDER),
         ('INNERGRID', (0,0),(-1,-1), 0.3, C_BORDER),
     ]))
-    story += [cond, Spacer(1, 7)]
+    story += [KeepTogether([sec('CONDICIONES DEL ENSAYO'), cond]), Spacer(1, 7)]
 
     # ── COMPOSICIÓN DE LA MEZCLA ──
-    story.append(sec('COMPOSICIÓN DE LA MEZCLA'))
+    comp_sec = sec('COMPOSICIÓN DE LA MEZCLA')
     if detalles:
         sc = sty('center', fontSize=8, leading=10)
         sb = sty('body',   fontSize=8, leading=10)
-        mhdr = [Paragraph(t, sty('thc', fontSize=8)) for t in ['#', 'Producto', 'Categoría', 'Empresa', 'Principio Activo', 'Dosis', 'Ud.']]
+        spa = sty('body',  fontSize=7.5, leading=9.5)
+
+        def _form_badge(code):
+            """Código de formulación como badge gris (o '—' si no hay)."""
+            if not code:
+                return Paragraph('—', sc)
+            b = Table([[Paragraph(f'<b>{code}</b>', sty('center', fontSize=7, leading=8,
+                                                          textColor=colors.HexColor('#455A64')))]],
+                      colWidths=[1.0*cm])
+            b.setStyle(TableStyle([
+                ('BACKGROUND', (0,0),(-1,-1), colors.HexColor('#ECEFF1')),
+                ('BOX', (0,0),(-1,-1), 0.5, colors.HexColor('#B0BEC5')),
+                ('ROUNDEDCORNERS', [3, 3, 3, 3]),
+                ('TOPPADDING', (0,0),(-1,-1), 1.5), ('BOTTOMPADDING', (0,0),(-1,-1), 2),
+                ('LEFTPADDING', (0,0),(-1,-1), 1), ('RIGHTPADDING', (0,0),(-1,-1), 1),
+            ]))
+            return b
+
+        mhdr = [Paragraph(t, sty('thc', fontSize=8)) for t in ['#', 'Producto', 'Categoría', 'Empresa', 'Form.', 'Principio Activo', 'Dosis', 'Ud.']]
         mrows = [mhdr]
         obs_row_indices = set()
         prod_row_indices = []
@@ -810,7 +849,8 @@ def _build_pdf(e, detalles, fotos):
                 Paragraph((d['nombre_comercial'] or '—').upper(), sb),
                 Paragraph((d['categoria'] or '—').upper(), sb),
                 Paragraph((d['empresa'] or '—').upper(), sb),
-                Paragraph((d['principio_activo'] or '—').upper(), sb),
+                _form_badge(d['formulacion']),
+                Paragraph((d['principio_activo'] or '—').upper(), spa),
                 Paragraph(str(d['dosis'] or '—'), sc),
                 Paragraph((d['unidad'] or 'L').upper(), sc),
             ])
@@ -820,10 +860,12 @@ def _build_pdf(e, detalles, fotos):
                     Paragraph('', sc),
                     Paragraph(f'<i><font color="#1A7A7A">Obs:</font> {d["observacion"].strip()}</i>',
                               sty('body', fontSize=7, leading=9, textColor=colors.HexColor('#555555'))),
-                    '', '', '', '', '',
+                    '', '', '', '', '', '',
                 ])
                 obs_row_indices.add(len(mrows) - 1)
-        mt = Table(mrows, colWidths=[0.8*cm, 3.5*cm, 2.3*cm, 3*cm, 4.6*cm, 1.6*cm, 1.6*cm])
+        # Total 17.4 cm: la columna Form. sale de Producto, Empresa, Principio Activo, Dosis y Ud.
+        mt = Table(mrows, colWidths=[0.8*cm, 3.4*cm, 2.3*cm, 2.6*cm, 1.3*cm, 4.4*cm, 1.4*cm, 1.2*cm],
+                   repeatRows=1)
         ms = [
             ('BACKGROUND', (0,0),(-1,0), C_DARK),
             ('TOPPADDING', (0,0),(-1,-1), 4), ('BOTTOMPADDING', (0,0),(-1,-1), 4),
@@ -834,7 +876,7 @@ def _build_pdf(e, detalles, fotos):
         ]
         for r in obs_row_indices:
             ms += [
-                ('SPAN', (1, r), (6, r)),
+                ('SPAN', (1, r), (7, r)),
                 ('TOPPADDING', (0, r), (-1, r), 2),
                 ('BOTTOMPADDING', (0, r), (-1, r), 3),
                 ('BACKGROUND', (0, r), (-1, r), C_WHITE),
@@ -844,13 +886,12 @@ def _build_pdf(e, detalles, fotos):
             if i % 2 == 0:
                 ms.append(('BACKGROUND', (0, r), (-1, r), C_LGRAY))
         mt.setStyle(TableStyle(ms))
-        story.append(mt)
+        story.append(KeepTogether([comp_sec, mt]))
     else:
-        story.append(Paragraph('Sin productos registrados.', sty()))
+        story.append(KeepTogether([comp_sec, Paragraph('Sin productos registrados.', sty())]))
     story.append(Spacer(1, 7))
 
     # ── OBSERVACIONES VISUALES ──
-    story.append(sec('OBSERVACIONES VISUALES'))
 
     def ind(val):
         v = str(val or 'No').strip()
@@ -883,10 +924,9 @@ def _build_pdf(e, detalles, fotos):
         ('INNERGRID', (0,0),(-1,-1), 0.3, C_BORDER),
         ('VALIGN', (0,0),(-1,-1), 'MIDDLE'),
     ]))
-    story += [ov, Spacer(1, 7)]
+    story += [KeepTogether([sec('OBSERVACIONES VISUALES'), ov]), Spacer(1, 7)]
 
     # ── CONCLUSIÓN ──
-    story.append(sec('CONCLUSIÓN Y RECOMENDACIÓN', bg=C_RESULT))
     conc = Table([
         [Paragraph('Resultado Final:', sty('label')),
          Paragraph(f'<font color="white"><b>  {resultado.upper() or "—"}  </b></font>',
@@ -895,19 +935,20 @@ def _build_pdf(e, detalles, fotos):
          Paragraph(e['recomendacion'] or '—', sty())],
     ], colWidths=[3.5*cm, 13.9*cm])
     conc.setStyle(TableStyle([
-        ('BACKGROUND', (1,0),(1,0), C_RESULT),
+        # ROWBACKGROUNDS primero: ReportLab pinta en orden y, si va después,
+        # tapa con blanco la celda del resultado (texto blanco invisible).
         ('ROWBACKGROUNDS', (0,0),(-1,-1), [C_WHITE, C_LGRAY]),
+        ('BACKGROUND', (1,0),(1,0), C_RESULT),
         ('TOPPADDING', (0,0),(-1,-1), 7), ('BOTTOMPADDING', (0,0),(-1,-1), 7),
         ('LEFTPADDING', (0,0),(-1,-1), 8), ('RIGHTPADDING', (0,0),(-1,-1), 8),
         ('BOX', (0,0),(-1,-1), 0.5, C_BORDER),
         ('INNERGRID', (0,0),(-1,-1), 0.3, C_BORDER),
         ('VALIGN', (0,0),(-1,-1), 'TOP'),
     ]))
-    story += [conc, Spacer(1, 7)]
+    story += [KeepTogether([sec('CONCLUSIÓN Y RECOMENDACIÓN', bg=C_RESULT), conc]), Spacer(1, 7)]
 
     # ── MICROSCOPÍA ──
     if e['obs_microscopio']:
-        story.append(sec('OBSERVACIONES AL MICROSCOPIO'))
         mic = Table([[Paragraph(e['obs_microscopio'], sty('obs'))]], colWidths=[17.4*cm])
         mic.setStyle(TableStyle([
             ('BACKGROUND', (0,0),(-1,-1), C_WHITE),
@@ -916,13 +957,12 @@ def _build_pdf(e, detalles, fotos):
             ('LEFTPADDING', (0,0),(-1,-1), 10), ('RIGHTPADDING', (0,0),(-1,-1), 10),
             ('BOX', (0,0),(-1,-1), 0.5, C_BORDER),
         ]))
-        story += [mic, Spacer(1, 7)]
+        story += [KeepTogether([sec('OBSERVACIONES AL MICROSCOPIO'), mic]), Spacer(1, 7)]
 
     # ── FOTOS ──
     if fotos:
-        story.append(sec('IMÁGENES DE MICROSCOPÍA'))
         foto_pairs = [fotos[i:i+2] for i in range(0, len(fotos), 2)]
-        for pair in foto_pairs:
+        for n_pair, pair in enumerate(foto_pairs):
             cells = []
             for foto in pair:
                 cell = []
@@ -958,7 +998,11 @@ def _build_pdf(e, detalles, fotos):
                 ('BOX', (0,0),(-1,-1), 0.3, colors.lightgrey),
                 ('INNERGRID', (0,0),(-1,-1), 0.3, colors.lightgrey),
             ]))
-            story.append(ft)
+            # El encabezado viaja junto con la primera fila de fotos
+            if n_pair == 0:
+                story.append(KeepTogether([sec('IMÁGENES DE MICROSCOPÍA'), ft]))
+            else:
+                story.append(ft)
         story.append(Spacer(1, 8))
 
     # ── FIRMAS ──

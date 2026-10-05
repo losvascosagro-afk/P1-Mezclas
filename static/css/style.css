@@ -231,6 +231,7 @@ body {
 .cat-fertilizante{ background: #F3E5F5 !important; color: #4A148C !important; border: 1px solid #CE93D8; }
 .cat-semilla     { background: #E8F5E9 !important; color: #1B5E20 !important; border: 1px solid #81C784; }
 .cat-acaricida   { background: #FBE9E7 !important; color: #BF360C !important; border: 1px solid #FF7043; }
+.form-badge      { background: #ECEFF1 !important; color: #455A64 !important; border: 1px solid #B0BEC5; }
 
 /* ── FOTOS ── */
 .foto-card {
