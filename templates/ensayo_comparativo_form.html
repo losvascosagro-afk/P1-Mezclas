@@ -8,6 +8,7 @@
 {% endblock %}
 
 {% block content %}
+{% import '_obs_campos.html' as obs with context %}
 <form method="post" id="ensayoForm">
 
   <!-- DATOS GENERALES -->
@@ -149,15 +150,10 @@
         <div class="col-lg-4">
           <div class="border rounded p-3 mb-3">
             <div class="small fw-semibold mb-2"><i class="fa-solid fa-eye me-1"></i>Observaciones visuales</div>
-            {% for campo, label in obs_visuales %}
-            <div class="d-flex justify-content-between align-items-center mb-1">
-              <span class="small">{{ label }}</span>
-              <span>
-                <input class="form-check-input" type="radio" name="m__K___{{ campo }}" value="No" checked>
-                <span class="small text-success fw-semibold me-2">No</span>
-                <input class="form-check-input" type="radio" name="m__K___{{ campo }}" value="Si">
-                <span class="small text-danger fw-semibold">Sí</span>
-              </span>
+            {% for campo, label in OBS_ETIQUETAS %}
+            <div class="mb-2">
+              <div class="small mb-1">{{ label }}</div>
+              {{ obs.selector('m__K___' ~ campo, campo) }}
             </div>
             {% endfor %}
           </div>
@@ -214,12 +210,28 @@ function nuevaCard() {
   return card;
 }
 
+// Marca el valor de una observación; si es un valor anterior a la escala ("Si", "No"
+// en redispersión) agrega esa opción para no perderlo al guardar.
+function elegirObs(card, c, valor) {
+  const nombre = `m${card.dataset.k}_${c}`;
+  let r = [...card.querySelectorAll(`[name="${nombre}"]`)].find(x => x.value === valor);
+  if (!r) {
+    const grupo = card.querySelector(`.obs-op-group[data-campo="${c}"]`);
+    const id = `${nombre}_extra`;
+    grupo.insertAdjacentHTML('beforeend',
+      `<input type="radio" class="btn-check" name="${nombre}" id="${id}" value="${valor}" autocomplete="off">` +
+      `<label class="btn btn-outline-secondary obs-op" for="${id}" style="--c:#C62828;--fg:#fff">${/^s[ií]$/i.test(valor) ? 'Sí (sin grado)' : valor}</label>`);
+    r = document.getElementById(id);
+  }
+  r.checked = true;
+}
+
 function campo(card, nombre) { return card.querySelector(`[name="m${card.dataset.k}_${nombre}"]`); }
 
 function leerMezcla(card) {
   const d = { id_mezcla: campo(card, 'id_mezcla').value, productos: [] };
   CAMPOS.forEach(c => d[c] = campo(card, c).value);
-  OBS.forEach(c => { const r = card.querySelector(`[name="m${card.dataset.k}_${c}"]:checked`); d[c] = r ? r.value : 'No'; });
+  OBS.forEach(c => { const r = card.querySelector(`[name="m${card.dataset.k}_${c}"]:checked`); d[c] = r ? r.value : ''; });
   card.querySelectorAll('.prod-body tr').forEach(tr => d.productos.push({
     id_producto: tr.querySelector('.prod-id').value, nombre: tr.querySelector('.prod-search').value,
     orden: tr.querySelector('.orden').value, dosis: tr.querySelector('.dosis').value,
@@ -231,11 +243,7 @@ function leerMezcla(card) {
 function llenarMezcla(card, d) {
   campo(card, 'id_mezcla').value = d.id_mezcla || '';
   CAMPOS.forEach(c => { if (d[c] !== undefined && d[c] !== null) campo(card, c).value = d[c]; });
-  OBS.forEach(c => {
-    const v = (d[c] === 'Si' || d[c] === 'Sí') ? 'Si' : 'No';
-    const r = card.querySelector(`[name="m${card.dataset.k}_${c}"][value="${v}"]`);
-    if (r) r.checked = true;
-  });
+  OBS.forEach(c => { if (d[c]) elegirObs(card, c, d[c]); });
   (d.productos || []).forEach(p => agregarProducto(card, p));
   if (!(d.productos || []).length) agregarProducto(card);
   mostrarFotosGuardadas(card.querySelector('.fotos-area'), d.fotos);

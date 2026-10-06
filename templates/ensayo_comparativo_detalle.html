@@ -59,6 +59,7 @@
 {% endmacro %}
 
 {% block content %}
+{% import '_obs_campos.html' as obs with context %}
 <div class="row g-4">
   <div class="col-lg-9">
 
@@ -100,10 +101,7 @@
               <td><a href="#mezcla{{ m.id_mezcla }}" class="fw-semibold text-decoration-none">{{ m.nombre }}</a></td>
               <td><small class="text-muted">{{ agua(m) }}</small></td>
               {% for c, label in obs_visuales %}
-                <td class="text-center">
-                  {% if m[c] in ('Si','Sí') %}<i class="fa-solid fa-circle-xmark text-danger" title="Sí"></i>
-                  {% else %}<i class="fa-solid fa-circle-check text-success" title="No"></i>{% endif %}
-                </td>
+                <td class="text-center">{{ obs.pill(c, m[c]) }}</td>
               {% endfor %}
               <td>{{ badge_resultado(m.resultado_final) }}</td>
             </tr>
@@ -159,11 +157,9 @@
 
         <div class="row g-2 mb-3 text-center">
           {% for c, label in obs_visuales %}
-          <div class="col-3">
-            {% if m[c] in ('Si','Sí') %}<div class="obs-badge obs-bad"><i class="fa-solid fa-circle-xmark"></i></div>
-            {% else %}<div class="obs-badge obs-good"><i class="fa-solid fa-circle-check"></i></div>{% endif %}
-            <div class="small fw-semibold mt-1">{{ label }}</div>
-            <div class="small text-muted">{{ m[c] or 'No' }}</div>
+          <div class="col-6 col-md-3">
+            <div class="small fw-semibold mb-1">{{ label }}</div>
+            {{ obs.pill(c, m[c]) }}
           </div>
           {% endfor %}
         </div>

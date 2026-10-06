@@ -14,6 +14,7 @@ from reportlab.lib.enums import TA_CENTER, TA_LEFT, TA_RIGHT
 from reportlab.lib.utils import ImageReader
 
 from db import get_db, close_db, init_db, BACKEND, BASE_DIR, SNAP_COLS
+import observaciones
 
 # En Vercel el filesystem es efímero; usamos /tmp para uploads.
 # Localmente se usa static/uploads/ (persistente y servido directamente).
@@ -75,6 +76,13 @@ FORMULACION_CODES = [c for c, _ in FORMULACIONES]
 @app.context_processor
 def inject_formulaciones():
     return {'FORMULACIONES': FORMULACIONES, 'FORMULACION_CODES': FORMULACION_CODES}
+
+
+@app.context_processor
+def inject_observaciones():
+    return {'obs_estilo': observaciones.estilo, 'obs_opciones': observaciones.opciones,
+            'obs_etiqueta': observaciones.etiqueta_opcion, 'OBS_ETIQUETAS': observaciones.ETIQUETAS,
+            'OBS_ESCALAS': observaciones.ESCALAS, 'OBS_DEFECTO': observaciones.POR_DEFECTO}
 
 
 @app.teardown_appcontext
@@ -515,7 +523,7 @@ def ensayo_nuevo():
              request.form.get('espuma') or 'No',
              request.form.get('precipitado') or 'No',
              request.form.get('separacion_fases') or 'No',
-             request.form.get('redispersion') or 'No',
+             request.form.get('redispersion') or observaciones.POR_DEFECTO['redispersion'],
              request.form.get('obs_microscopio') or None))
         eid = cur.lastrowid
         _save_detalles(db, eid, request.form)
@@ -587,7 +595,7 @@ def ensayo_editar(id):
              request.form.get('espuma') or 'No',
              request.form.get('precipitado') or 'No',
              request.form.get('separacion_fases') or 'No',
-             request.form.get('redispersion') or 'No',
+             request.form.get('redispersion') or observaciones.POR_DEFECTO['redispersion'],
              request.form.get('obs_microscopio') or None, id))
         previos = {r['id_producto']: r for r in db.execute(
             'SELECT * FROM detalle_mezcla WHERE id_ensayo=?', (id,)).fetchall()}
@@ -1010,31 +1018,35 @@ def _build_pdf(e, detalles, fotos):
 
     # ── OBSERVACIONES VISUALES ──
 
-    def ind(val):
-        v = str(val or 'No').strip()
-        bg = C_RED if v.lower() in ('si', 'sí') else C_TEAL
-        return Paragraph(f'<font color="white"><b> {v.upper()} </b></font>',
+    def ind(val, campo):
+        # escala No/Leve/Medio/Grave (o Total/Parcial… en redispersión); datos viejos Si/No tal cual
+        v = str(val or '').strip()
+        texto, _, fg = observaciones.estilo(campo, v, pdf=True)
+        if observaciones.es_viejo_si(v) or not v:
+            texto = (v or 'No')
+        return Paragraph(f'<font color="{fg}"><b> {texto.upper()} </b></font>',
                          sty('center', textColor=C_WHITE, fontName='Helvetica-Bold', fontSize=9))
 
     ov = Table([
         [Paragraph('Parámetro', sty('th')), Paragraph('Resultado', sty('thc')),
          Paragraph('Parámetro', sty('th')), Paragraph('Resultado', sty('thc'))],
-        [Paragraph('Espuma', sty('label')), ind(e['espuma']),
-         Paragraph('Precipitado', sty('label')), ind(e['precipitado'])],
-        [Paragraph('Separación de Fases', sty('label')), ind(e['separacion_fases']),
-         Paragraph('Redispersión', sty('label')), ind(e['redispersion'])],
+        [Paragraph('Espuma', sty('label')), ind(e['espuma'], 'espuma'),
+         Paragraph('Precipitado', sty('label')), ind(e['precipitado'], 'precipitado')],
+        [Paragraph('Separación de Fases', sty('label')), ind(e['separacion_fases'], 'separacion_fases'),
+         Paragraph('Redispersión', sty('label')), ind(e['redispersion'], 'redispersion')],
     ], colWidths=[5*cm, 3.7*cm, 5*cm, 3.7*cm])
 
-    def _obs_bg(val):
-        return C_RED if str(val or '').lower() in ('si', 'sí') else C_TEAL
+    def _obs_bg(val, campo):
+        v = str(val or '').strip() or 'No'
+        return colors.HexColor(observaciones.estilo(campo, v, pdf=True)[1])
 
     ov.setStyle(TableStyle([
         ('BACKGROUND', (0,0),(-1,0), C_DARK),
         ('ROWBACKGROUNDS', (0,1),(-1,-1), [C_WHITE, C_LGRAY]),
-        ('BACKGROUND', (1,1),(1,1), _obs_bg(e['espuma'])),
-        ('BACKGROUND', (3,1),(3,1), _obs_bg(e['precipitado'])),
-        ('BACKGROUND', (1,2),(1,2), _obs_bg(e['separacion_fases'])),
-        ('BACKGROUND', (3,2),(3,2), _obs_bg(e['redispersion'])),
+        ('BACKGROUND', (1,1),(1,1), _obs_bg(e['espuma'], 'espuma')),
+        ('BACKGROUND', (3,1),(3,1), _obs_bg(e['precipitado'], 'precipitado')),
+        ('BACKGROUND', (1,2),(1,2), _obs_bg(e['separacion_fases'], 'separacion_fases')),
+        ('BACKGROUND', (3,2),(3,2), _obs_bg(e['redispersion'], 'redispersion')),
         ('TOPPADDING', (0,0),(-1,-1), 6), ('BOTTOMPADDING', (0,0),(-1,-1), 6),
         ('LEFTPADDING', (0,0),(-1,-1), 8), ('RIGHTPADDING', (0,0),(-1,-1), 8),
         ('BOX', (0,0),(-1,-1), 0.5, C_BORDER),

@@ -14,6 +14,7 @@
           "catalogo_senasa.py",
           "comparativos.py",
           "informe_comparativo.py",
+          "observaciones.py",
           "data/**",
           "Mezclas_Base.xlsx"
         ]

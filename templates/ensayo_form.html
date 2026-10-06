@@ -8,6 +8,7 @@
 {% endblock %}
 
 {% block content %}
+{% import '_obs_campos.html' as obs with context %}
 <form method="post" id="ensayoForm">
 <div class="row g-4">
 
@@ -190,21 +191,10 @@
     <div class="card-custom mb-4">
       <div class="card-header-custom"><i class="fa-solid fa-eye me-2"></i>Observaciones Visuales</div>
       <div class="p-4">
-        {% for campo, label in [('espuma','Espuma'),('precipitado','Precipitado'),('separacion_fases','Separación de Fases'),('redispersion','Redispersión')] %}
+        {% for campo, label in OBS_ETIQUETAS %}
         <div class="mb-3">
-          <label class="form-label fw-semibold">{{ label }}</label>
-          <div class="d-flex gap-3">
-            <div class="form-check">
-              <input class="form-check-input" type="radio" name="{{ campo }}" value="No" id="{{ campo }}_no"
-                {% if not e or e[campo] in ('No', None, '') %}checked{% endif %}>
-              <label class="form-check-label text-success fw-semibold" for="{{ campo }}_no">No</label>
-            </div>
-            <div class="form-check">
-              <input class="form-check-input" type="radio" name="{{ campo }}" value="Si" id="{{ campo }}_si"
-                {% if e and e[campo] in ('Si','Sí') %}checked{% endif %}>
-              <label class="form-check-label text-danger fw-semibold" for="{{ campo }}_si">Sí</label>
-            </div>
-          </div>
+          <label class="form-label fw-semibold d-block">{{ label }}</label>
+          {{ obs.selector(campo, campo, e[campo] if e else None) }}
         </div>
         {% endfor %}
       </div>

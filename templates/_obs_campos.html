@@ -1,0 +1,17 @@
+{# Selector de una observación visual con su escala, como botones de colores.
+   Importar con: {% import '_obs_campos.html' as obs with context %} #}
+{% macro selector(nombre, campo, valor=None) %}
+<div class="btn-group btn-group-sm flex-wrap obs-op-group" role="group" data-campo="{{ campo }}">
+  {% set elegido = valor if valor else OBS_DEFECTO[campo] %}
+  {% for op in obs_opciones(campo, valor) %}
+    {% set est = obs_estilo(campo, op) %}
+    <input type="radio" class="btn-check" name="{{ nombre }}" id="{{ nombre }}_{{ loop.index }}" value="{{ op }}"
+           autocomplete="off" {% if op == elegido %}checked{% endif %}>
+    <label class="btn btn-outline-secondary obs-op" for="{{ nombre }}_{{ loop.index }}"
+           style="--c:{{ est[1] }};--fg:{{ est[2] }}">{{ obs_etiqueta(op) }}</label>
+  {% endfor %}
+</div>
+{% endmacro %}
+
+{# Valor de una observación como etiqueta de color (fichas). #}
+{% macro pill(campo, valor) %}{% set est = obs_estilo(campo, valor) %}<span class="obs-pill" style="background:{{ est[1] }};color:{{ est[2] }}">{{ est[0] }}</span>{% endmacro %}

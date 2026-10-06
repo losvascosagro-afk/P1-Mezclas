@@ -13,6 +13,7 @@ from datetime import datetime
 
 from flask import Blueprint, flash, jsonify, redirect, render_template, request, url_for
 
+import observaciones
 from db import BACKEND, SNAP_COLS, get_db
 
 bp = Blueprint('comparativos', __name__)
@@ -21,8 +22,7 @@ CAMPOS_MEZCLA = ['nombre', 'descripcion', 'tipo_agua', 'ph', 'dureza', 'temperat
                  'espuma', 'precipitado', 'separacion_fases', 'redispersion', 'obs_microscopio',
                  'resultado_final']
 _NUMERICOS = {'ph', 'dureza', 'temperatura', 'conductividad'}
-OBS_VISUALES = [('espuma', 'Espuma'), ('precipitado', 'Precipitado'),
-                ('separacion_fases', 'Separación de Fases'), ('redispersion', 'Redispersión')]
+OBS_VISUALES = observaciones.ETIQUETAS
 RESULTADOS = ['Estable', 'Inestable', 'Estable con observaciones', 'Requiere más ensayos']
 TIPOS_AGUA = ['Estándar laboratorio', 'Agua de pozo', 'Agua de red', 'Agua destilada',
               'Agua de lluvia', 'Agua dura', 'Agua blanda', 'Otra']
@@ -102,8 +102,8 @@ def _valor(form, k, campo):
     v = form.get(f'm{k}_{campo}')
     if campo in _NUMERICOS:
         return _app()._float_or_none(v)
-    if campo in ('espuma', 'precipitado', 'separacion_fases', 'redispersion'):
-        return v or 'No'
+    if campo in observaciones.ESCALAS:
+        return v or observaciones.POR_DEFECTO[campo]
     return (v or '').strip() or None
 
 

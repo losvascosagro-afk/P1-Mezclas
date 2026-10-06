@@ -10,6 +10,7 @@ import io
 import os
 from datetime import datetime
 
+import observaciones
 from reportlab.lib import colors
 from reportlab.lib.enums import TA_CENTER, TA_LEFT
 from reportlab.lib.pagesizes import A4
@@ -108,10 +109,6 @@ def _grilla(filas, anchos):
         ('BOX', (0, 0), (-1, -1), 0.5, C_BORDER), ('INNERGRID', (0, 0), (-1, -1), 0.3, C_BORDER),
         ('VALIGN', (0, 0), (-1, -1), 'MIDDLE')]))
     return t
-
-
-def _si(v):
-    return str(v or '').strip().lower() in ('si', 'sí')
 
 
 def _badge_res(res, ancho):
@@ -265,12 +262,13 @@ def construir(e, mezclas, fotos_generales, upload_folder):
         fila = [Paragraph(f'<b>{_esc(m["nombre"])}</b>', sty('body', fontSize=8.5, leading=10.5)),
                 Paragraph(_agua_txt(m), sty('body', fontSize=7.5, leading=9.5))]
         for j, campo in enumerate(['espuma', 'precipitado', 'separacion_fases', 'redispersion'], start=2):
-            v = m[campo] or 'No'
-            fila.append(Paragraph(f'<font color="white"><b>{_esc(v).upper()}</b></font>', sc))
-            estilos.append(('BACKGROUND', (j, i), (j, i), C_RED if _si(v) else C_TEAL))
+            texto, bg, fg = observaciones.estilo(campo, m[campo], pdf=True)
+            fila.append(Paragraph(f'<font color="{fg}"><b>{_esc(texto).upper()}</b></font>',
+                                  sty('center', fontSize=7.5, leading=9)))
+            estilos.append(('BACKGROUND', (j, i), (j, i), colors.HexColor(bg)))
         fila.append(_badge_res(m['resultado_final'], 3.2 * cm))
         filas.append(fila)
-    res = Table(filas, colWidths=[3.3 * cm, 4.2 * cm, 1.6 * cm, 1.5 * cm, 1.8 * cm, 1.6 * cm, 3.4 * cm], repeatRows=1)
+    res = Table(filas, colWidths=[3.2 * cm, 3.7 * cm, 1.6 * cm, 1.6 * cm, 1.8 * cm, 2.1 * cm, 3.4 * cm], repeatRows=1)
     res.setStyle(TableStyle([('BACKGROUND', (0, 0), (-1, 0), C_DARK),
                              ('ROWBACKGROUNDS', (0, 1), (1, -1), [C_WHITE, C_LGRAY]),
                              ('TOPPADDING', (0, 0), (-1, -1), 5), ('BOTTOMPADDING', (0, 0), (-1, -1), 5),
@@ -295,17 +293,18 @@ def construir(e, mezclas, fotos_generales, upload_folder):
         if m['detalles']:
             bloque += [Spacer(1, 4), sec('Composición'), _composicion(m['detalles'])]
         story += [KeepTogether(bloque), Spacer(1, 4)]
-        obs = [[Paragraph(lbl, sty('label')),
-                Paragraph(f'<font color="white"><b>{_esc(m[c] or "No").upper()}</b></font>', sc)]
-               for c, lbl in [('espuma', 'Espuma'), ('precipitado', 'Precipitado'),
-                              ('separacion_fases', 'Separación de Fases'), ('redispersion', 'Redispersión')]]
+        obs, fondos = [], []
+        for c, lbl in observaciones.ETIQUETAS:
+            texto, bg, fg = observaciones.estilo(c, m[c], pdf=True)
+            obs.append([Paragraph(lbl, sty('label')),
+                        Paragraph(f'<font color="{fg}"><b>{_esc(texto).upper()}</b></font>', sc)])
+            fondos.append(colors.HexColor(bg))
         ov = Table([obs[0] + obs[1], obs[2] + obs[3]], colWidths=[5 * cm, 3.7 * cm, 5 * cm, 3.7 * cm])
         ov_st = [('TOPPADDING', (0, 0), (-1, -1), 5), ('BOTTOMPADDING', (0, 0), (-1, -1), 5),
                  ('LEFTPADDING', (0, 0), (-1, -1), 8), ('BOX', (0, 0), (-1, -1), 0.5, C_BORDER),
                  ('INNERGRID', (0, 0), (-1, -1), 0.3, C_BORDER), ('VALIGN', (0, 0), (-1, -1), 'MIDDLE')]
-        for (r, c), campo in zip([(0, 1), (0, 3), (1, 1), (1, 3)],
-                                 ['espuma', 'precipitado', 'separacion_fases', 'redispersion']):
-            ov_st.append(('BACKGROUND', (c, r), (c, r), C_RED if _si(m[campo]) else C_TEAL))
+        for (r, c), fondo in zip([(0, 1), (0, 3), (1, 1), (1, 3)], fondos):
+            ov_st.append(('BACKGROUND', (c, r), (c, r), fondo))
         ov.setStyle(TableStyle(ov_st))
         story += [KeepTogether([sec('Observaciones visuales'), ov]), Spacer(1, 4)]
         if m['obs_microscopio']:
