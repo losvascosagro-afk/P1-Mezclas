@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% block title %}Catálogo SENASA — Lab. Mezclas{% endblock %}
+{% block page_title %}Carga del catálogo SENASA{% endblock %}
+
+{% block content %}
+{% set n_upd = plan.actualizaciones|length %}
+<div class="card-custom mb-3">
+  <div class="card-header-custom"><i class="fa-solid fa-database me-2"></i>Plan de carga</div>
+  <div class="p-3">
+    <p class="mb-2">Plan generado el <strong>{{ plan.generado }}</strong> a partir de <strong>{{ plan.fuente_senasa }}</strong>
+      y la base <strong>{{ plan.destino }}</strong>.</p>
+    <ul class="mb-3">
+      <li><strong>{{ n_upd }}</strong> productos existentes corregidos, vinculados a SENASA o con el nombre pasado a mayúsculas</li>
+      <li><strong>{{ plan.ocultar|length }}</strong> productos duplicados ocultos (no se borran)</li>
+      <li><strong>{{ plan.altas|length }}</strong> productos nuevos (herbicidas, fungicidas, insecticidas, acaricidas y coadyuvantes)</li>
+    </ul>
+    <p class="text-muted small mb-0">
+      Los ensayos ya realizados no cambian: cada ensayo conserva los datos de sus productos tal como estaban.
+      Antes de aplicar se guarda un respaldo de la tabla de productos y cada cambio queda registrado para poder deshacerlo.
+    </p>
+  </div>
+</div>
+
+{% if estado %}
+<div class="alert alert-success">
+  <i class="fa-solid fa-circle-check me-1"></i>
+  El lote <strong>{{ lote }}</strong> ya está aplicado en esta base
+  {% for accion, (n, fecha) in estado.items() %}{% if loop.first %}({{ fecha }}){% endif %}{% endfor %}.
+  {% for accion, (n, fecha) in estado.items() %}
+    {{ n }} {{ 'altas' if accion == 'INSERT' else 'campos modificados' }}{% if not loop.last %} · {% endif %}
+  {% endfor %}
+</div>
+{% endif %}
+
+{% if error %}
+<div class="alert alert-danger"><i class="fa-solid fa-triangle-exclamation me-1"></i>{{ error }}</div>
+{% endif %}
+
+{% if resultado %}
+<div class="alert {{ 'alert-success' if modo == 'aplicar' else 'alert-info' }}">
+  <strong>{{ 'Carga aplicada.' if modo == 'aplicar' else 'Prueba: esto es lo que haría (no se guardó nada).' }}</strong>
+  <ul class="mb-0 mt-2">
+    <li>Productos actualizados: {{ resultado.actualizados }}</li>
+    <li>Productos ocultados: {{ resultado.ocultados }}</li>
+    <li>Productos nuevos: {{ resultado.altas }}{% if resultado.altas_ya_existentes %} ({{ resultado.altas_ya_existentes }} ya existían y se saltearon){% endif %}</li>
+    <li>Total de productos visibles: {{ resultado.total_visibles }}</li>
+  </ul>
+</div>
+{% endif %}
+
+{% if avisos %}
+<div class="alert alert-warning">
+  <strong>{{ avisos|length }} cambios salteados</strong> porque el producto no coincide con el esperado:
+  <ul class="mb-0 mt-2 small">{% for a in avisos %}<li>{{ a }}</li>{% endfor %}</ul>
+</div>
+{% endif %}
+
+{% if not estado %}
+<div class="card-custom">
+  <div class="card-header-custom"><i class="fa-solid fa-play me-2"></i>Acciones</div>
+  <div class="p-3 d-flex flex-wrap gap-4">
+    <form method="post">
+      <input type="hidden" name="accion" value="probar">
+      <button class="btn btn-outline-primary"><i class="fa-solid fa-flask me-1"></i>Probar (no guarda nada)</button>
+    </form>
+    <form method="post" class="d-flex flex-wrap align-items-center gap-2"
+          onsubmit="return confirm('¿Aplicar la carga del catálogo SENASA?')">
+      <input type="hidden" name="accion" value="aplicar">
+      <label class="small text-muted" for="conf">Escribí <strong>{{ confirmacion }}</strong> para aplicar:</label>
+      <input id="conf" name="confirmacion" class="form-control form-control-sm" style="width:120px" autocomplete="off">
+      <button class="btn btn-primary"><i class="fa-solid fa-upload me-1"></i>Aplicar</button>
+    </form>
+  </div>
+</div>
+{% endif %}
+{% endblock %}

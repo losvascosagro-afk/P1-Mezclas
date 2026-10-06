@@ -3,13 +3,20 @@ Arma el plan de carga del catálogo SENASA (data/senasa_carga.json).
 
 Lee:
   - SENASA_formulados_<fecha>.xlsx      base del registro SENASA
-  - Productos_a_agregar_SENASA_v2.xlsx  decisiones revisadas a mano (hoja REVISAR, columna INCLUIR)
-  - mezclas.db                          productos de la app (ids y nombres esperados)
+  - Productos_a_agregar_SENASA_v2.xlsx  decisiones revisadas a mano (hoja REVISAR, columna INCLUIR),
+                                        hechas sobre los productos de mezclas.db
+  - backup_mezclas_*.xlsx               productos de la base DESTINO (backup de producción, /backup/excel).
+                                        Las decisiones se trasladan a sus ids por nombre.
+  - Productos_produccion_a_revisar.xlsx decisiones sobre productos que sólo están en el destino
+                                        (si hace falta, la primera corrida lo genera y se detiene)
 
 No modifica ninguna base: sólo escribe el JSON. Lo aplica scripts/cargar_senasa.py.
 
 Uso:  python scripts/armar_carga_senasa.py
 """
+import argparse
+import difflib
+import glob
 import json
 import os
 import re
@@ -24,6 +31,7 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SENASA_XLSX = os.path.join(ROOT, 'SENASA_formulados_2026-10-06.xlsx')
 REVISION_XLSX = os.path.join(ROOT, 'Productos_a_agregar_SENASA_v2.xlsx')
 APP_DB = os.path.join(ROOT, 'mezclas.db')
+REVISION_PROD_XLSX = os.path.join(ROOT, 'Productos_produccion_a_revisar.xlsx')
 SALIDA = os.path.join(ROOT, 'data', 'senasa_carga.json')
 
 APTITUDES = ['Herbicida', 'Fungicida', 'Insecticida', 'Acaricida', 'Coadyuvante']
@@ -54,8 +62,6 @@ FUENTE_CORRECCION = {
 CONFIRMADO_OTRO_REGISTRO = {1, 51, 78}   # 2,4 D ACTION, ESPUELA, LA TIJERETA PLATINUM
 # Registros que el usuario marcó como "el mismo" pero que pasan a ser productos nuevos.
 REGISTROS_A_AGREGAR = {'40545', '41755'}   # PINAR 5 ME, PINAR ELITE (otra formulación)
-# Pendientes de definir: se vinculan sin corregir y sus candidatos no se agregan.
-PENDIENTES = {}
 # Productos de la app duplicados: se ocultan (no se borran).
 OCULTAR = {13: 'ATRATOP 90 duplicado de id 12'}
 
@@ -105,6 +111,12 @@ FORMAS_APP = [
 # Sin tildes, igual que los datos que ya tiene la app: el buscador no distingue
 # "potasica" de "potásica" si ambos están escritos igual.
 SIN_DET = '(SAL/ESTER SIN DETERMINAR)'
+# Variantes de escritura de activos en la app → nombre SENASA (para comparar)
+ALIAS_ACTIVOS = {'LAMBDACIALOTRINA': 'LAMBDACIALOTRINA', 'TIAMETOXAN': 'TIAMETOXAM', 'FLUXAPIROXAD': 'FLUXAPYROXAD',
+                 'PYRACLOSTROBIN': 'PIRACLOSTROBIN', 'PIROXASULFONA': 'PIROXASULFONE', 'PYROXASULFONE': 'PIROXASULFONE',
+                 'PYRAFLUFEN': 'PIRAFLUFEN', 'CLORANTRANILIPROL': 'CLORANTRANILIPROLE', 'HALOXIFOP': 'HALOXIFOPPMETIL',
+                 'FLUROCLORIDONA': 'FLUROCLORIDONA', 'CLOPIRALYD': 'CLOPYRALID', 'CLOPIRALID': 'CLOPYRALID',
+                 'PICLORAN': 'PICLORAM', 'THIENCARBAZONE': 'TIENCARBAZONE'}
 
 
 def norm(s):
@@ -228,33 +240,206 @@ def conservar_sal(texto_senasa, texto_app, activos):
     return texto_senasa.replace(SIN_DET, sin_acentos(formas[0]).upper()), True
 
 
+def leer_productos_backup(ruta):
+    df = pd.read_excel(ruta, sheet_name='productos')
+    df = df.astype(object).where(df.notna(), None)
+    return {int(r['id_producto']): dict(r) for r in df.to_dict('records')}
+
+
+def leer_productos_sqlite(ruta):
+    con = sqlite3.connect(ruta)
+    con.row_factory = sqlite3.Row
+    out = {r['id_producto']: dict(r) for r in con.execute('SELECT * FROM productos')}
+    con.close()
+    return out
+
+
+def ultimo_backup():
+    cands = sorted(glob.glob(os.path.join(ROOT, 'backup_mezclas_*.xlsx')))
+    return cands[-1] if cands else None
+
+
+def mapa_local_a_destino(local, destino):
+    """id de la base local (donde se hizo la revisión) → id en la base destino.
+    Mismo id con nombre igual o contenido; si no, nombre exacto único."""
+    por_clave = {}
+    for tid, t in destino.items():
+        por_clave.setdefault(compact(t['nombre_comercial']), []).append(tid)
+    mapa = {}
+    for lid, l in local.items():
+        k = compact(l['nombre_comercial'])
+        t = destino.get(lid)
+        if t is not None:
+            tk = compact(t['nombre_comercial'])
+            if tk == k or (len(k) >= 5 and (k in tk or tk in k)):
+                mapa[lid] = lid
+                continue
+        c = por_clave.get(k, [])
+        if len(c) == 1:
+            mapa[lid] = c[0]
+    return mapa
+
+
+def candidatos(producto, sen, sen_claves):
+    """Registros SENASA parecidos por nombre y con el mismo activo (para revisar)."""
+    ak = compact(producto['nombre_comercial'])
+    if len(ak) < 4:
+        return []
+    texto = compact(producto['principio_activo'])
+    for k, v in ALIAS_ACTIVOS.items():
+        texto = texto.replace(k, v)
+    out = []
+    for reg, sk in sen_claves:
+        if sk == ak:
+            continue
+        parecido = difflib.SequenceMatcher(None, ak, sk).ratio() >= 0.85
+        contenido = len(ak) >= 5 and (ak in sk or sk in ak)
+        if not (parecido or contenido):
+            continue
+        acts = [compact(a) for a in sen[reg]['_activos']]
+        if acts and all(a[:8] in texto for a in acts):
+            out.append(reg)
+    return out
+
+
+def misma_empresa(app_emp, firma):
+    f = norm(firma)
+    toks = [t for t in norm(app_emp).split() if len(t) >= 3 and t not in ('SRL', 'SAS', 'ARGENTINA')]
+    if not toks:
+        return False
+    sig = ''.join(w[0] for w in f.split() if w not in ('DE', 'Y', 'LA', 'EL', 'S', 'A', 'R', 'L'))
+    return any(t in f.split() for t in toks) or norm(app_emp).replace(' ', '') in (sig, sig[:3])
+
+
+def numeros(t):
+    return {round(float(x.replace(',', '.')), 1) for x in re.findall(r'\d+(?:[.,]\d+)?', str(t or ''))}
+
+
+def escribir_revision(filas, ruta):
+    from openpyxl import load_workbook
+    from openpyxl.styles import PatternFill, Font, Alignment
+    from openpyxl.worksheet.datavalidation import DataValidation
+    rev = pd.DataFrame(filas)
+    guia = pd.DataFrame({'Qué hacer': [
+        'Estos productos están cargados en la app de PRODUCCIÓN pero no estaban en la revisión anterior.',
+        'Igual que antes: cada fila compara tu producto (columnas APP, gris) con un registro SENASA parecido (verde).',
+        'En DECISIÓN elegí: ES EL MISMO - DEJAR MIS DATOS / ES EL MISMO - CORREGIR NOMBRE / '
+        'ES EL MISMO - CORREGIR TODO / ES OTRO PRODUCTO. Si queda vacía se aplica la SUGERENCIA; '
+        'las amarillas (REVISAR) vacías no se agregan.',
+        'Los productos cuyo nombre coincide exacto con SENASA ya se resuelven solos (CORREGIR TODO), como acordamos.',
+        'Guardá con el mismo nombre y avisame.']})
+    with pd.ExcelWriter(ruta, engine='openpyxl') as w:
+        guia.to_excel(w, sheet_name='COMO REVISAR', index=False)
+        rev.to_excel(w, sheet_name='REVISAR', index=False)
+    wb = load_workbook(ruta)
+    g = wb['COMO REVISAR']
+    g.column_dimensions['A'].width = 150
+    for row in g.iter_rows():
+        row[0].alignment = Alignment(wrap_text=True, vertical='top')
+    ws = wb['REVISAR']
+    ws.freeze_panes = 'A2'
+    hdr = {c.value: c.column for c in ws[1]}
+    for c in ws[1]:
+        c.font = Font(bold=True)
+        c.alignment = Alignment(wrap_text=True, vertical='top')
+    for col in ws.columns:
+        ws.column_dimensions[col[0].column_letter].width = min(50, max(10, max(len(str(c.value or '')) for c in col) + 2))
+    for name, col in hdr.items():
+        fill = 'EEEEEE' if name.startswith('APP') else 'E2F0D9' if name.startswith('SENASA') else 'DDEBF7' if name == 'DECISIÓN' else None
+        if fill:
+            for r in range(1, ws.max_row + 1):
+                ws.cell(r, col).fill = PatternFill('solid', fgColor=fill)
+    for r in range(2, ws.max_row + 1):
+        if str(ws.cell(r, hdr['SUGERENCIA']).value).startswith('REVISAR'):
+            ws.cell(r, hdr['SUGERENCIA']).fill = PatternFill('solid', fgColor='FFF2CC')
+    dv = DataValidation(type='list', formula1='"ES EL MISMO - DEJAR MIS DATOS,ES EL MISMO - CORREGIR NOMBRE,'
+                                              'ES EL MISMO - CORREGIR TODO,ES OTRO PRODUCTO"', allow_blank=True)
+    ws.add_data_validation(dv)
+    dv.add(f"{ws.cell(2, hdr['DECISIÓN']).coordinate}:{ws.cell(max(2, ws.max_row), hdr['DECISIÓN']).coordinate}")
+    ws.auto_filter.ref = ws.dimensions
+    wb.save(ruta)
+
+
+def decision_final(row):
+    d = row['DECISIÓN']
+    if isinstance(d, str) and d.strip():
+        return d.strip()
+    s = str(row['SUGERENCIA'])
+    return 'ES OTRO PRODUCTO' if s.startswith('ES OTRO') else s if s.startswith('ES EL MISMO') else 'SIN DECISIÓN'
+
+
 def main():
+    ap = argparse.ArgumentParser(description='Arma data/senasa_carga.json')
+    ap.add_argument('--destino', help='backup Excel de la base destino (por defecto el backup_mezclas_*.xlsx '
+                                      'más reciente de la carpeta; si no hay, mezclas.db)')
+    ap.add_argument('--local', action='store_true', help='usar mezclas.db como destino (pruebas)')
+    ap.add_argument('--salida', default=SALIDA)
+    args = ap.parse_args()
+    destino_xlsx = None if args.local else (args.destino or ultimo_backup())
     for f in (SENASA_XLSX, REVISION_XLSX, APP_DB):
         if not os.path.exists(f):
             sys.exit(f'Falta {f}')
     sen = productos_senasa()
+    sen_claves = [(r, compact(s['nombre_comercial'])) for r, s in sen.items()]
 
-    con = sqlite3.connect(APP_DB)
-    con.row_factory = sqlite3.Row
-    app = {r['id_producto']: dict(r) for r in con.execute('SELECT * FROM productos')}
-    con.close()
+    local = leer_productos_sqlite(APP_DB)
+    app = leer_productos_backup(destino_xlsx) if destino_xlsx else local
+    print(f'Base destino: {os.path.basename(destino_xlsx) if destino_xlsx else "mezclas.db"} ({len(app)} productos)')
+    mapa = mapa_local_a_destino(local, app)
+    m = lambda lid: mapa.get(lid)   # noqa: E731
 
+    # ── Decisiones de la revisión (hechas sobre la base local) traducidas a ids destino ──
     rev = pd.read_excel(REVISION_XLSX, sheet_name='REVISAR', dtype={'SENASA registro': str})
     alt = pd.read_excel(REVISION_XLSX, sheet_name='Productos_a_agregar', dtype={'N° registro SENASA': str})
+    rev['final'] = rev.apply(decision_final, axis=1)
+    rev['id_destino'] = rev['APP id'].map(m)
+    perdidas = rev[rev['id_destino'].isna()]['APP nombre'].unique().tolist()
 
-    def final(row):
-        d = row['DECISIÓN']
-        if isinstance(d, str) and d.strip():
-            return d.strip()
-        s = row['SUGERENCIA']
-        return 'ES OTRO PRODUCTO' if s.startswith('ES OTRO') else s if s.startswith('ES EL MISMO') else 'SIN DECISIÓN'
-    rev['final'] = rev.apply(final, axis=1)
+    fuente_corr = {m(k): v for k, v in FUENTE_CORRECCION.items() if m(k)}
+    confirmado_otro = {m(k) for k in CONFIRMADO_OTRO_REGISTRO if m(k)}
+    ocultar_ids = {m(k): v for k, v in OCULTAR.items() if m(k)}
 
-    # Registros que NO se agregan (el usuario dijo que es el mismo o que está repetido)
+    # ── Productos del destino que no pasaron por la revisión ──
+    revisados = set(mapa.values())
+    nuevos_en_destino = [tid for tid in app if tid not in revisados]
+    filas_rev_prod = []
+    for tid in nuevos_en_destino:
+        a = app[tid]
+        if norm(a.get('categoria')) in ('SEMILLA', 'FERTILIZANTE', 'BOLSON', 'INOCULANTE'):
+            continue
+        cands = candidatos(a, sen, sen_claves)
+        if len(cands) > 8:
+            # nombre genérico (p. ej. "SULFENTRAZONE"): sólo los de la misma empresa
+            cands = [r for r in cands if misma_empresa(a.get('empresa'), sen[r]['empresa'])]
+        for reg in cands:
+            s = sen[reg]
+            conc = all(c in numeros(a['principio_activo']) for c in numeros(s['principio_activo']) if c > 0.5)
+            emp = misma_empresa(a.get('empresa'), s['empresa'])
+            sug = ('ES EL MISMO - DEJAR MIS DATOS' if emp and conc else
+                   'REVISAR: misma empresa, otra concentración' if emp else 'ES OTRO PRODUCTO (otra empresa)')
+            filas_rev_prod.append({
+                'SUGERENCIA': sug, 'APP id': tid, 'APP nombre': a['nombre_comercial'], 'APP empresa': a.get('empresa'),
+                'APP formulación': a.get('formulacion'), 'APP principio activo': a.get('principio_activo'),
+                'SENASA registro': reg, 'SENASA nombre': s['nombre_comercial'], 'SENASA empresa': s['empresa'],
+                'SENASA formulación': s['formulacion'], 'SENASA principio activo': s['principio_activo'],
+                'DECISIÓN': '', 'Comentario': ''})
+    if filas_rev_prod:
+        if not os.path.exists(REVISION_PROD_XLSX):
+            orden = {'R': 0, 'E': 1}
+            filas_rev_prod.sort(key=lambda f: (orden.get(f['SUGERENCIA'][0], 2) if not f['SUGERENCIA'].startswith('ES OTRO') else 2,
+                                               f['APP nombre'], f['SENASA nombre']))
+            escribir_revision(filas_rev_prod, REVISION_PROD_XLSX)
+            sys.exit(f'Hay {len(filas_rev_prod)} comparaciones para revisar en {REVISION_PROD_XLSX}. '
+                     'Revisalo y volvé a correr este script.')
+        rp = pd.read_excel(REVISION_PROD_XLSX, sheet_name='REVISAR', dtype={'SENASA registro': str})
+        rp['final'] = rp.apply(decision_final, axis=1)
+        rp['id_destino'] = rp['APP id']
+        rev = pd.concat([rev, rp], ignore_index=True)
+
     reclamados = set(rev.loc[rev['final'].str.startswith(('ES EL MISMO', 'REPETIDO', 'SIN DECISIÓN')), 'SENASA registro'])
     reclamados -= REGISTROS_A_AGREGAR
 
-    # ── Coincidencias exactas por nombre (no estaban en REVISAR) ──
+    # ── Coincidencias exactas por nombre ──
     por_nombre = {}
     for reg, s in sen.items():
         por_nombre.setdefault(compact(s['nombre_comercial']), []).append(reg)
@@ -262,57 +447,46 @@ def main():
     for pid, a in app.items():
         regs = por_nombre.get(compact(a['nombre_comercial']), [])
         if regs:
-            # si hay más de uno, el de la misma formulación; si no, el más reciente
-            form_app = norm(a['formulacion']).split(' ')[0] if a['formulacion'] else ''
+            form_app = norm(a['formulacion']).split(' ')[0] if a.get('formulacion') else ''
             regs = sorted(regs, key=lambda r: sen[r]['_fecha'], reverse=True)
             regs.sort(key=lambda r: sen[r]['formulacion'] != form_app)
             exactos[pid] = regs[0]
 
-    # ── Acción por producto de la app ──
+    # ── Acción por producto ──
     acciones = {}
-    for pid, g in rev.groupby('APP id'):
+    for pid, g in rev[rev['id_destino'].notna()].groupby('id_destino'):
+        pid = int(pid)
         corr = g[g['final'].str.contains('CORREGIR')]
         vinc = g[g['final'].str.startswith('ES EL MISMO')]
         regs_vinc = list(dict.fromkeys(vinc['SENASA registro']))
-        if pid in PENDIENTES:
-            acciones[pid] = ('PENDIENTE', None, [], PENDIENTES[pid])
-            continue
         if len(corr):
-            fuente = FUENTE_CORRECCION.get(pid)
+            fuente = fuente_corr.get(pid)
             if fuente is None:
                 if corr['SENASA registro'].nunique() > 1:
-                    sys.exit(f'Producto {pid} con varias fuentes de corrección y sin resolución')
+                    sys.exit(f'Producto {app[pid]["nombre_comercial"]} (id {pid}) con varias fuentes de corrección: '
+                             'definir cuál en FUENTE_CORRECCION')
                 fuente = corr['SENASA registro'].iloc[0]
                 tipo = corr['final'].iloc[0]
             else:
                 tipo = 'ES EL MISMO - CORREGIR TODO'
             accion = 'CORREGIR_NOMBRE' if tipo.endswith('NOMBRE') else 'CORREGIR_TODO'
-            regs = [fuente] + [r for r in regs_vinc if r != fuente]
-            acciones[pid] = (accion, fuente, regs, '')
+            acciones[pid] = (accion, fuente, [fuente] + [r for r in regs_vinc if r != fuente], '')
         elif regs_vinc:
             acciones[pid] = ('VINCULAR', None, regs_vinc, '')
-    # exactos sin decisión en REVISAR → CORREGIR TODO con su registro exacto (punto 5);
-    # con decisión → el registro de nombre exacto también queda vinculado (no se duplica)
     for pid, reg in exactos.items():
         if pid not in acciones:
             acciones[pid] = ('CORREGIR_TODO', reg, [reg], 'nombre exacto en SENASA')
-        elif pid not in CONFIRMADO_OTRO_REGISTRO and reg not in acciones[pid][2]:
+        elif pid not in confirmado_otro and reg not in acciones[pid][2]:
             accion, fuente, regs, nota = acciones[pid]
-            if accion == 'PENDIENTE':
-                continue
             acciones[pid] = (accion, fuente, regs + [reg], nota)
 
-    usados_como_fuente = {a[1] for a in acciones.values() if a[1]}
     vinculados = {r for a in acciones.values() for r in a[2]}
-    # registros exactos que quedaron libres porque su producto de la app se corrigió con otro
     liberados = {reg for pid, reg in exactos.items() if reg not in vinculados}
 
     actualizaciones, avisos = [], []
-    for pid, (accion, fuente, regs, nota) in sorted(acciones.items()):
-        a = app.get(pid)
-        if a is None:
-            avisos.append(f'id {pid} no existe en la base local')
-            continue
+    for pid in sorted(app):
+        a = app[pid]
+        accion, fuente, regs, nota = acciones.get(pid, ('MAYUSCULAS', None, [], ''))
         cambios = {'registro_senasa': ' | '.join(regs)} if regs else {}
         if accion in ('CORREGIR_NOMBRE', 'CORREGIR_TODO'):
             if fuente not in sen:
@@ -322,44 +496,49 @@ def main():
                 s = sen[fuente]
                 cambios['nombre_comercial'] = s['nombre_comercial']
                 if accion == 'CORREGIR_TODO':
-                    pa, conservada = conservar_sal(s['principio_activo'], a['principio_activo'], s['_activos'])
+                    pa, conservada = conservar_sal(s['principio_activo'], a.get('principio_activo'), s['_activos'])
                     cambios.update({k: s[k] for k in ('categoria', 'empresa', 'formulacion', 'unidad_medida', 'familia')})
                     cambios['principio_activo'] = pa
                     if conservada:
                         nota = (nota + '; ' if nota else '') + 'sal/éster tomada de la app'
-        # sólo los campos que realmente cambian
+        # nombres siempre en mayúsculas y sin espacios de más
+        nombre = cambios.get('nombre_comercial', a['nombre_comercial'])
+        cambios['nombre_comercial'] = re.sub(r'\s+', ' ', str(nombre)).strip().upper()
         cambios = {k: v for k, v in cambios.items() if (a.get(k) or None) != (v or None)}
+        if not cambios:
+            continue
         actualizaciones.append({'id_producto': pid, 'nombre_esperado': a['nombre_comercial'],
                                 'accion': accion, 'registro_fuente': fuente, 'cambios': cambios, 'nota': nota})
 
-    ocultar = [{'id_producto': pid, 'nombre_esperado': app[pid]['nombre_comercial'], 'motivo': m}
-               for pid, m in OCULTAR.items() if pid in app]
+    ocultar = [{'id_producto': pid, 'nombre_esperado': app[pid]['nombre_comercial'], 'motivo': mo}
+               for pid, mo in ocultar_ids.items() if pid in app]
 
-    # ── Altas ──
     incluir = alt[alt['INCLUIR'].astype(str).str.upper().str.startswith('S')]['N° registro SENASA']
     regs_alta = (set(incluir) - reclamados - vinculados) | ((REGISTROS_A_AGREGAR | liberados) - vinculados)
     altas = [{k: v for k, v in sen[r].items() if not k.startswith('_')}
              for r in sorted(regs_alta, key=lambda r: sen[r]['nombre_comercial']) if r in sen]
 
+    if perdidas:
+        avisos.append('Decisiones de la revisión sin producto en destino: ' + ', '.join(map(str, perdidas)))
     plan = {
         'generado': date.today().isoformat(),
         'fuente_senasa': os.path.basename(SENASA_XLSX),
-        'revision': os.path.basename(REVISION_XLSX),
-        'pendientes': PENDIENTES,
+        'destino': os.path.basename(destino_xlsx) if destino_xlsx else 'mezclas.db',
+        'revision': [os.path.basename(REVISION_XLSX)] + ([os.path.basename(REVISION_PROD_XLSX)] if filas_rev_prod else []),
         'avisos': avisos,
         'actualizaciones': actualizaciones,
         'ocultar': ocultar,
         'altas': altas,
     }
-    os.makedirs(os.path.dirname(SALIDA), exist_ok=True)
-    with open(SALIDA, 'w', encoding='utf-8') as f:
+    os.makedirs(os.path.dirname(args.salida), exist_ok=True)
+    with open(args.salida, 'w', encoding='utf-8') as f:
         json.dump(plan, f, ensure_ascii=False, indent=1)
 
     cuenta = pd.Series([u['accion'] for u in actualizaciones]).value_counts().to_dict()
-    print(f'Plan escrito en {SALIDA}')
+    print(f'Plan escrito en {args.salida}')
     print(f'  Actualizaciones: {len(actualizaciones)} {cuenta}')
     print(f'  Ocultar: {len(ocultar)}')
-    print(f'  Altas: {len(altas)}  (incluye {len((REGISTROS_A_AGREGAR | liberados) - vinculados)} liberados/reasignados)')
+    print(f'  Altas: {len(altas)}')
     for a in avisos:
         print('  AVISO:', a)
 

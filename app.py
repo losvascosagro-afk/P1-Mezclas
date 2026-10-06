@@ -140,6 +140,44 @@ def backup_excel():
 
 
 # ──────────────────────────────────────────────────────────
+# CARGA DEL CATÁLOGO SENASA
+# ──────────────────────────────────────────────────────────
+# Página sin enlace en el menú. "Probar" no escribe nada; "Aplicar" pide escribir
+# CARGAR, sólo se puede hacer una vez por lote y deja respaldo y registro.
+# Deshacer no está en la página: se hace con scripts/cargar_senasa.py --revertir.
+SENASA_CONFIRMACION = 'CARGAR'
+
+
+@app.route('/admin/catalogo-senasa', methods=['GET', 'POST'])
+def admin_catalogo_senasa():
+    import catalogo_senasa as cs
+    db = get_db()
+    plan = cs.cargar_plan()
+    resultado = avisos = error = None
+    modo = None
+    if request.method == 'POST':
+        modo = request.form.get('accion')
+        escribir = modo == 'aplicar'
+        if escribir and request.form.get('confirmacion', '').strip().upper() != SENASA_CONFIRMACION:
+            error = f'Para aplicar hay que escribir {SENASA_CONFIRMACION} en el recuadro.'
+        else:
+            try:
+                resultado, avisos = cs.aplicar(db, plan, escribir)
+                if escribir:
+                    db.commit()
+                else:
+                    db.rollback()
+            except RuntimeError as e:
+                db.rollback()
+                error = str(e)
+    estado = cs.estado(db)
+    db.commit()   # crea las tablas de registro si no existían
+    return render_template('admin_senasa.html', plan=plan, lote=cs.LOTE, estado=estado,
+                           resultado=resultado, avisos=avisos or [], error=error, modo=modo,
+                           confirmacion=SENASA_CONFIRMACION)
+
+
+# ──────────────────────────────────────────────────────────
 # DASHBOARD
 # ──────────────────────────────────────────────────────────
 @app.route('/')

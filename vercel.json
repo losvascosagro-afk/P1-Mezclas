@@ -11,6 +11,8 @@
           "static/**",
           "app.py",
           "db.py",
+          "catalogo_senasa.py",
+          "data/**",
           "Mezclas_Base.xlsx"
         ]
       }
