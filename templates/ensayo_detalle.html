@@ -255,6 +255,12 @@
         <a href="{{ url_for('ensayo_editar', id=e.id_ensayo) }}" class="btn btn-warning">
           <i class="fa-solid fa-pen me-2"></i>Editar Ensayo
         </a>
+        <form method="post" action="{{ url_for('comparativos.duplicar', id=e.id_ensayo) }}"
+              onsubmit="return confirm('¿Duplicar este ensayo? Se crea uno nuevo con fecha de hoy y los mismos productos (sin fotos).')">
+          <button class="btn btn-outline-primary w-100">
+            <i class="fa-solid fa-copy me-2"></i>Duplicar Ensayo
+          </button>
+        </form>
         <hr class="my-1">
         <form method="post" action="{{ url_for('ensayo_eliminar', id=e.id_ensayo) }}"
               onsubmit="return confirm('¿Eliminar este ensayo y todas sus fotos?')">

@@ -117,6 +117,7 @@ def backup_excel():
         'productos': 'SELECT * FROM productos',
         'ensayos': 'SELECT * FROM ensayos',
         'detalle_mezcla': 'SELECT * FROM detalle_mezcla',
+        'mezclas_ensayo': 'SELECT * FROM mezclas_ensayo',
         'fotos_ensayo': '''SELECT id_foto, id_ensayo, nombre_archivo,
                                   descripcion, fecha_carga
                            FROM fotos_ensayo''',
@@ -462,7 +463,8 @@ def ensayos():
     sql = '''
         SELECT e.*, c.razon_social,
                (SELECT COUNT(*) FROM fotos_ensayo WHERE id_ensayo=e.id_ensayo) AS fotos,
-               (SELECT COUNT(*) FROM detalle_mezcla WHERE id_ensayo=e.id_ensayo) AS nproductos
+               (SELECT COUNT(*) FROM detalle_mezcla WHERE id_ensayo=e.id_ensayo) AS nproductos,
+               (SELECT COUNT(*) FROM mezclas_ensayo WHERE id_ensayo=e.id_ensayo) AS nmezclas
         FROM ensayos e
         LEFT JOIN clientes c ON e.id_cliente=c.id_cliente
         WHERE 1=1
@@ -533,6 +535,8 @@ def ensayo_detalle(id):
     if not e:
         flash('Ensayo no encontrado.', 'danger')
         return redirect(url_for('ensayos'))
+    if e['tipo'] == 'comparativo':
+        return comparativos.detalle(db, e)
     detalles = db.execute(f'''
         SELECT dm.*, {_DET_COLS}
         FROM detalle_mezcla dm
@@ -551,6 +555,8 @@ def ensayo_editar(id):
     if not e:
         flash('Ensayo no encontrado.', 'danger')
         return redirect(url_for('ensayos'))
+    if e['tipo'] == 'comparativo':
+        return comparativos.editar(db, id)
     if request.method == 'POST':
         db.execute(
             'UPDATE ensayos SET fecha=?,id_cliente=?,objetivo=?,obs_mezcla=?,tipo_agua=?,ph=?,'
@@ -601,6 +607,7 @@ def ensayo_eliminar(id):
             os.remove(p)
     db.execute('DELETE FROM fotos_ensayo WHERE id_ensayo=?', (id,))
     db.execute('DELETE FROM detalle_mezcla WHERE id_ensayo=?', (id,))
+    db.execute('DELETE FROM mezclas_ensayo WHERE id_ensayo=?', (id,))
     db.execute('DELETE FROM ensayos WHERE id_ensayo=?', (id,))
     db.commit()
     flash('Ensayo eliminado.', 'success')
@@ -611,16 +618,17 @@ _SNAP_INSERT = ','.join(s for s, _ in SNAP_COLS)
 _SNAP_SELECT = ','.join(c for _, c in SNAP_COLS)
 
 
-def _save_detalles(db, eid, form, previos=None):
+def _save_detalles(db, eid, form, previos=None, prefijo='', id_mezcla=None):
     """Guarda los productos de la mezcla con su copia congelada.
-    previos: detalles anteriores del ensayo (al editar), para no cambiar la copia
-    de los productos que ya estaban."""
+    previos: detalles anteriores (al editar), para no cambiar la copia de los
+    productos que ya estaban. prefijo/id_mezcla: para cada mezcla de un ensayo
+    comparativo (campos m<k>_producto_id[], etc.)."""
     previos = previos or {}
-    pids = form.getlist('producto_id[]')
-    ords = form.getlist('orden_carga[]')
-    doss = form.getlist('dosis[]')
-    unis = form.getlist('unidad[]')
-    obss = form.getlist('det_obs[]')
+    pids = form.getlist(prefijo + 'producto_id[]')
+    ords = form.getlist(prefijo + 'orden_carga[]')
+    doss = form.getlist(prefijo + 'dosis[]')
+    unis = form.getlist(prefijo + 'unidad[]')
+    obss = form.getlist(prefijo + 'det_obs[]')
     for i, pid in enumerate(pids):
         if pid:
             pid = int(pid)
@@ -631,9 +639,9 @@ def _save_detalles(db, eid, form, previos=None):
                 row = db.execute(f'SELECT {_SNAP_SELECT} FROM productos WHERE id_producto=?', (pid,)).fetchone()
                 snap = tuple(row) if row else (None,) * len(SNAP_COLS)
             db.execute(
-                'INSERT INTO detalle_mezcla (id_ensayo,orden_carga,id_producto,dosis,unidad,observacion,'
-                f'{_SNAP_INSERT}) VALUES (?,?,?,?,?,?,{",".join("?" * len(SNAP_COLS))})',
-                (eid,
+                'INSERT INTO detalle_mezcla (id_ensayo,id_mezcla,orden_carga,id_producto,dosis,unidad,observacion,'
+                f'{_SNAP_INSERT}) VALUES (?,?,?,?,?,?,?,{",".join("?" * len(SNAP_COLS))})',
+                (eid, id_mezcla,
                  int(ords[i]) if i < len(ords) and ords[i] else i + 1,
                  pid,
                  _float_or_none(doss[i] if i < len(doss) else None),
@@ -664,9 +672,9 @@ def foto_upload(id):
         except Exception:
             pass
         db.execute(
-            'INSERT INTO fotos_ensayo (id_ensayo,nombre_archivo,descripcion,fecha_carga,imagen_data)'
-            ' VALUES (?,?,?,?,?)',
-            (id, fname, request.form.get('descripcion', ''),
+            'INSERT INTO fotos_ensayo (id_ensayo,id_mezcla,nombre_archivo,descripcion,fecha_carga,imagen_data)'
+            ' VALUES (?,?,?,?,?,?)',
+            (id, request.form.get('id_mezcla') or None, fname, request.form.get('descripcion', ''),
              datetime.now().strftime('%Y-%m-%d %H:%M'),
              img_bytes))
         db.commit()
@@ -719,6 +727,11 @@ def ensayo_pdf(id):
     if not e:
         flash('Ensayo no encontrado.', 'danger')
         return redirect(url_for('ensayos'))
+    if e['tipo'] == 'comparativo':
+        buf = comparativos.pdf(db, e)
+        fecha_str = (e['fecha'] or 'sin_fecha').replace('-', '')
+        return send_file(buf, mimetype='application/pdf', as_attachment=True,
+                         download_name=f"Informe_Comparativo_{id:04d}_{fecha_str}.pdf")
     detalles = db.execute(f'''
         SELECT dm.*, {_DET_COLS}
         FROM detalle_mezcla dm
@@ -1158,6 +1171,11 @@ def _build_pdf(e, detalles, fotos):
     doc.build(story, onFirstPage=_watermark, onLaterPages=_watermark)
     buf.seek(0)
     return buf
+
+
+# Ensayos comparativos (varias mezclas por ensayo)
+import comparativos  # noqa: E402
+app.register_blueprint(comparativos.bp)
 
 
 if __name__ == '__main__':

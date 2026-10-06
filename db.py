@@ -287,6 +287,40 @@ _PRODUCTOS_COLS_NUEVAS = [
     ('oculto',          'INTEGER DEFAULT 0'),  # 1 = no aparece en búsquedas (duplicados)
 ]
 
+# ──────────────────────────────────────────────────────────
+# Ensayos comparativos: un ensayo con varias mezclas
+# ──────────────────────────────────────────────────────────
+# ensayos.tipo = 'comparativo' → sus mezclas están en mezclas_ensayo, y cada
+# producto (detalle_mezcla) y foto (fotos_ensayo) indica su id_mezcla.
+# Ensayos simples: tipo NULL y id_mezcla NULL, como siempre.
+_MEZCLAS_COLS = '''
+        id_ensayo        INTEGER,
+        orden            INTEGER,
+        nombre           TEXT,
+        descripcion      TEXT,
+        tipo_agua        TEXT,
+        ph               REAL,
+        dureza           REAL,
+        temperatura      REAL,
+        conductividad    REAL,
+        espuma           TEXT,
+        precipitado      TEXT,
+        separacion_fases TEXT,
+        redispersion     TEXT,
+        obs_microscopio  TEXT,
+        resultado_final  TEXT,
+        FOREIGN KEY (id_ensayo) REFERENCES ensayos(id_ensayo)
+'''
+_SCHEMA_MEZCLAS = {
+    'sqlite': f'CREATE TABLE IF NOT EXISTS mezclas_ensayo (id_mezcla INTEGER PRIMARY KEY AUTOINCREMENT,{_MEZCLAS_COLS})',
+    'postgres': f'CREATE TABLE IF NOT EXISTS mezclas_ensayo (id_mezcla SERIAL PRIMARY KEY,{_MEZCLAS_COLS})',
+}
+_COLS_COMPARATIVO = [
+    ('ensayos', 'tipo', 'TEXT'),
+    ('detalle_mezcla', 'id_mezcla', 'INTEGER'),
+    ('fotos_ensayo', 'id_mezcla', 'INTEGER'),
+]
+
 _SQL_SNAPSHOT_BACKFILL = (
     'UPDATE detalle_mezcla SET ' +
     ', '.join(f'{s} = (SELECT p.{c} FROM productos p WHERE p.id_producto = detalle_mezcla.id_producto)'
@@ -344,6 +378,13 @@ def _init_sqlite():
     for col, tipo in _PRODUCTOS_COLS_NUEVAS:
         try:
             conn.execute(f'ALTER TABLE productos ADD COLUMN {col} {tipo}')
+            conn.commit()
+        except Exception:
+            pass
+    conn.execute(_SCHEMA_MEZCLAS['sqlite'])
+    for tabla, col, tipo in _COLS_COMPARATIVO:
+        try:
+            conn.execute(f'ALTER TABLE {tabla} ADD COLUMN {col} {tipo}')
             conn.commit()
         except Exception:
             pass
@@ -441,6 +482,9 @@ def _init_postgres():
         cur.execute(f'ALTER TABLE detalle_mezcla ADD COLUMN IF NOT EXISTS {col} TEXT')
     for col, tipo in _PRODUCTOS_COLS_NUEVAS:
         cur.execute(f'ALTER TABLE productos ADD COLUMN IF NOT EXISTS {col} {tipo}')
+    cur.execute(_SCHEMA_MEZCLAS['postgres'])
+    for tabla, col, tipo in _COLS_COMPARATIVO:
+        cur.execute(f'ALTER TABLE {tabla} ADD COLUMN IF NOT EXISTS {col} {tipo}')
     conn.commit()
     cur.execute('SELECT COUNT(*) FROM clientes')
     count = cur.fetchone()[0]

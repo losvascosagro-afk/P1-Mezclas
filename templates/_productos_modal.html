@@ -1,0 +1,75 @@
+{# Buscador de productos (dropdown) y modal de creación rápida. Se usa junto con _productos_autocomplete_js.html #}
+<!-- Dropdown global de productos (fixed, nunca cortado por overflow) -->
+<div id="prodDropdown" style="display:none;position:fixed;z-index:9999;background:#fff;border:1px solid #dee2e6;border-radius:6px;box-shadow:0 4px 20px rgba(0,0,0,.15);max-height:260px;overflow-y:auto;min-width:280px"></div>
+
+<!-- Modal creación rápida de producto -->
+<div class="modal fade" id="modalNuevoProducto" tabindex="-1" aria-labelledby="modalNuevoProductoLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="modalNuevoProductoLabel"><i class="fa-solid fa-box me-2"></i>Nuevo Producto</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <div class="mb-3">
+          <label class="form-label fw-semibold">Nombre Comercial <span class="text-danger">*</span></label>
+          <input type="text" id="mpNombre" class="form-control" placeholder="Ej: Roundup Max">
+        </div>
+        <div class="row g-2">
+          <div class="col-6">
+            <label class="form-label fw-semibold">Categoría</label>
+            <select id="mpCategoria" class="form-select">
+              <option value="">— Seleccionar —</option>
+              {% for opt in ['HERBICIDA','INSECTICIDA','FUNGICIDA','ACARICIDA','ADYUVANTE','FERTILIZANTE','SEMILLA','OTRO'] %}
+                <option value="{{ opt }}">{{ opt }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="col-6">
+            <label class="form-label fw-semibold">Empresa</label>
+            <input type="text" id="mpEmpresa" class="form-control" placeholder="Ej: Monsanto">
+          </div>
+          <div class="col-6">
+            <label class="form-label fw-semibold">Formulación</label>
+            <select id="mpFormulacion" class="form-select">
+              <option value="">— Seleccionar —</option>
+              {% for code, desc in FORMULACIONES %}
+                <option value="{{ code }}">{{ code }} — {{ desc }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="col-6">
+            <label class="form-label fw-semibold">Unidad de Medida</label>
+            <select id="mpUnidad" class="form-select">
+              {% for opt in ['L','Kg','ml','g'] %}
+                <option value="{{ opt }}" {% if opt == 'L' %}selected{% endif %}>{{ opt }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="col-12">
+            <label class="form-label fw-semibold">Principio Activo</label>
+            <input type="text" id="mpPrincipioActivo" class="form-control" placeholder="Ej: Glifosato 48%">
+          </div>
+          <div class="col-8">
+            <label class="form-label fw-semibold">Familia / Modo de Acción</label>
+            <input type="text" id="mpFamilia" class="form-control" placeholder="Ej: Organofosforado">
+          </div>
+          <div class="col-4">
+            <label class="form-label fw-semibold">Precio (USD)</label>
+            <div class="input-group">
+              <span class="input-group-text">$</span>
+              <input type="number" id="mpPrecio" class="form-control" step="0.01" min="0" placeholder="0.00">
+            </div>
+          </div>
+        </div>
+        <div id="mpError" class="text-danger small mt-2" style="display:none"></div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <button type="button" class="btn btn-primary" id="mpGuardar">
+          <i class="fa-solid fa-floppy-disk me-1"></i>Guardar y usar
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

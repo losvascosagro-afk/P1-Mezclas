@@ -2,6 +2,9 @@
 {% block title %}Ensayos — Lab. Mezclas{% endblock %}
 {% block page_title %}Ensayos{% endblock %}
 {% block topbar_actions %}
+  <a href="{{ url_for('comparativos.nuevo') }}" class="btn btn-outline-primary btn-sm">
+    <i class="fa-solid fa-code-compare me-1"></i>Nuevo Comparativo
+  </a>
   <a href="{{ url_for('ensayo_nuevo') }}" class="btn btn-primary btn-sm">
     <i class="fa-solid fa-plus me-1"></i>Nuevo Ensayo
   </a>
@@ -60,7 +63,9 @@
             </small>
           </td>
           <td>
-            {% if e.resultado_final %}
+            {% if e.tipo == 'comparativo' %}
+              <span class="badge" style="background:#5E35B1"><i class="fa-solid fa-code-compare me-1"></i>Comparativo · {{ e.nmezclas }} mezclas</span>
+            {% elif e.resultado_final %}
               {% set r = e.resultado_final|lower %}
               {% if 'inestable' in r %}
                 <span class="badge" style="background:#C62828"><i class="fa-solid fa-circle-xmark me-1"></i>{{ e.resultado_final }}</span>

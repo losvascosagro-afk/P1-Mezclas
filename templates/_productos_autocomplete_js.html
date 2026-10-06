@@ -1,0 +1,159 @@
+{# Autocompletado de productos en cualquier input .prod-search (con su .prod-id en la misma celda) #}
+// ── Autocomplete de productos (dropdown global fixed) ──
+let _acTimer;
+let _activeInp = null;   // input que está buscando actualmente
+let _activeModalInp = null; // input que abrió el modal
+
+const DROP = document.getElementById('prodDropdown');
+
+function positionDrop(inp) {
+  const r = inp.getBoundingClientRect();
+  DROP.style.top  = (r.bottom + 2) + 'px';
+  DROP.style.left = r.left + 'px';
+  DROP.style.width = Math.max(r.width, 300) + 'px';
+}
+
+function closeDrop() {
+  DROP.style.display = 'none';
+  _activeInp = null;
+}
+
+function buildDropdown(prods, q) {
+  const items = prods.map(p =>
+    `<button type="button"
+             class="prod-option d-flex align-items-center gap-2 px-3 py-2 border-0 w-100 text-start"
+             style="background:none;cursor:pointer"
+             data-id="${p.id_producto}" data-name="${p.nombre_comercial.replace(/"/g,'&quot;')}">
+       <span class="flex-grow-1">
+         <span class="fw-semibold">${p.nombre_comercial}</span>
+         ${p.empresa ? `<span class="text-muted small ms-2">${p.empresa}</span>` : ''}
+       </span>
+       ${p.categoria ? `<span class="badge bg-secondary" style="font-size:.65rem;white-space:nowrap">${p.categoria}</span>` : ''}
+     </button>`
+  ).join('');
+
+  const sep = items ? `<div style="border-top:1px solid #e9ecef"></div>` : '';
+  const crear =
+    `<button type="button"
+             class="prod-crear d-flex align-items-center gap-2 px-3 py-2 border-0 w-100 text-start"
+             style="background:#f0f4ff;cursor:pointer;color:#0d6efd;font-size:.875rem"
+             data-q="${q.replace(/"/g,'&quot;')}">
+       <i class="fa-solid fa-circle-plus"></i>
+       <span>Crear "<strong>${q}</strong>" como nuevo producto</span>
+     </button>`;
+
+  DROP.innerHTML = items + sep + crear;
+  DROP.style.display = 'block';
+}
+
+document.addEventListener('input', e => {
+  if (!e.target.classList.contains('prod-search')) return;
+  clearTimeout(_acTimer);
+  _activeInp = e.target;
+  const hiddenId = _activeInp.closest('td').querySelector('.prod-id');
+  hiddenId.value = '';
+  const q = _activeInp.value.trim();
+  if (q.length < 1) { closeDrop(); return; }
+  _acTimer = setTimeout(async () => {
+    try {
+      const res = await fetch('/api/productos?q=' + encodeURIComponent(q));
+      const prods = await res.json();
+      positionDrop(_activeInp);
+      buildDropdown(prods, q);
+    } catch(err) { closeDrop(); }
+  }, 200);
+});
+
+// Reposicionar al hacer scroll o resize
+window.addEventListener('scroll', () => { if (_activeInp) positionDrop(_activeInp); }, true);
+window.addEventListener('resize', () => { if (_activeInp) positionDrop(_activeInp); });
+
+document.addEventListener('click', e => {
+  // Seleccionar producto existente
+  const opt = e.target.closest('.prod-option');
+  if (opt) {
+    if (_activeInp) {
+      _activeInp.value = opt.dataset.name;
+      _activeInp.closest('td').querySelector('.prod-id').value = opt.dataset.id;
+    }
+    closeDrop();
+    return;
+  }
+
+  // Abrir modal para crear nuevo
+  const crear = e.target.closest('.prod-crear');
+  if (crear) {
+    _activeModalInp = _activeInp;
+    const q = crear.dataset.q || '';
+    document.getElementById('mpNombre').value = q;
+    document.getElementById('mpCategoria').value = '';
+    document.getElementById('mpEmpresa').value = '';
+    document.getElementById('mpFormulacion').value = '';
+    document.getElementById('mpUnidad').value = 'L';
+    document.getElementById('mpPrincipioActivo').value = '';
+    document.getElementById('mpFamilia').value = '';
+    document.getElementById('mpPrecio').value = '';
+    document.getElementById('mpError').style.display = 'none';
+    closeDrop();
+    new bootstrap.Modal(document.getElementById('modalNuevoProducto')).show();
+    return;
+  }
+
+  // Cerrar si se hace click fuera
+  if (!e.target.closest('#prodDropdown') && !e.target.classList.contains('prod-search')) {
+    closeDrop();
+  }
+});
+
+// Hover visual
+DROP.addEventListener('mouseover', e => {
+  const opt = e.target.closest('.prod-option');
+  if (opt) opt.style.background = '#f0f4ff';
+});
+DROP.addEventListener('mouseout', e => {
+  const opt = e.target.closest('.prod-option');
+  if (opt) opt.style.background = 'none';
+});
+
+// ── Modal: guardar nuevo producto ──
+document.getElementById('mpGuardar').addEventListener('click', async () => {
+  const nombre = document.getElementById('mpNombre').value.trim();
+  const errEl = document.getElementById('mpError');
+  if (!nombre) { errEl.textContent = 'El nombre es obligatorio.'; errEl.style.display = 'block'; return; }
+  errEl.style.display = 'none';
+
+  const btn = document.getElementById('mpGuardar');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Guardando...';
+
+  try {
+    const res = await fetch('/api/productos/nuevo', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({
+        nombre_comercial: nombre,
+        categoria: document.getElementById('mpCategoria').value || null,
+        empresa: document.getElementById('mpEmpresa').value.trim() || null,
+        formulacion: document.getElementById('mpFormulacion').value || null,
+        unidad_medida: document.getElementById('mpUnidad').value,
+        principio_activo: document.getElementById('mpPrincipioActivo').value.trim() || null,
+        familia: document.getElementById('mpFamilia').value.trim() || null,
+        precio_unit_usd: parseFloat(document.getElementById('mpPrecio').value) || null
+      })
+    });
+    const data = await res.json();
+    if (!res.ok) { errEl.textContent = data.error || 'Error al guardar.'; errEl.style.display = 'block'; return; }
+
+    if (_activeModalInp) {
+      _activeModalInp.value = data.nombre_comercial;
+      _activeModalInp.closest('td').querySelector('.prod-id').value = data.id_producto;
+    }
+    bootstrap.Modal.getInstance(document.getElementById('modalNuevoProducto')).hide();
+  } catch(err) {
+    errEl.textContent = 'Error de red. Intente nuevamente.';
+    errEl.style.display = 'block';
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '<i class="fa-solid fa-floppy-disk me-1"></i>Guardar y usar';
+  }
+});

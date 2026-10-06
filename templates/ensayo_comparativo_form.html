@@ -1,0 +1,370 @@
+{% extends "base.html" %}
+{% block title %}{{ titulo }} — Lab. Mezclas{% endblock %}
+{% block page_title %}{{ titulo }}{% endblock %}
+{% block topbar_actions %}
+  <a href="{{ url_for('ensayo_detalle', id=e.id_ensayo) if e else url_for('ensayos') }}" class="btn btn-outline-secondary btn-sm">
+    <i class="fa-solid fa-arrow-left me-1"></i>Volver
+  </a>
+{% endblock %}
+
+{% block content %}
+<form method="post" id="ensayoForm">
+
+  <!-- DATOS GENERALES -->
+  <div class="card-custom mb-4">
+    <div class="card-header-custom"><i class="fa-solid fa-code-compare me-2"></i>Datos generales del ensayo comparativo</div>
+    <div class="p-4">
+      <div class="row g-3">
+        <div class="col-md-3">
+          <label class="form-label fw-semibold">Fecha <span class="text-danger">*</span></label>
+          <input type="date" name="fecha" class="form-control" required value="{{ e.fecha if e else today }}">
+        </div>
+        <div class="col-md-5">
+          <label class="form-label fw-semibold">Cliente</label>
+          <input type="hidden" name="id_cliente" id="clienteId" value="{{ e.id_cliente if e and e.id_cliente else '' }}">
+          <input type="text" id="clienteSearch" class="form-control" autocomplete="off"
+                 placeholder="Buscar por nombre..." value="{{ e.razon_social if e and e.razon_social else '' }}">
+          <div id="clienteDrop" style="display:none;position:fixed;z-index:9999;background:#fff;border:1px solid #dee2e6;border-radius:6px;box-shadow:0 4px 20px rgba(0,0,0,.15);max-height:260px;overflow-y:auto;min-width:280px"></div>
+        </div>
+        <div class="col-md-4">
+          <label class="form-label fw-semibold">Objetivo</label>
+          <input type="text" name="objetivo" class="form-control"
+                 value="{{ e.objetivo if e else 'Ensayo comparativo' }}" placeholder="Ej: Harrier Bio vs. candidatos">
+        </div>
+        <div class="col-12">
+          <label class="form-label fw-semibold">Descripción del ensayo</label>
+          <textarea name="obs_mezcla" class="form-control" rows="2"
+                    placeholder="Qué se compara, en qué condiciones, para qué...">{{ e.obs_mezcla if e and e.obs_mezcla else '' }}</textarea>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label fw-semibold">Volúmenes de caldo (L)</label>
+          <input type="hidden" name="volumenes" id="volumenesHidden" value="{{ e.volumenes if e and e.volumenes else '' }}">
+          <div class="d-flex gap-2 align-items-center flex-wrap" id="volChips"></div>
+          <div class="d-flex gap-2 mt-2">
+            <input type="number" id="volInput" class="form-control form-control-sm" style="max-width:100px" step="1" min="1" placeholder="50">
+            <button type="button" class="btn btn-sm btn-outline-secondary" onclick="addChip('vol')"><i class="fa-solid fa-plus"></i> Agregar</button>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label fw-semibold">Tiempos de observación (min)</label>
+          <input type="hidden" name="tiempos_obs" id="tiemposHidden" value="{{ e.tiempos_obs if e and e.tiempos_obs else '' }}">
+          <div class="d-flex gap-2 align-items-center flex-wrap" id="tObsChips"></div>
+          <div class="d-flex gap-2 mt-2">
+            <input type="number" id="tObsInput" class="form-control form-control-sm" style="max-width:100px" step="1" min="1" placeholder="5">
+            <button type="button" class="btn btn-sm btn-outline-secondary" onclick="addChip('tobs')"><i class="fa-solid fa-plus"></i> Agregar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MEZCLAS -->
+  <div class="d-flex justify-content-between align-items-center mb-2">
+    <h5 class="mb-0"><i class="fa-solid fa-flask me-2"></i>Mezclas a comparar <span class="badge bg-secondary" id="mezclaCount">0</span></h5>
+    <button type="button" class="btn btn-primary btn-sm" onclick="agregarMezcla()">
+      <i class="fa-solid fa-plus me-1"></i>Agregar mezcla
+    </button>
+  </div>
+  <p class="text-muted small mb-3">Tip: cargá la primera mezcla completa y usá <b>Duplicar</b> para armar las demás cambiando sólo lo que difiere (por ejemplo el adyuvante).</p>
+  <div id="mezclas"></div>
+
+  <!-- CONCLUSIÓN -->
+  <div class="card-custom mb-4">
+    <div class="card-header-custom"><i class="fa-solid fa-lightbulb me-2"></i>Conclusión general</div>
+    <div class="p-4">
+      <textarea name="recomendacion" class="form-control" rows="3"
+                placeholder="Ej: Harrier Bio mantuvo la mezcla estable en ambas aguas; Candidato 2 generó espuma en agua dura.">{{ e.recomendacion if e and e.recomendacion else '' }}</textarea>
+    </div>
+  </div>
+
+  <div class="d-flex gap-2 justify-content-end mb-5">
+    <a href="{{ url_for('ensayo_detalle', id=e.id_ensayo) if e else url_for('ensayos') }}" class="btn btn-outline-secondary">Cancelar</a>
+    <button type="submit" class="btn btn-primary btn-lg"><i class="fa-solid fa-floppy-disk me-2"></i>Guardar ensayo comparativo</button>
+  </div>
+</form>
+
+{% include '_productos_modal.html' %}
+
+<!-- Plantilla de una mezcla (__K__ = clave de la mezcla en el formulario) -->
+<template id="mezclaTemplate">
+  <div class="card-custom mb-4 mezcla-card" data-k="__K__">
+    <input type="hidden" name="mezcla_key[]" value="__K__">
+    <input type="hidden" name="m__K___id_mezcla" value="">
+    <div class="card-header-custom d-flex flex-wrap gap-2 align-items-center">
+      <span class="badge bg-light text-dark mezcla-num">Mezcla 1</span>
+      <input type="text" name="m__K___nombre" class="form-control form-control-sm flex-grow-1" style="max-width:340px"
+             placeholder="Nombre: Harrier Bio, Candidato 1...">
+      <div class="ms-auto d-flex gap-1">
+        <button type="button" class="btn btn-sm btn-light" title="Subir" onclick="moverMezcla(this,-1)"><i class="fa-solid fa-arrow-up"></i></button>
+        <button type="button" class="btn btn-sm btn-light" title="Bajar" onclick="moverMezcla(this,1)"><i class="fa-solid fa-arrow-down"></i></button>
+        <button type="button" class="btn btn-sm btn-light" onclick="duplicarMezcla(this)"><i class="fa-solid fa-copy me-1"></i>Duplicar</button>
+        <button type="button" class="btn btn-sm btn-outline-light" onclick="eliminarMezcla(this)"><i class="fa-solid fa-trash me-1"></i>Eliminar</button>
+      </div>
+    </div>
+    <div class="p-3">
+      <div class="row g-3">
+        <div class="col-lg-8">
+          <div class="row g-2 mb-3">
+            <div class="col-md-4">
+              <label class="form-label small fw-semibold">Tipo de agua</label>
+              <select name="m__K___tipo_agua" class="form-select form-select-sm agua-tipo">
+                <option value="">— Seleccionar —</option>
+                {% for t in tipos_agua %}<option value="{{ t }}">{{ t }}</option>{% endfor %}
+              </select>
+            </div>
+            <div class="col-md-2"><label class="form-label small fw-semibold">pH</label>
+              <input type="number" name="m__K___ph" class="form-control form-control-sm agua-ph" step="0.1" min="0" max="14" placeholder="7.0"></div>
+            <div class="col-md-2"><label class="form-label small fw-semibold">Dureza</label>
+              <input type="number" name="m__K___dureza" class="form-control form-control-sm agua-dureza" step="1" placeholder="mg/L"></div>
+            <div class="col-md-2"><label class="form-label small fw-semibold">Temp. °C</label>
+              <input type="number" name="m__K___temperatura" class="form-control form-control-sm agua-temp" step="1" placeholder="25"></div>
+            <div class="col-md-2"><label class="form-label small fw-semibold">Cond. µS/cm</label>
+              <input type="number" name="m__K___conductividad" class="form-control form-control-sm" step="1"></div>
+          </div>
+          <label class="form-label small fw-semibold">Descripción de la mezcla</label>
+          <textarea name="m__K___descripcion" class="form-control form-control-sm mb-3" rows="2"
+                    placeholder="Qué tiene de particular esta mezcla, cómo se preparó..."></textarea>
+          <div class="table-responsive" style="overflow:visible">
+            <table class="table table-sm mb-1">
+              <thead><tr>
+                <th style="width:55px">Orden</th><th>Producto</th><th style="width:90px">Dosis</th>
+                <th style="width:75px">Unidad</th><th style="width:140px">Observación</th><th style="width:40px"></th>
+              </tr></thead>
+              <tbody class="prod-body"></tbody>
+            </table>
+          </div>
+          <button type="button" class="btn btn-sm btn-outline-primary" onclick="agregarProducto(this.closest('.mezcla-card'))">
+            <i class="fa-solid fa-plus me-1"></i>Agregar producto
+          </button>
+        </div>
+        <div class="col-lg-4">
+          <div class="border rounded p-3 mb-3">
+            <div class="small fw-semibold mb-2"><i class="fa-solid fa-eye me-1"></i>Observaciones visuales</div>
+            {% for campo, label in obs_visuales %}
+            <div class="d-flex justify-content-between align-items-center mb-1">
+              <span class="small">{{ label }}</span>
+              <span>
+                <input class="form-check-input" type="radio" name="m__K___{{ campo }}" value="No" checked>
+                <span class="small text-success fw-semibold me-2">No</span>
+                <input class="form-check-input" type="radio" name="m__K___{{ campo }}" value="Si">
+                <span class="small text-danger fw-semibold">Sí</span>
+              </span>
+            </div>
+            {% endfor %}
+          </div>
+          <label class="form-label small fw-semibold">Resultado</label>
+          <select name="m__K___resultado_final" class="form-select form-select-sm mb-3">
+            <option value="">— Sin resultado —</option>
+            {% for r in resultados %}<option value="{{ r }}">{{ r }}</option>{% endfor %}
+          </select>
+          <label class="form-label small fw-semibold">Observaciones al microscopio</label>
+          <textarea name="m__K___obs_microscopio" class="form-control form-control-sm" rows="3"></textarea>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+
+<template id="prodRowTemplate">
+  <tr>
+    <td><input type="number" name="m__K___orden_carga[]" class="form-control form-control-sm orden" value="1" min="1"></td>
+    <td>
+      <input type="text" class="form-control form-control-sm prod-search" autocomplete="off" placeholder="Buscar por nombre, empresa, principio...">
+      <input type="hidden" name="m__K___producto_id[]" class="prod-id" value="">
+    </td>
+    <td><input type="number" name="m__K___dosis[]" class="form-control form-control-sm dosis" step="0.001" placeholder="0.0"></td>
+    <td><select name="m__K___unidad[]" class="form-select form-select-sm unidad">
+      {% for u in ['L','Kg','ml','g'] %}<option value="{{ u }}">{{ u }}</option>{% endfor %}
+    </select></td>
+    <td><input type="text" name="m__K___det_obs[]" class="form-control form-control-sm det-obs" placeholder="Opcional"></td>
+    <td><button type="button" class="btn btn-sm btn-outline-danger" onclick="quitarProducto(this)"><i class="fa-solid fa-xmark"></i></button></td>
+  </tr>
+</template>
+{% endblock %}
+
+{% block scripts %}
+<script>
+const MEZCLAS_INICIALES = {{ mezclas_json|tojson }};
+const CAMPOS = ['nombre','descripcion','tipo_agua','ph','dureza','temperatura','conductividad','obs_microscopio','resultado_final'];
+const OBS = {{ obs_visuales|map('first')|list|tojson }};
+let _k = 0;
+
+// ── Mezclas ──
+function nuevaCard() {
+  const k = 'n' + (++_k);
+  const html = document.getElementById('mezclaTemplate').innerHTML.replaceAll('__K__', k);
+  const wrap = document.createElement('div');
+  wrap.innerHTML = html.trim();
+  const card = wrap.firstElementChild;
+  card.querySelector('.agua-tipo').addEventListener('change', function () {
+    if (this.value === 'Estándar laboratorio') {
+      const set = (sel, v) => { const el = card.querySelector(sel); if (!el.value) el.value = v; };
+      set('.agua-ph', '7.8'); set('.agua-dureza', '75'); set('.agua-temp', '25');
+    }
+  });
+  return card;
+}
+
+function campo(card, nombre) { return card.querySelector(`[name="m${card.dataset.k}_${nombre}"]`); }
+
+function leerMezcla(card) {
+  const d = { id_mezcla: campo(card, 'id_mezcla').value, productos: [] };
+  CAMPOS.forEach(c => d[c] = campo(card, c).value);
+  OBS.forEach(c => { const r = card.querySelector(`[name="m${card.dataset.k}_${c}"]:checked`); d[c] = r ? r.value : 'No'; });
+  card.querySelectorAll('.prod-body tr').forEach(tr => d.productos.push({
+    id_producto: tr.querySelector('.prod-id').value, nombre: tr.querySelector('.prod-search').value,
+    orden: tr.querySelector('.orden').value, dosis: tr.querySelector('.dosis').value,
+    unidad: tr.querySelector('.unidad').value, obs: tr.querySelector('.det-obs').value,
+  }));
+  return d;
+}
+
+function llenarMezcla(card, d) {
+  campo(card, 'id_mezcla').value = d.id_mezcla || '';
+  CAMPOS.forEach(c => { if (d[c] !== undefined && d[c] !== null) campo(card, c).value = d[c]; });
+  OBS.forEach(c => {
+    const v = (d[c] === 'Si' || d[c] === 'Sí') ? 'Si' : 'No';
+    const r = card.querySelector(`[name="m${card.dataset.k}_${c}"][value="${v}"]`);
+    if (r) r.checked = true;
+  });
+  (d.productos || []).forEach(p => agregarProducto(card, p));
+  if (!(d.productos || []).length) agregarProducto(card);
+}
+
+function agregarMezcla(datos, despuesDe) {
+  const card = nuevaCard();
+  const cont = document.getElementById('mezclas');
+  if (despuesDe) despuesDe.after(card); else cont.appendChild(card);
+  llenarMezcla(card, datos || {});
+  renumerar();
+  return card;
+}
+
+function duplicarMezcla(btn) {
+  const card = btn.closest('.mezcla-card');
+  const d = leerMezcla(card);
+  d.id_mezcla = '';
+  d.nombre = d.nombre ? d.nombre + ' (copia)' : '';
+  const nueva = agregarMezcla(d, card);
+  const nombre = campo(nueva, 'nombre');
+  nombre.focus(); nombre.select();
+}
+
+function eliminarMezcla(btn) {
+  const card = btn.closest('.mezcla-card');
+  if (document.querySelectorAll('.mezcla-card').length === 1) { alert('El ensayo necesita al menos una mezcla.'); return; }
+  const nombre = campo(card, 'nombre').value || card.querySelector('.mezcla-num').textContent;
+  const aviso = campo(card, 'id_mezcla').value ? '\nSus fotos quedan en el ensayo como fotos generales.' : '';
+  if (!confirm(`¿Quitar "${nombre}" del ensayo?${aviso}`)) return;
+  card.remove();
+  renumerar();
+}
+
+function moverMezcla(btn, dir) {
+  const card = btn.closest('.mezcla-card');
+  const otra = dir < 0 ? card.previousElementSibling : card.nextElementSibling;
+  if (!otra) return;
+  if (dir < 0) otra.before(card); else otra.after(card);
+  renumerar();
+}
+
+function renumerar() {
+  const cards = document.querySelectorAll('.mezcla-card');
+  cards.forEach((c, i) => c.querySelector('.mezcla-num').textContent = 'Mezcla ' + (i + 1));
+  document.getElementById('mezclaCount').textContent = cards.length;
+}
+
+// ── Productos de una mezcla ──
+function agregarProducto(card, p) {
+  const html = document.getElementById('prodRowTemplate').innerHTML.replaceAll('__K__', card.dataset.k);
+  const tbody = card.querySelector('.prod-body');
+  tbody.insertAdjacentHTML('beforeend', html.trim());
+  const tr = tbody.lastElementChild;
+  tr.querySelector('.orden').value = (p && p.orden) || tbody.children.length;
+  if (p) {
+    tr.querySelector('.prod-id').value = p.id_producto || '';
+    tr.querySelector('.prod-search').value = p.nombre || '';
+    tr.querySelector('.dosis').value = (p.dosis ?? '');
+    tr.querySelector('.unidad').value = p.unidad || 'L';
+    tr.querySelector('.det-obs').value = p.obs || '';
+  }
+}
+
+function quitarProducto(btn) {
+  const tbody = btn.closest('tbody');
+  btn.closest('tr').remove();
+  tbody.querySelectorAll('tr').forEach((tr, i) => tr.querySelector('.orden').value = i + 1);
+}
+
+document.getElementById('ensayoForm').addEventListener('submit', e => {
+  if (!document.querySelectorAll('.mezcla-card').length) { e.preventDefault(); alert('Agregá al menos una mezcla.'); return; }
+  const sinElegir = [...document.querySelectorAll('.prod-search')].filter(i => i.value.trim() && !i.closest('td').querySelector('.prod-id').value);
+  if (sinElegir.length && !confirm(`Hay ${sinElegir.length} producto(s) escritos pero no elegidos de la lista: no se van a guardar. ¿Guardar igual?`)) {
+    e.preventDefault();
+  }
+});
+
+window.addEventListener('DOMContentLoaded', () => {
+  if (MEZCLAS_INICIALES.length) MEZCLAS_INICIALES.forEach(m => agregarMezcla(m));
+  else agregarMezcla();
+  renderChips('vol'); renderChips('tobs');
+});
+
+// ── Chips multi-valor (volúmenes y tiempos), igual que en el ensayo simple ──
+function renderChips(type) {
+  const isVol = type === 'vol';
+  const hidden = document.getElementById(isVol ? 'volumenesHidden' : 'tiemposHidden');
+  const container = document.getElementById(isVol ? 'volChips' : 'tObsChips');
+  const unit = isVol ? 'L' : 'min';
+  const vals = hidden.value ? hidden.value.split(',').map(v => v.trim()).filter(Boolean) : [];
+  container.innerHTML = '';
+  vals.forEach((v, i) => {
+    const chip = document.createElement('span');
+    chip.className = 'badge bg-light text-dark border d-flex align-items-center gap-1';
+    chip.style.fontSize = '0.85rem';
+    chip.innerHTML = `${v} ${unit} <button type="button" class="btn-close btn-close-sm" style="font-size:0.6rem" aria-label="Quitar"></button>`;
+    chip.querySelector('button').addEventListener('click', () => { vals.splice(i, 1); hidden.value = vals.join(','); renderChips(type); });
+    container.appendChild(chip);
+  });
+}
+function addChip(type) {
+  const isVol = type === 'vol';
+  const input = document.getElementById(isVol ? 'volInput' : 'tObsInput');
+  const hidden = document.getElementById(isVol ? 'volumenesHidden' : 'tiemposHidden');
+  const val = input.value.trim();
+  if (!val || isNaN(val)) return;
+  const vals = hidden.value ? hidden.value.split(',').map(v => v.trim()).filter(Boolean) : [];
+  if (!vals.includes(val)) { vals.push(val); hidden.value = vals.join(','); renderChips(type); }
+  input.value = ''; input.focus();
+}
+['volInput', 'tObsInput'].forEach(id => document.getElementById(id).addEventListener('keydown', e => {
+  if (e.key === 'Enter') { e.preventDefault(); addChip(id === 'volInput' ? 'vol' : 'tobs'); }
+}));
+
+// ── Autocomplete de clientes ──
+(function () {
+  const inp = document.getElementById('clienteSearch');
+  const hiddenId = document.getElementById('clienteId');
+  const drop = document.getElementById('clienteDrop');
+  let timer;
+  const pos = () => { const r = inp.getBoundingClientRect(); drop.style.top = (r.bottom + 2) + 'px'; drop.style.left = r.left + 'px'; drop.style.width = Math.max(r.width, 260) + 'px'; };
+  const cerrar = () => drop.style.display = 'none';
+  inp.addEventListener('input', () => {
+    clearTimeout(timer); hiddenId.value = '';
+    const q = inp.value.trim();
+    timer = setTimeout(async () => {
+      const clientes = await (await fetch('/api/clientes?q=' + encodeURIComponent(q))).json();
+      if (!clientes.length) { cerrar(); return; }
+      drop.innerHTML = clientes.map(c => `<button type="button" class="cli-opt d-flex align-items-center px-3 py-2 border-0 w-100 text-start" style="background:none;cursor:pointer" data-id="${c.id_cliente}" data-name="${c.razon_social.replace(/"/g, '&quot;')}">${c.razon_social}</button>`).join('');
+      pos(); drop.style.display = 'block';
+    }, 200);
+  });
+  inp.addEventListener('focus', () => { if (!inp.value.trim()) inp.dispatchEvent(new Event('input')); });
+  drop.addEventListener('click', e => { const o = e.target.closest('.cli-opt'); if (!o) return; inp.value = o.dataset.name; hiddenId.value = o.dataset.id; cerrar(); });
+  document.addEventListener('click', e => { if (!e.target.closest('#clienteDrop') && e.target !== inp) cerrar(); });
+  window.addEventListener('scroll', () => { if (drop.style.display !== 'none') pos(); }, true);
+})();
+
+{% include '_productos_autocomplete_js.html' %}
+</script>
+{% endblock %}
