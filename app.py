@@ -13,7 +13,7 @@ from reportlab.platypus import (SimpleDocTemplate, Table, TableStyle,
 from reportlab.lib.enums import TA_CENTER, TA_LEFT, TA_RIGHT
 from reportlab.lib.utils import ImageReader
 
-from db import get_db, close_db, init_db, BACKEND, BASE_DIR
+from db import get_db, close_db, init_db, BACKEND, BASE_DIR, SNAP_COLS
 
 # En Vercel el filesystem es efímero; usamos /tmp para uploads.
 # Localmente se usa static/uploads/ (persistente y servido directamente).
@@ -22,6 +22,10 @@ if IS_VERCEL:
     UPLOAD_FOLDER = '/tmp/uploads'
 else:
     UPLOAD_FOLDER = os.path.join(BASE_DIR, 'static', 'uploads')
+
+# Columnas de producto para ficha/PDF: primero la copia congelada del ensayo,
+# si no existe (detalles muy viejos sin copia) el dato actual del catálogo.
+_DET_COLS = ', '.join(f'COALESCE(dm.{s}, p.{c}) AS {c}' for s, c in SNAP_COLS)
 
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'tiff', 'tif', 'bmp', 'gif'}
 
@@ -46,6 +50,22 @@ FORMULACIONES = [
     ('WP', 'Polvo mojable'),
     ('SG', 'Gránulos solubles'),
     ('DC', 'Concentrado dispersable'),
+    # Siglas adicionales del registro SENASA
+    ('ZC', 'Mezcla de SC y CS'),
+    ('SP', 'Polvo soluble'),
+    ('AL', 'Líquido'),
+    ('FS', 'Suspensión concentrada p/ tratamiento de semillas'),
+    ('WS', 'Polvo dispersable p/ tratamiento de semillas'),
+    ('ES', 'Emulsión p/ tratamiento de semillas'),
+    ('MS', 'Microemulsión p/ tratamiento de semillas'),
+    ('GL', 'Gel emulsionable'),
+    ('EO', 'Emulsión agua en aceite'),
+    ('OL', 'Líquido miscible en aceite'),
+    ('DE', 'Diluido emulsionable'),
+    ('UL', 'Líquido ultra bajo volumen'),
+    ('DP', 'Polvo seco'),
+    ('GR', 'Gránulo'),
+    ('GB', 'Cebo granulado'),
     ('OTRO', 'Otro/Adyuvante'),
 ]
 FORMULACION_CODES = [c for c, _ in FORMULACIONES]
@@ -238,25 +258,37 @@ def cliente_eliminar(id):
 # ──────────────────────────────────────────────────────────
 # PRODUCTOS
 # ──────────────────────────────────────────────────────────
+PRODUCTOS_POR_PAGINA = 100
+
+
 @app.route('/productos')
 def productos():
     db = get_db()
     q = request.args.get('q', '')
     cat = request.args.get('categoria', '')
-    sql = 'SELECT * FROM productos WHERE 1=1'
+    try:
+        page = max(1, int(request.args.get('page', 1)))
+    except ValueError:
+        page = 1
+    where = ' WHERE COALESCE(oculto,0)=0'
     params = []
     if q:
-        sql += ' AND (nombre_comercial LIKE ? OR empresa LIKE ? OR principio_activo LIKE ?)'
+        where += ' AND (nombre_comercial LIKE ? OR empresa LIKE ? OR principio_activo LIKE ?)'
         params.extend([f'%{q}%'] * 3)
     if cat:
-        sql += ' AND categoria=?'
+        where += ' AND categoria=?'
         params.append(cat)
-    sql += ' ORDER BY nombre_comercial'
-    rows = db.execute(sql, params).fetchall()
+    total = db.execute('SELECT COUNT(*) FROM productos' + where, params).fetchone()[0]
+    pages = max(1, -(-total // PRODUCTOS_POR_PAGINA))
+    page = min(page, pages)
+    rows = db.execute(
+        'SELECT * FROM productos' + where + ' ORDER BY nombre_comercial LIMIT ? OFFSET ?',
+        params + [PRODUCTOS_POR_PAGINA, (page - 1) * PRODUCTOS_POR_PAGINA]).fetchall()
     cats = db.execute(
         'SELECT DISTINCT categoria FROM productos WHERE categoria IS NOT NULL ORDER BY categoria'
     ).fetchall()
-    return render_template('productos.html', productos=rows, q=q, cat_sel=cat, categorias=cats)
+    return render_template('productos.html', productos=rows, q=q, cat_sel=cat, categorias=cats,
+                           total=total, page=page, pages=pages)
 
 
 @app.route('/productos/nuevo', methods=['GET', 'POST'])
@@ -340,7 +372,7 @@ def api_productos():
     if not q:
         rows = db.execute(
             'SELECT id_producto,nombre_comercial,categoria,empresa,unidad_medida '
-            'FROM productos ORDER BY nombre_comercial LIMIT 30'
+            'FROM productos WHERE COALESCE(oculto,0)=0 ORDER BY nombre_comercial LIMIT 30'
         ).fetchall()
     else:
         words = q.split()
@@ -351,7 +383,7 @@ def api_productos():
         params = [p for w in words for p in (f'%{w}%', f'%{w}%', f'%{w}%')]
         rows = db.execute(
             f'SELECT id_producto,nombre_comercial,categoria,empresa,unidad_medida '
-            f'FROM productos WHERE {conditions} ORDER BY nombre_comercial LIMIT 30',
+            f'FROM productos WHERE COALESCE(oculto,0)=0 AND {conditions} ORDER BY nombre_comercial LIMIT 30',
             params
         ).fetchall()
     return jsonify([dict(r) for r in rows])
@@ -445,7 +477,7 @@ def ensayo_nuevo():
         flash('Ensayo creado exitosamente.', 'success')
         return redirect(url_for('ensayo_detalle', id=eid))
     clientes_list = db.execute('SELECT id_cliente,razon_social FROM clientes ORDER BY razon_social').fetchall()
-    productos_list = db.execute('SELECT id_producto,nombre_comercial,categoria,empresa,unidad_medida FROM productos ORDER BY nombre_comercial').fetchall()
+    productos_list = []  # el formulario busca productos por /api/productos
     return render_template('ensayo_form.html', e=None, clientes=clientes_list,
                            productos=productos_list, detalles=[], titulo='Nuevo Ensayo')
 
@@ -462,9 +494,8 @@ def ensayo_detalle(id):
     if not e:
         flash('Ensayo no encontrado.', 'danger')
         return redirect(url_for('ensayos'))
-    detalles = db.execute('''
-        SELECT dm.*, p.nombre_comercial, p.categoria, p.empresa,
-               p.formulacion, p.principio_activo
+    detalles = db.execute(f'''
+        SELECT dm.*, {_DET_COLS}
         FROM detalle_mezcla dm
         LEFT JOIN productos p ON dm.id_producto=p.id_producto
         WHERE dm.id_ensayo=? ORDER BY dm.orden_carga
@@ -504,15 +535,17 @@ def ensayo_editar(id):
              request.form.get('separacion_fases') or 'No',
              request.form.get('redispersion') or 'No',
              request.form.get('obs_microscopio') or None, id))
+        previos = {r['id_producto']: r for r in db.execute(
+            'SELECT * FROM detalle_mezcla WHERE id_ensayo=?', (id,)).fetchall()}
         db.execute('DELETE FROM detalle_mezcla WHERE id_ensayo=?', (id,))
-        _save_detalles(db, id, request.form)
+        _save_detalles(db, id, request.form, previos)
         db.commit()
         flash('Ensayo actualizado.', 'success')
         return redirect(url_for('ensayo_detalle', id=id))
     clientes_list = db.execute('SELECT id_cliente,razon_social FROM clientes ORDER BY razon_social').fetchall()
-    productos_list = db.execute('SELECT id_producto,nombre_comercial,categoria,empresa,unidad_medida FROM productos ORDER BY nombre_comercial').fetchall()
+    productos_list = []  # el formulario busca productos por /api/productos
     detalles = db.execute(
-        'SELECT dm.*,p.nombre_comercial FROM detalle_mezcla dm '
+        'SELECT dm.*,COALESCE(dm.snap_nombre,p.nombre_comercial) AS nombre_comercial FROM detalle_mezcla dm '
         'LEFT JOIN productos p ON dm.id_producto=p.id_producto '
         'WHERE dm.id_ensayo=? ORDER BY dm.orden_carga', (id,)).fetchall()
     return render_template('ensayo_form.html', e=e, clientes=clientes_list,
@@ -535,7 +568,15 @@ def ensayo_eliminar(id):
     return redirect(url_for('ensayos'))
 
 
-def _save_detalles(db, eid, form):
+_SNAP_INSERT = ','.join(s for s, _ in SNAP_COLS)
+_SNAP_SELECT = ','.join(c for _, c in SNAP_COLS)
+
+
+def _save_detalles(db, eid, form, previos=None):
+    """Guarda los productos de la mezcla con su copia congelada.
+    previos: detalles anteriores del ensayo (al editar), para no cambiar la copia
+    de los productos que ya estaban."""
+    previos = previos or {}
     pids = form.getlist('producto_id[]')
     ords = form.getlist('orden_carga[]')
     doss = form.getlist('dosis[]')
@@ -543,15 +584,22 @@ def _save_detalles(db, eid, form):
     obss = form.getlist('det_obs[]')
     for i, pid in enumerate(pids):
         if pid:
+            pid = int(pid)
+            prev = previos.get(pid)
+            if prev is not None and prev['snap_nombre'] is not None:
+                snap = tuple(prev[s] for s, _ in SNAP_COLS)
+            else:
+                row = db.execute(f'SELECT {_SNAP_SELECT} FROM productos WHERE id_producto=?', (pid,)).fetchone()
+                snap = tuple(row) if row else (None,) * len(SNAP_COLS)
             db.execute(
-                'INSERT INTO detalle_mezcla (id_ensayo,orden_carga,id_producto,dosis,unidad,observacion)'
-                ' VALUES (?,?,?,?,?,?)',
+                'INSERT INTO detalle_mezcla (id_ensayo,orden_carga,id_producto,dosis,unidad,observacion,'
+                f'{_SNAP_INSERT}) VALUES (?,?,?,?,?,?,{",".join("?" * len(SNAP_COLS))})',
                 (eid,
                  int(ords[i]) if i < len(ords) and ords[i] else i + 1,
-                 int(pid),
+                 pid,
                  _float_or_none(doss[i] if i < len(doss) else None),
                  unis[i] if i < len(unis) and unis[i] else 'L',
-                 obss[i] if i < len(obss) and obss[i] else None))
+                 obss[i] if i < len(obss) and obss[i] else None) + snap)
 
 
 # ──────────────────────────────────────────────────────────
@@ -632,9 +680,8 @@ def ensayo_pdf(id):
     if not e:
         flash('Ensayo no encontrado.', 'danger')
         return redirect(url_for('ensayos'))
-    detalles = db.execute('''
-        SELECT dm.*, p.nombre_comercial, p.categoria, p.empresa,
-               p.formulacion, p.principio_activo, p.unidad_medida
+    detalles = db.execute(f'''
+        SELECT dm.*, {_DET_COLS}
         FROM detalle_mezcla dm
         LEFT JOIN productos p ON dm.id_producto=p.id_producto
         WHERE dm.id_ensayo=? ORDER BY dm.orden_carga

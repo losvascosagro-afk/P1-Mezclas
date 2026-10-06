@@ -268,6 +268,40 @@ _SCHEMA_PG = [
 
 
 # ──────────────────────────────────────────────────────────
+# Copia congelada de los datos del producto en cada ensayo
+# ──────────────────────────────────────────────────────────
+# Cada fila de detalle_mezcla guarda cómo era el producto al momento del
+# ensayo. Ficha, PDF y edición leen esta copia, así que corregir el catálogo
+# no altera ensayos ya realizados.
+SNAP_COLS = [
+    ('snap_nombre',           'nombre_comercial'),
+    ('snap_categoria',        'categoria'),
+    ('snap_empresa',          'empresa'),
+    ('snap_formulacion',      'formulacion'),
+    ('snap_principio_activo', 'principio_activo'),
+    ('snap_unidad_medida',    'unidad_medida'),
+]
+
+_PRODUCTOS_COLS_NUEVAS = [
+    ('registro_senasa', 'TEXT'),               # N° de registro SENASA vinculado
+    ('oculto',          'INTEGER DEFAULT 0'),  # 1 = no aparece en búsquedas (duplicados)
+]
+
+_SQL_SNAPSHOT_BACKFILL = (
+    'UPDATE detalle_mezcla SET ' +
+    ', '.join(f'{s} = (SELECT p.{c} FROM productos p WHERE p.id_producto = detalle_mezcla.id_producto)'
+              for s, c in SNAP_COLS) +
+    ' WHERE snap_nombre IS NULL AND id_producto IS NOT NULL'
+)
+
+
+def snapshot_existentes(conn, backend=None):
+    """Congela los datos de producto en los detalles que todavía no tienen copia.
+    Idempotente: sólo toca filas con snap_nombre vacío."""
+    _exec(conn, _SQL_SNAPSHOT_BACKFILL, backend=backend)
+
+
+# ──────────────────────────────────────────────────────────
 # Inicialización y migración desde Excel
 # ──────────────────────────────────────────────────────────
 
@@ -301,9 +335,23 @@ def _init_sqlite():
         conn.commit()
     except Exception:
         pass
+    for col, _ in SNAP_COLS:
+        try:
+            conn.execute(f'ALTER TABLE detalle_mezcla ADD COLUMN {col} TEXT')
+            conn.commit()
+        except Exception:
+            pass
+    for col, tipo in _PRODUCTOS_COLS_NUEVAS:
+        try:
+            conn.execute(f'ALTER TABLE productos ADD COLUMN {col} {tipo}')
+            conn.commit()
+        except Exception:
+            pass
     count = conn.execute('SELECT COUNT(*) FROM clientes').fetchone()[0]
     if count == 0 and os.path.exists(EXCEL_PATH):
         _import_from_excel(conn, 'sqlite')
+    snapshot_existentes(conn, 'sqlite')
+    conn.commit()
     conn.close()
 
 
@@ -389,6 +437,10 @@ def _init_postgres():
             END IF;
         END $$;
     """)
+    for col, _ in SNAP_COLS:
+        cur.execute(f'ALTER TABLE detalle_mezcla ADD COLUMN IF NOT EXISTS {col} TEXT')
+    for col, tipo in _PRODUCTOS_COLS_NUEVAS:
+        cur.execute(f'ALTER TABLE productos ADD COLUMN IF NOT EXISTS {col} {tipo}')
     conn.commit()
     cur.execute('SELECT COUNT(*) FROM clientes')
     count = cur.fetchone()[0]
@@ -407,6 +459,8 @@ def _init_postgres():
                 pass
         conn.commit()
         cur2.close()
+    snapshot_existentes(conn, 'postgres')
+    conn.commit()
     conn.close()
 
 
