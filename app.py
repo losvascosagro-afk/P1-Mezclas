@@ -551,7 +551,9 @@ def ensayo_detalle(id):
 @app.route('/ensayos/<int:id>/editar', methods=['GET', 'POST'])
 def ensayo_editar(id):
     db = get_db()
-    e = db.execute('SELECT * FROM ensayos WHERE id_ensayo=?', (id,)).fetchone()
+    # con la razón social, para que el campo Cliente del formulario no aparezca vacío
+    e = db.execute('SELECT e.*, c.razon_social FROM ensayos e '
+                   'LEFT JOIN clientes c ON e.id_cliente=c.id_cliente WHERE e.id_ensayo=?', (id,)).fetchone()
     if not e:
         flash('Ensayo no encontrado.', 'danger')
         return redirect(url_for('ensayos'))
