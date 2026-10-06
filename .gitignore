@@ -44,3 +44,5 @@ Thumbs.db
 
 # Respaldos generados por scripts/cargar_senasa.py
 backups/
+# Backups bajados de /backup/excel (datos de clientes)
+backup_mezclas_*.xlsx
