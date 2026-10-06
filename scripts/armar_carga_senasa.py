@@ -62,6 +62,22 @@ FUENTE_CORRECCION = {
 CONFIRMADO_OTRO_REGISTRO = {1, 51, 78}   # 2,4 D ACTION, ESPUELA, LA TIJERETA PLATINUM
 # Registros que el usuario marcó como "el mismo" pero que pasan a ser productos nuevos.
 REGISTROS_A_AGREGAR = {'40545', '41755'}   # PINAR 5 ME, PINAR ELITE (otra formulación)
+# Productos que sólo están en PRODUCCIÓN y que el usuario confirmó como el mismo
+# producto que estos registros (empresa con otro nombre: Monsanto→Bayer, etc.).
+# id de producción → [registro fuente de la corrección, otros registros vinculados]
+MISMO_PRODUCTO_PROD = {
+    153: ['38279', '41222'],                            # La tijereta box  → LA TIJERETA BOX L / W
+    176: ['41221'],                                     # Sniper dry       → SNIPER DRY W
+    170: ['40647', '38505'],                            # Tuken            → TUKEN SC / ALB
+    198: ['40052', '38322', '41672', '38550', '40897'], # Power Maxx       → POWER MAXX 75,7 SG y otros
+    209: ['41418', '42256'],                            # Glifosato Macro Protect → GLIFOSATO MACRO PROTECT 66.2%
+    212: ['42629'],                                     # MACROPROTEC CLETODIM → MACROPROTECT CLETODIM 24
+    206: ['37176'],                                     # PANZER GOLD      → PANZER GOLD EN
+    150: ['39242'],                                     # Latium super     → LATIUM SUPER U.
+}
+NOMBRES_MISMO_PRODUCTO_PROD = {153: 'La tijereta box', 176: 'Sniper dry', 170: 'Tuken', 198: 'Power Maxx',
+                               209: 'Glifosato Macro Protect', 212: 'MACROPROTEC CLETODIM',
+                               206: 'PANZER GOLD', 150: 'Latium super'}
 # Productos de la app duplicados: se ocultan (no se borran).
 OCULTAR = {13: 'ATRATOP 90 duplicado de id 12'}
 
@@ -453,7 +469,7 @@ def main():
             exactos[pid] = regs[0]
 
     # ── Acción por producto ──
-    acciones = {}
+    acciones, avisos_previos = {}, []
     for pid, g in rev[rev['id_destino'].notna()].groupby('id_destino'):
         pid = int(pid)
         corr = g[g['final'].str.contains('CORREGIR')]
@@ -473,17 +489,37 @@ def main():
             acciones[pid] = (accion, fuente, [fuente] + [r for r in regs_vinc if r != fuente], '')
         elif regs_vinc:
             acciones[pid] = ('VINCULAR', None, regs_vinc, '')
+    excluir_exacto = set()
+    if destino_xlsx:
+        for pid, regs in MISMO_PRODUCTO_PROD.items():
+            if pid in app and app[pid]['nombre_comercial'] == NOMBRES_MISMO_PRODUCTO_PROD[pid]:
+                # si además hay un registro con su nombre exacto y es el mismo producto (misma
+                # formulación y concentración), ése es la fuente: conserva el nombre
+                fuente = regs[0]
+                ex = exactos.get(pid)
+                if ex and ex != regs[0]:
+                    s_ex, s_el = sen[ex], sen[regs[0]]
+                    if (s_ex['formulacion'], s_ex['principio_activo']) == (s_el['formulacion'], s_el['principio_activo']):
+                        fuente = ex
+                    else:
+                        regs = [r for r in regs if r != ex]   # el exacto es otro producto: no se vincula
+                        excluir_exacto.add(pid)
+                acciones[pid] = ('CORREGIR_TODO', fuente, [fuente] + [r for r in regs if r != fuente],
+                                 'confirmado: mismo producto')
+            else:
+                avisos_previos.append(f'MISMO_PRODUCTO_PROD: id {pid} no coincide con '
+                                      f'{NOMBRES_MISMO_PRODUCTO_PROD[pid]}; no se aplica')
     for pid, reg in exactos.items():
         if pid not in acciones:
             acciones[pid] = ('CORREGIR_TODO', reg, [reg], 'nombre exacto en SENASA')
-        elif pid not in confirmado_otro and reg not in acciones[pid][2]:
+        elif pid not in confirmado_otro and reg not in acciones[pid][2] and pid not in excluir_exacto:
             accion, fuente, regs, nota = acciones[pid]
             acciones[pid] = (accion, fuente, regs + [reg], nota)
 
     vinculados = {r for a in acciones.values() for r in a[2]}
     liberados = {reg for pid, reg in exactos.items() if reg not in vinculados}
 
-    actualizaciones, avisos = [], []
+    actualizaciones, avisos = [], list(avisos_previos)
     for pid in sorted(app):
         a = app[pid]
         accion, fuente, regs, nota = acciones.get(pid, ('MAYUSCULAS', None, [], ''))

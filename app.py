@@ -23,9 +23,10 @@ if IS_VERCEL:
 else:
     UPLOAD_FOLDER = os.path.join(BASE_DIR, 'static', 'uploads')
 
-# Columnas de producto para ficha/PDF: primero la copia congelada del ensayo,
-# si no existe (detalles muy viejos sin copia) el dato actual del catálogo.
-_DET_COLS = ', '.join(f'COALESCE(dm.{s}, p.{c}) AS {c}' for s, c in SNAP_COLS)
+# Columnas de producto para ficha/PDF: si el detalle tiene copia congelada se usa
+# entera (también sus campos vacíos); sólo sin copia se lee el catálogo actual.
+_DET_COLS = ', '.join(f'CASE WHEN dm.snap_nombre IS NOT NULL THEN dm.{s} ELSE p.{c} END AS {c}'
+                      for s, c in SNAP_COLS)
 
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'tiff', 'tif', 'bmp', 'gif'}
 

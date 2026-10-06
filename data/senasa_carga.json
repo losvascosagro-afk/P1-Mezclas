@@ -1,13 +1,16 @@
 {
  "generado": "2026-10-06",
  "fuente_senasa": "SENASA_formulados_2026-10-06.xlsx",
- "revision": "Productos_a_agregar_SENASA_v2.xlsx",
- "pendientes": {},
+ "destino": "backup_mezclas_20261006_195420.xlsx",
+ "revision": [
+  "Productos_a_agregar_SENASA_v2.xlsx",
+  "Productos_produccion_a_revisar.xlsx"
+ ],
  "avisos": [],
  "actualizaciones": [
   {
    "id_producto": 1,
-   "nombre_esperado": "2,4 D ACTION",
+   "nombre_esperado": "2,4 D ACTION EH",
    "accion": "CORREGIR_TODO",
    "registro_fuente": "42403",
    "cambios": {
@@ -21,7 +24,7 @@
   },
   {
    "id_producto": 3,
-   "nombre_esperado": "A 35 T GOLD",
+   "nombre_esperado": "A 35 t gold",
    "accion": "CORREGIR_TODO",
    "registro_fuente": "40168",
    "cambios": {
@@ -35,7 +38,7 @@
   },
   {
    "id_producto": 4,
-   "nombre_esperado": "ABAMEC 3.6",
+   "nombre_esperado": "Abamec 3.6",
    "accion": "CORREGIR_TODO",
    "registro_fuente": "41215",
    "cambios": {
@@ -48,12 +51,23 @@
    "nota": ""
   },
   {
+   "id_producto": 5,
+   "nombre_esperado": "Aca vg 48 mgrr 2",
+   "accion": "MAYUSCULAS",
+   "registro_fuente": null,
+   "cambios": {
+    "nombre_comercial": "ACA VG 48 MGRR 2"
+   },
+   "nota": ""
+  },
+  {
    "id_producto": 6,
-   "nombre_esperado": "ACURON UNO",
+   "nombre_esperado": "Acuron uno",
    "accion": "CORREGIR_TODO",
    "registro_fuente": "38411",
    "cambios": {
     "registro_senasa": "38411",
+    "nombre_comercial": "ACURON UNO",
     "empresa": "SYNGENTA AGRO SOCIEDAD ANONIMA",
     "familia": "HRAC 27",
     "principio_activo": "BICICLOPIRONA 20%"
@@ -62,11 +76,12 @@
   },
   {
    "id_producto": 7,
-   "nombre_esperado": "ALTACOR",
+   "nombre_esperado": "Altacor",
    "accion": "CORREGIR_TODO",
    "registro_fuente": "36775",
    "cambios": {
     "registro_senasa": "36775",
+    "nombre_comercial": "ALTACOR",
     "empresa": "FMC QUIMICA S. A.",
     "familia": "IRAC 28",
     "principio_activo": "CLORANTRANILIPROLE 35%"
@@ -75,11 +90,12 @@
   },
   {
    "id_producto": 8,
-   "nombre_esperado": "AMPLIGO",
+   "nombre_esperado": "Ampligo",
    "accion": "CORREGIR_TODO",
    "registro_fuente": "36033",
    "cambios": {
     "registro_senasa": "36033",
+    "nombre_comercial": "AMPLIGO",
     "empresa": "SYNGENTA AGRO SOCIEDAD ANONIMA",
     "formulacion": "ZC",
     "familia": "IRAC 28 + IRAC 3A",
@@ -89,11 +105,12 @@
   },
   {
    "id_producto": 9,
-   "nombre_esperado": "ATHENA",
+   "nombre_esperado": "Athena",
    "accion": "CORREGIR_TODO",
    "registro_fuente": "35697",
    "cambios": {
     "registro_senasa": "35697",
+    "nombre_comercial": "ATHENA",
     "empresa": "FMC QUIMICA S. A.",
     "familia": "IRAC 3A",
     "principio_activo": "BIFENTRIN 10%"
@@ -102,7 +119,7 @@
   },
   {
    "id_producto": 10,
-   "nombre_esperado": "ATRAMYL",
+   "nombre_esperado": "Atramyl",
    "accion": "CORREGIR_TODO",
    "registro_fuente": "37493",
    "cambios": {
@@ -116,7 +133,7 @@
   },
   {
    "id_producto": 11,
-   "nombre_esperado": "ATRANEX 90",
+   "nombre_esperado": "Atranex 90",
    "accion": "CORREGIR_TODO",
    "registro_fuente": "36610",
    "cambios": {
@@ -130,7 +147,7 @@
   },
   {
    "id_producto": 12,
-   "nombre_esperado": "ATRATOP 90",
+   "nombre_esperado": "Atratop 90",
    "accion": "CORREGIR_TODO",
    "registro_fuente": "36710",
    "cambios": {
@@ -144,17 +161,18 @@
   },
   {
    "id_producto": 13,
-   "nombre_esperado": "ATRATOP 90",
+   "nombre_esperado": "Atratop 90",
    "accion": "VINCULAR",
    "registro_fuente": null,
    "cambios": {
-    "registro_senasa": "39578 | 36712"
+    "registro_senasa": "39578 | 36712",
+    "nombre_comercial": "ATRATOP 90"
    },
    "nota": ""
   },
   {
    "id_producto": 14,
-   "nombre_esperado": "ATRAZINA MAX 90 SIGMA",
+   "nombre_esperado": "Atrazina max 90 sigma",
    "accion": "CORREGIR_TODO",
    "registro_fuente": "36973",
    "cambios": {
@@ -168,25 +186,46 @@
   },
   {
    "id_producto": 15,
-   "nombre_esperado": "AUTHORITY",
+   "nombre_esperado": "Authority",
    "accion": "CORREGIR_TODO",
    "registro_fuente": "33591",
    "cambios": {
     "registro_senasa": "33591",
+    "nombre_comercial": "AUTHORITY",
     "empresa": "FMC QUIMICA S. A.",
-    "formulacion": "SC",
     "familia": "HRAC 14",
     "principio_activo": "SULFENTRAZONE 50%"
    },
    "nota": "nombre exacto en SENASA"
   },
   {
+   "id_producto": 16,
+   "nombre_esperado": "Avena bb",
+   "accion": "MAYUSCULAS",
+   "registro_fuente": null,
+   "cambios": {
+    "nombre_comercial": "AVENA BB"
+   },
+   "nota": ""
+  },
+  {
+   "id_producto": 17,
+   "nombre_esperado": "Avena paloma",
+   "accion": "MAYUSCULAS",
+   "registro_fuente": null,
+   "cambios": {
+    "nombre_comercial": "AVENA PALOMA"
+   },
+   "nota": ""
+  },
+  {
    "id_producto": 18,
-   "nombre_esperado": "BANVEL",
+   "nombre_esperado": "Banvel",
    "accion": "CORREGIR_TODO",
    "registro_fuente": "30596",
    "cambios": {
     "registro_senasa": "30596",
+    "nombre_comercial": "BANVEL",
     "empresa": "SYNGENTA AGRO SOCIEDAD ANONIMA",
     "familia": "HRAC 4",
     "principio_activo": "DICAMBA SAL DIMETILAMINA (DMA) 57,8% (EA 48%)"
@@ -194,12 +233,33 @@
    "nota": "nombre exacto en SENASA"
   },
   {
+   "id_producto": 19,
+   "nombre_esperado": "Barmax premium + protector",
+   "accion": "MAYUSCULAS",
+   "registro_fuente": null,
+   "cambios": {
+    "nombre_comercial": "BARMAX PREMIUM + PROTECTOR"
+   },
+   "nota": ""
+  },
+  {
+   "id_producto": 20,
+   "nombre_esperado": "Barmax sur + protector",
+   "accion": "MAYUSCULAS",
+   "registro_fuente": null,
+   "cambios": {
+    "nombre_comercial": "BARMAX SUR + PROTECTOR"
+   },
+   "nota": ""
+  },
+  {
    "id_producto": 21,
-   "nombre_esperado": "BARON",
+   "nombre_esperado": "Baron",
    "accion": "CORREGIR_TODO",
    "registro_fuente": "34766",
    "cambios": {
     "registro_senasa": "34766",
+    "nombre_comercial": "BARON",
     "empresa": "HELM ARGENTINA S. R. L.",
     "familia": "HRAC 22",
     "principio_activo": "PARAQUAT DICLORURO 27,6%"
@@ -207,18 +267,49 @@
    "nota": "nombre exacto en SENASA"
   },
   {
+   "id_producto": 22,
+   "nombre_esperado": "Bio 4.51",
+   "accion": "MAYUSCULAS",
+   "registro_fuente": null,
+   "cambios": {
+    "nombre_comercial": "BIO 4.51"
+   },
+   "nota": ""
+  },
+  {
+   "id_producto": 23,
+   "nombre_esperado": "Bolson 9 x 60",
+   "accion": "MAYUSCULAS",
+   "registro_fuente": null,
+   "cambios": {
+    "nombre_comercial": "BOLSON 9 X 60"
+   },
+   "nota": ""
+  },
+  {
+   "id_producto": 24,
+   "nombre_esperado": "Bolson 9x75",
+   "accion": "MAYUSCULAS",
+   "registro_fuente": null,
+   "cambios": {
+    "nombre_comercial": "BOLSON 9X75"
+   },
+   "nota": ""
+  },
+  {
    "id_producto": 25,
-   "nombre_esperado": "BORJA",
+   "nombre_esperado": "Borja",
    "accion": "VINCULAR",
    "registro_fuente": null,
    "cambios": {
-    "registro_senasa": "41353 | 39832"
+    "registro_senasa": "41353 | 39832",
+    "nombre_comercial": "BORJA"
    },
    "nota": ""
   },
   {
    "id_producto": 26,
-   "nombre_esperado": "BREACK THRU MSO MAX",
+   "nombre_esperado": "Breack thru mso max",
    "accion": "CORREGIR_TODO",
    "registro_fuente": "39046",
    "cambios": {
@@ -231,11 +322,12 @@
   },
   {
    "id_producto": 27,
-   "nombre_esperado": "BYFEX",
+   "nombre_esperado": "Byfex",
    "accion": "CORREGIR_TODO",
    "registro_fuente": "38188",
    "cambios": {
     "registro_senasa": "38188",
+    "nombre_comercial": "BYFEX",
     "empresa": "UPL ARGENTINA S. A.",
     "formulacion": "SC",
     "familia": "IRAC 3A + IRAC 4A",
@@ -245,7 +337,7 @@
   },
   {
    "id_producto": 28,
-   "nombre_esperado": "CAPAZ",
+   "nombre_esperado": "Capaz",
    "accion": "CORREGIR_TODO",
    "registro_fuente": "33067",
    "cambios": {
@@ -259,8 +351,18 @@
    "nota": ""
   },
   {
+   "id_producto": 29,
+   "nombre_esperado": "Chikara",
+   "accion": "MAYUSCULAS",
+   "registro_fuente": null,
+   "cambios": {
+    "nombre_comercial": "CHIKARA"
+   },
+   "nota": ""
+  },
+  {
    "id_producto": 30,
-   "nombre_esperado": "CIALOTRIN 5",
+   "nombre_esperado": "Cialotrin 5",
    "accion": "CORREGIR_TODO",
    "registro_fuente": "40660",
    "cambios": {
@@ -275,11 +377,12 @@
   },
   {
    "id_producto": 31,
-   "nombre_esperado": "CLEARSOL DF",
+   "nombre_esperado": "Clearsol df",
    "accion": "CORREGIR_TODO",
    "registro_fuente": "34908",
    "cambios": {
     "registro_senasa": "34908",
+    "nombre_comercial": "CLEARSOL DF",
     "empresa": "BASF AGRICULTURAL SOLUTIONS ARGENTINA S.A.",
     "familia": "HRAC 2",
     "principio_activo": "IMAZAPIR (SAL/ESTER SIN DETERMINAR) 80%"
@@ -288,11 +391,12 @@
   },
   {
    "id_producto": 32,
-   "nombre_esperado": "DARREN",
+   "nombre_esperado": "Darren",
    "accion": "CORREGIR_TODO",
    "registro_fuente": "39202",
    "cambios": {
     "registro_senasa": "39202",
+    "nombre_comercial": "DARREN",
     "empresa": "AGROFINA S A",
     "formulacion": "SC",
     "familia": "HRAC 14",
@@ -302,11 +406,12 @@
   },
   {
    "id_producto": 33,
-   "nombre_esperado": "DASEN",
+   "nombre_esperado": "Dasen",
    "accion": "CORREGIR_TODO",
    "registro_fuente": "33309",
    "cambios": {
     "registro_senasa": "33309",
+    "nombre_comercial": "DASEN",
     "empresa": "AGROFINA S A",
     "formulacion": "SC",
     "familia": "HRAC 4",
@@ -316,11 +421,12 @@
   },
   {
    "id_producto": 34,
-   "nombre_esperado": "DASEN PLUS",
+   "nombre_esperado": "Dasen plus",
    "accion": "CORREGIR_TODO",
    "registro_fuente": "39277",
    "cambios": {
     "registro_senasa": "39277",
+    "nombre_comercial": "DASEN PLUS",
     "empresa": "AGROFINA S A",
     "formulacion": "SC",
     "familia": "HRAC 4 + HRAC 14",
@@ -330,7 +436,7 @@
   },
   {
    "id_producto": 35,
-   "nombre_esperado": "DASH MSO MAX",
+   "nombre_esperado": "Dash mso max",
    "accion": "CORREGIR_TODO",
    "registro_fuente": "38081",
    "cambios": {
@@ -344,7 +450,7 @@
   },
   {
    "id_producto": 36,
-   "nombre_esperado": "DICAMAX",
+   "nombre_esperado": "Dicamax",
    "accion": "CORREGIR_NOMBRE",
    "registro_fuente": "34082",
    "cambios": {
@@ -355,11 +461,12 @@
   },
   {
    "id_producto": 37,
-   "nombre_esperado": "DICAMAX NEO",
+   "nombre_esperado": "Dicamax neo",
    "accion": "CORREGIR_TODO",
    "registro_fuente": "40112",
    "cambios": {
     "registro_senasa": "40112",
+    "nombre_comercial": "DICAMAX NEO",
     "empresa": "ASOCIACION DE COOPERATIVAS ARGENTINAS - COOP. LTDA.",
     "familia": "HRAC 4",
     "principio_activo": "DICAMBA (SAL/ESTER SIN DETERMINAR) 20%"
@@ -368,11 +475,12 @@
   },
   {
    "id_producto": 38,
-   "nombre_esperado": "DICLOSULAM FORMULAGRO",
+   "nombre_esperado": "Diclosulam formulagro",
    "accion": "CORREGIR_TODO",
    "registro_fuente": "40547",
    "cambios": {
     "registro_senasa": "40547",
+    "nombre_comercial": "DICLOSULAM FORMULAGRO",
     "empresa": "FORMULAGRO SOCIEDAD RESPONSABILIDAD LIMITADA",
     "formulacion": "WP",
     "familia": "HRAC 2",
@@ -382,11 +490,12 @@
   },
   {
    "id_producto": 39,
-   "nombre_esperado": "DIFLUFENICAN 50 SIGMA",
+   "nombre_esperado": "Diflufenican 50 sigma",
    "accion": "CORREGIR_TODO",
    "registro_fuente": "40784",
    "cambios": {
     "registro_senasa": "40784",
+    "nombre_comercial": "DIFLUFENICAN 50 SIGMA",
     "empresa": "SIGMA AGRO S.A",
     "formulacion": "SC",
     "familia": "HRAC 12",
@@ -395,22 +504,64 @@
    "nota": "nombre exacto en SENASA"
   },
   {
+   "id_producto": 40,
+   "nombre_esperado": "Dm 40 r 21 sts",
+   "accion": "MAYUSCULAS",
+   "registro_fuente": null,
+   "cambios": {
+    "nombre_comercial": "DM 40 R 21 STS"
+   },
+   "nota": ""
+  },
+  {
+   "id_producto": 41,
+   "nombre_esperado": "Dm 46 i 20 sts",
+   "accion": "MAYUSCULAS",
+   "registro_fuente": null,
+   "cambios": {
+    "nombre_comercial": "DM 46 I 20 STS"
+   },
+   "nota": ""
+  },
+  {
+   "id_producto": 42,
+   "nombre_esperado": "Dm 46 r 18 sts",
+   "accion": "MAYUSCULAS",
+   "registro_fuente": null,
+   "cambios": {
+    "nombre_comercial": "DM 46 R 18 STS"
+   },
+   "nota": ""
+  },
+  {
+   "id_producto": 43,
+   "nombre_esperado": "Dogo",
+   "accion": "MAYUSCULAS",
+   "registro_fuente": null,
+   "cambios": {
+    "nombre_comercial": "DOGO"
+   },
+   "nota": ""
+  },
+  {
    "id_producto": 44,
-   "nombre_esperado": "DUAL GOLD",
+   "nombre_esperado": "Dual gold",
    "accion": "VINCULAR",
    "registro_fuente": null,
    "cambios": {
-    "registro_senasa": "39912 | 33400"
+    "registro_senasa": "39912 | 33400",
+    "nombre_comercial": "DUAL GOLD"
    },
    "nota": ""
   },
   {
    "id_producto": 45,
-   "nombre_esperado": "ECO RIZOSPRAY",
+   "nombre_esperado": "Eco rizospray",
    "accion": "CORREGIR_TODO",
    "registro_fuente": "34434",
    "cambios": {
     "registro_senasa": "34434",
+    "nombre_comercial": "ECO RIZOSPRAY",
     "empresa": "RIZOBACTER ARGENTINA S A",
     "principio_activo": "ALCOHOL GRASO ETOXILADO 48%"
    },
@@ -418,11 +569,12 @@
   },
   {
    "id_producto": 46,
-   "nombre_esperado": "EDDUS",
+   "nombre_esperado": "Eddus",
    "accion": "CORREGIR_TODO",
    "registro_fuente": "38392",
    "cambios": {
     "registro_senasa": "38392",
+    "nombre_comercial": "EDDUS",
     "empresa": "SYNGENTA AGRO SOCIEDAD ANONIMA",
     "familia": "HRAC 14 + HRAC 15",
     "principio_activo": "FOMESAFEN SAL SODICA 11,95% (EA 11,4%) + S-METOLACLORO 51,8%"
@@ -431,13 +583,13 @@
   },
   {
    "id_producto": 47,
-   "nombre_esperado": "ELEVORE",
+   "nombre_esperado": "Elevore",
    "accion": "CORREGIR_TODO",
    "registro_fuente": "40776",
    "cambios": {
     "registro_senasa": "40776",
+    "nombre_comercial": "ELEVORE",
     "empresa": "CORTEVA AGRISCIENCE ARGENTINA SRL",
-    "formulacion": "SC",
     "familia": "HRAC 4",
     "principio_activo": "HALAUXIFEN METIL 7,14%"
    },
@@ -445,11 +597,12 @@
   },
   {
    "id_producto": 48,
-   "nombre_esperado": "ELUMIS",
+   "nombre_esperado": "Elumis",
    "accion": "CORREGIR_TODO",
    "registro_fuente": "40970",
    "cambios": {
     "registro_senasa": "40970",
+    "nombre_comercial": "ELUMIS",
     "empresa": "SYNGENTA AGRO SOCIEDAD ANONIMA",
     "formulacion": "OD",
     "familia": "HRAC 27 + HRAC 2",
@@ -459,7 +612,7 @@
   },
   {
    "id_producto": 49,
-   "nombre_esperado": "EMPIRIC",
+   "nombre_esperado": "Empiric",
    "accion": "CORREGIR_TODO",
    "registro_fuente": "40118",
    "cambios": {
@@ -473,7 +626,7 @@
   },
   {
    "id_producto": 50,
-   "nombre_esperado": "ENGEO",
+   "nombre_esperado": "Engeo",
    "accion": "CORREGIR_TODO",
    "registro_fuente": "34554",
    "cambios": {
@@ -488,7 +641,7 @@
   },
   {
    "id_producto": 51,
-   "nombre_esperado": "ESPUELA",
+   "nombre_esperado": "Espuela",
    "accion": "CORREGIR_TODO",
    "registro_fuente": "40469",
    "cambios": {
@@ -503,11 +656,12 @@
   },
   {
    "id_producto": 52,
-   "nombre_esperado": "ESTRELLA AURUM",
+   "nombre_esperado": "Estrella aurum",
    "accion": "CORREGIR_TODO",
    "registro_fuente": "34365",
    "cambios": {
     "registro_senasa": "34365 | 30450",
+    "nombre_comercial": "ESTRELLA AURUM",
     "empresa": "ASOCIACION DE COOPERATIVAS ARGENTINAS - COOP. LTDA.",
     "formulacion": "SL",
     "familia": "HRAC 9",
@@ -517,11 +671,12 @@
   },
   {
    "id_producto": 53,
-   "nombre_esperado": "ESTRELLA AURUM II",
+   "nombre_esperado": "Estrella aurum ii",
    "accion": "CORREGIR_TODO",
    "registro_fuente": "39843",
    "cambios": {
     "registro_senasa": "39843",
+    "nombre_comercial": "ESTRELLA AURUM II",
     "empresa": "ASOCIACION DE COOPERATIVAS ARGENTINAS - COOP. LTDA.",
     "familia": "HRAC 9",
     "principio_activo": "GLIFOSATO SAL POTASICA 58,8% (EA 48%)"
@@ -530,7 +685,7 @@
   },
   {
    "id_producto": 54,
-   "nombre_esperado": "EXCEL 89",
+   "nombre_esperado": "Excel 89",
    "accion": "CORREGIR_TODO",
    "registro_fuente": "40156",
    "cambios": {
@@ -543,8 +698,18 @@
    "nota": ""
   },
   {
+   "id_producto": 55,
+   "nombre_esperado": "Fipronil 20",
+   "accion": "MAYUSCULAS",
+   "registro_fuente": null,
+   "cambios": {
+    "nombre_comercial": "FIPRONIL 20"
+   },
+   "nota": ""
+  },
+  {
    "id_producto": 56,
-   "nombre_esperado": "FLEXTAR",
+   "nombre_esperado": "Flextar",
    "accion": "CORREGIR_TODO",
    "registro_fuente": "40345",
    "cambios": {
@@ -558,11 +723,12 @@
   },
   {
    "id_producto": 57,
-   "nombre_esperado": "FLONTUS",
+   "nombre_esperado": "Flontus",
    "accion": "CORREGIR_TODO",
    "registro_fuente": "39635",
    "cambios": {
     "registro_senasa": "39635",
+    "nombre_comercial": "FLONTUS",
     "empresa": "SYNGENTA AGRO SOCIEDAD ANONIMA",
     "familia": "HRAC 15",
     "principio_activo": "S-METOLACLORO 96%"
@@ -571,11 +737,12 @@
   },
   {
    "id_producto": 58,
-   "nombre_esperado": "FULL CONTROL BIO",
+   "nombre_esperado": "Full control bio",
    "accion": "CORREGIR_TODO",
    "registro_fuente": "38485",
    "cambios": {
     "registro_senasa": "38485",
+    "nombre_comercial": "FULL CONTROL BIO",
     "empresa": "ARROWWS ARGENTINA S. R. L.",
     "principio_activo": "ACIDO FOSFORICO 23%"
    },
@@ -583,7 +750,7 @@
   },
   {
    "id_producto": 59,
-   "nombre_esperado": "GEMMITOP",
+   "nombre_esperado": "Gemmitop",
    "accion": "CORREGIR_TODO",
    "registro_fuente": "39238",
    "cambios": {
@@ -598,7 +765,7 @@
   },
   {
    "id_producto": 60,
-   "nombre_esperado": "GESAPRIM 90",
+   "nombre_esperado": "Gesaprim 90",
    "accion": "CORREGIR_TODO",
    "registro_fuente": "31220",
    "cambios": {
@@ -612,11 +779,12 @@
   },
   {
    "id_producto": 61,
-   "nombre_esperado": "HALOX 81",
+   "nombre_esperado": "Halox 81",
    "accion": "CORREGIR_TODO",
    "registro_fuente": "39799",
    "cambios": {
     "registro_senasa": "39799",
+    "nombre_comercial": "HALOX 81",
     "empresa": "AGROFINA S A",
     "familia": "HRAC 1",
     "principio_activo": "HALOXIFOP-P METIL 81%"
@@ -625,11 +793,12 @@
   },
   {
    "id_producto": 62,
-   "nombre_esperado": "HALOXIFOP SINER",
+   "nombre_esperado": "Haloxifop siner",
    "accion": "CORREGIR_TODO",
    "registro_fuente": "39863",
    "cambios": {
     "registro_senasa": "39863",
+    "nombre_comercial": "HALOXIFOP SINER",
     "empresa": "SINER S A",
     "familia": "HRAC 1",
     "principio_activo": "HALOXIFOP-P METIL 54%"
@@ -638,11 +807,12 @@
   },
   {
    "id_producto": 63,
-   "nombre_esperado": "HARD",
+   "nombre_esperado": "Hard",
    "accion": "CORREGIR_TODO",
    "registro_fuente": "38206",
    "cambios": {
     "registro_senasa": "38206",
+    "nombre_comercial": "HARD",
     "empresa": "ARROWWS ARGENTINA S. R. L.",
     "formulacion": "SL",
     "principio_activo": "ALCOHOL LAURICO ETOXILADO 32,7%"
@@ -651,11 +821,12 @@
   },
   {
    "id_producto": 64,
-   "nombre_esperado": "HARRIER BIO",
+   "nombre_esperado": "Harrier bio",
    "accion": "CORREGIR_TODO",
    "registro_fuente": "37930",
    "cambios": {
     "registro_senasa": "37930",
+    "nombre_comercial": "HARRIER BIO",
     "empresa": "ARROWWS ARGENTINA S. R. L.",
     "formulacion": "SL",
     "principio_activo": "ALCOHOL LAURICO ETOXILADO 32,7%"
@@ -664,11 +835,12 @@
   },
   {
    "id_producto": 65,
-   "nombre_esperado": "HEAT",
+   "nombre_esperado": "Heat",
    "accion": "CORREGIR_TODO",
    "registro_fuente": "35954",
    "cambios": {
     "registro_senasa": "35954",
+    "nombre_comercial": "HEAT",
     "empresa": "BASF AGRICULTURAL SOLUTIONS ARGENTINA S.A.",
     "familia": "HRAC 14",
     "principio_activo": "SAFLUFENACIL 70%"
@@ -677,7 +849,7 @@
   },
   {
    "id_producto": 66,
-   "nombre_esperado": "HELPER",
+   "nombre_esperado": "Helper",
    "accion": "CORREGIR_TODO",
    "registro_fuente": "39092",
    "cambios": {
@@ -691,11 +863,12 @@
   },
   {
    "id_producto": 67,
-   "nombre_esperado": "HERBIFEN ADVANCE",
+   "nombre_esperado": "Herbifen advance",
    "accion": "CORREGIR_TODO",
    "registro_fuente": "38783",
    "cambios": {
     "registro_senasa": "38783",
+    "nombre_comercial": "HERBIFEN ADVANCE",
     "empresa": "ATANOR SOCIEDAD EN COMANDITA POR ACCIONES",
     "familia": "HRAC 4",
     "principio_activo": "2,4 D ESTER ETILHEXILICO 97% (EA 64,3%)"
@@ -704,7 +877,7 @@
   },
   {
    "id_producto": 68,
-   "nombre_esperado": "IMAZETAPIR 10,6",
+   "nombre_esperado": "Imazetapir 10,6",
    "accion": "CORREGIR_TODO",
    "registro_fuente": "38375",
    "cambios": {
@@ -719,11 +892,12 @@
   },
   {
    "id_producto": 69,
-   "nombre_esperado": "IMIZET ACA 10",
+   "nombre_esperado": "Imizet aca 10",
    "accion": "CORREGIR_TODO",
    "registro_fuente": "34743",
    "cambios": {
     "registro_senasa": "34743",
+    "nombre_comercial": "IMIZET ACA 10",
     "empresa": "ASOCIACION DE COOPERATIVAS ARGENTINAS - COOP. LTDA.",
     "familia": "HRAC 2",
     "principio_activo": "IMAZETAPIR SAL AMONICA 10%"
@@ -732,7 +906,7 @@
   },
   {
    "id_producto": 70,
-   "nombre_esperado": "INTREPID",
+   "nombre_esperado": "Intrepid",
    "accion": "CORREGIR_TODO",
    "registro_fuente": "33473",
    "cambios": {
@@ -746,8 +920,78 @@
    "nota": ""
   },
   {
+   "id_producto": 71,
+   "nombre_esperado": "Joya",
+   "accion": "MAYUSCULAS",
+   "registro_fuente": null,
+   "cambios": {
+    "nombre_comercial": "JOYA"
+   },
+   "nota": ""
+  },
+  {
+   "id_producto": 72,
+   "nombre_esperado": "Km 3916 rr",
+   "accion": "MAYUSCULAS",
+   "registro_fuente": null,
+   "cambios": {
+    "nombre_comercial": "KM 3916 RR"
+   },
+   "nota": ""
+  },
+  {
+   "id_producto": 73,
+   "nombre_esperado": "Km 3916 vt3 pro",
+   "accion": "MAYUSCULAS",
+   "registro_fuente": null,
+   "cambios": {
+    "nombre_comercial": "KM 3916 VT3 PRO"
+   },
+   "nota": ""
+  },
+  {
+   "id_producto": 74,
+   "nombre_esperado": "Km 4216 vt3 pro",
+   "accion": "MAYUSCULAS",
+   "registro_fuente": null,
+   "cambios": {
+    "nombre_comercial": "KM 4216 VT3 PRO"
+   },
+   "nota": ""
+  },
+  {
+   "id_producto": 75,
+   "nombre_esperado": "Km 4480 vt3 pro",
+   "accion": "MAYUSCULAS",
+   "registro_fuente": null,
+   "cambios": {
+    "nombre_comercial": "KM 4480 VT3 PRO"
+   },
+   "nota": ""
+  },
+  {
+   "id_producto": 76,
+   "nombre_esperado": "Kws 13916 v3p",
+   "accion": "MAYUSCULAS",
+   "registro_fuente": null,
+   "cambios": {
+    "nombre_comercial": "KWS 13916 V3P"
+   },
+   "nota": ""
+  },
+  {
+   "id_producto": 77,
+   "nombre_esperado": "Kws 19120 v3p",
+   "accion": "MAYUSCULAS",
+   "registro_fuente": null,
+   "cambios": {
+    "nombre_comercial": "KWS 19120 V3P"
+   },
+   "nota": ""
+  },
+  {
    "id_producto": 78,
-   "nombre_esperado": "LA TIJERETA PLATINUM",
+   "nombre_esperado": "La tijereta platinum",
    "accion": "CORREGIR_TODO",
    "registro_fuente": "38702",
    "cambios": {
@@ -762,7 +1006,7 @@
   },
   {
    "id_producto": 79,
-   "nombre_esperado": "LAMBDA 25",
+   "nombre_esperado": "Lambda 25",
    "accion": "CORREGIR_TODO",
    "registro_fuente": "38530",
    "cambios": {
@@ -776,7 +1020,7 @@
   },
   {
    "id_producto": 80,
-   "nombre_esperado": "LAMBDA 25 ME",
+   "nombre_esperado": "Lambda 25 me",
    "accion": "CORREGIR_TODO",
    "registro_fuente": "36825",
    "cambios": {
@@ -791,7 +1035,7 @@
   },
   {
    "id_producto": 81,
-   "nombre_esperado": "LEGACY",
+   "nombre_esperado": "Legacy",
    "accion": "CORREGIR_TODO",
    "registro_fuente": "33743",
    "cambios": {
@@ -806,11 +1050,12 @@
   },
   {
    "id_producto": 82,
-   "nombre_esperado": "LIFELINE",
+   "nombre_esperado": "Lifeline",
    "accion": "CORREGIR_TODO",
    "registro_fuente": "38364",
    "cambios": {
     "registro_senasa": "38364",
+    "nombre_comercial": "LIFELINE",
     "empresa": "UPL ARGENTINA S. A.",
     "familia": "HRAC 10",
     "principio_activo": "GLUFOSINATO DE AMONIO 28%"
@@ -819,11 +1064,12 @@
   },
   {
    "id_producto": 83,
-   "nombre_esperado": "LOBUNO",
+   "nombre_esperado": "Lobuno",
    "accion": "CORREGIR_TODO",
    "registro_fuente": "40123",
    "cambios": {
     "registro_senasa": "40123",
+    "nombre_comercial": "LOBUNO",
     "empresa": "CHEMOTECNICA S. A.",
     "familia": "HRAC 10",
     "principio_activo": "GLUFOSINATO DE AMONIO 20%"
@@ -832,7 +1078,7 @@
   },
   {
    "id_producto": 84,
-   "nombre_esperado": "LUXOR",
+   "nombre_esperado": "Luxor",
    "accion": "CORREGIR_TODO",
    "registro_fuente": "38019",
    "cambios": {
@@ -846,11 +1092,12 @@
   },
   {
    "id_producto": 85,
-   "nombre_esperado": "MABYN",
+   "nombre_esperado": "Mabyn",
    "accion": "CORREGIR_TODO",
    "registro_fuente": "41069",
    "cambios": {
     "registro_senasa": "41069",
+    "nombre_comercial": "MABYN",
     "empresa": "AGROFINA S A",
     "familia": "HRAC 4",
     "principio_activo": "2,4 D (SAL/ESTER SIN DETERMINAR) 78,1% (EA 34%)"
@@ -859,11 +1106,12 @@
   },
   {
    "id_producto": 86,
-   "nombre_esperado": "MARCH II",
+   "nombre_esperado": "March ii",
    "accion": "CORREGIR_TODO",
    "registro_fuente": "36641",
    "cambios": {
     "registro_senasa": "36641 | 36251 | 38945",
+    "nombre_comercial": "MARCH II",
     "empresa": "AGROFINA S A",
     "familia": "HRAC 9",
     "principio_activo": "GLIFOSATO SAL POTASICA 66,2% (EA 54%)"
@@ -872,7 +1120,7 @@
   },
   {
    "id_producto": 87,
-   "nombre_esperado": "MARGEN",
+   "nombre_esperado": "Margen",
    "accion": "CORREGIR_TODO",
    "registro_fuente": "39430",
    "cambios": {
@@ -885,12 +1133,73 @@
    "nota": ""
   },
   {
+   "id_producto": 88,
+   "nombre_esperado": "Maxidrop",
+   "accion": "MAYUSCULAS",
+   "registro_fuente": null,
+   "cambios": {
+    "nombre_comercial": "MAXIDROP"
+   },
+   "nota": ""
+  },
+  {
+   "id_producto": 89,
+   "nombre_esperado": "Metilado arn ebc",
+   "accion": "MAYUSCULAS",
+   "registro_fuente": null,
+   "cambios": {
+    "nombre_comercial": "METILADO ARN EBC"
+   },
+   "nota": ""
+  },
+  {
+   "id_producto": 90,
+   "nombre_esperado": "Metsulfuron sf 60",
+   "accion": "MAYUSCULAS",
+   "registro_fuente": null,
+   "cambios": {
+    "nombre_comercial": "METSULFURON SF 60"
+   },
+   "nota": ""
+  },
+  {
+   "id_producto": 91,
+   "nombre_esperado": "Mezcla 7-40-0-5-7",
+   "accion": "MAYUSCULAS",
+   "registro_fuente": null,
+   "cambios": {
+    "nombre_comercial": "MEZCLA 7-40-0-5-7"
+   },
+   "nota": ""
+  },
+  {
+   "id_producto": 92,
+   "nombre_esperado": "Miravis duo",
+   "accion": "MAYUSCULAS",
+   "registro_fuente": null,
+   "cambios": {
+    "nombre_comercial": "MIRAVIS DUO"
+   },
+   "nota": ""
+  },
+  {
+   "id_producto": 93,
+   "nombre_esperado": "Mulchen so4",
+   "accion": "MAYUSCULAS",
+   "registro_fuente": null,
+   "cambios": {
+    "nombre_comercial": "MULCHEN SO4"
+   },
+   "nota": ""
+  },
+  {
    "id_producto": 94,
-   "nombre_esperado": "MUSTANG 20 EW",
+   "nombre_esperado": "Mustang 20 ew",
    "accion": "CORREGIR_TODO",
    "registro_fuente": "35162",
    "cambios": {
     "registro_senasa": "35162",
+    "nombre_comercial": "MUSTANG 20 EW",
     "empresa": "FMC QUIMICA S. A.",
     "formulacion": "EW",
     "familia": "IRAC 3A",
@@ -899,8 +1208,28 @@
    "nota": "nombre exacto en SENASA"
   },
   {
+   "id_producto": 95,
+   "nombre_esperado": "Ns 1113 cl (tratado)",
+   "accion": "MAYUSCULAS",
+   "registro_fuente": null,
+   "cambios": {
+    "nombre_comercial": "NS 1113 CL (TRATADO)"
+   },
+   "nota": ""
+  },
+  {
+   "id_producto": 96,
+   "nombre_esperado": "Ns 7921 v3pcl",
+   "accion": "MAYUSCULAS",
+   "registro_fuente": null,
+   "cambios": {
+    "nombre_comercial": "NS 7921 V3PCL"
+   },
+   "nota": ""
+  },
+  {
    "id_producto": 97,
-   "nombre_esperado": "NUVOXL",
+   "nombre_esperado": "Nuvoxl",
    "accion": "CORREGIR_TODO",
    "registro_fuente": "38046",
    "cambios": {
@@ -914,11 +1243,12 @@
   },
   {
    "id_producto": 98,
-   "nombre_esperado": "OPERA",
+   "nombre_esperado": "Opera",
    "accion": "CORREGIR_TODO",
    "registro_fuente": "33932",
    "cambios": {
     "registro_senasa": "33932",
+    "nombre_comercial": "OPERA",
     "empresa": "BASF AGRICULTURAL SOLUTIONS ARGENTINA S.A.",
     "formulacion": "SE",
     "familia": "FRAC 3 + FRAC 11",
@@ -927,18 +1257,39 @@
    "nota": "nombre exacto en SENASA"
   },
   {
+   "id_producto": 99,
+   "nombre_esperado": "Orcinus",
+   "accion": "MAYUSCULAS",
+   "registro_fuente": null,
+   "cambios": {
+    "nombre_comercial": "ORCINUS"
+   },
+   "nota": ""
+  },
+  {
+   "id_producto": 100,
+   "nombre_esperado": "Orquesta",
+   "accion": "MAYUSCULAS",
+   "registro_fuente": null,
+   "cambios": {
+    "nombre_comercial": "ORQUESTA"
+   },
+   "nota": ""
+  },
+  {
    "id_producto": 101,
-   "nombre_esperado": "PARAQUAT AGROCHEMQ",
+   "nombre_esperado": "Paraquat agrochemq",
    "accion": "VINCULAR",
    "registro_fuente": null,
    "cambios": {
-    "registro_senasa": "42123"
+    "registro_senasa": "42123",
+    "nombre_comercial": "PARAQUAT AGROCHEMQ"
    },
    "nota": ""
   },
   {
    "id_producto": 102,
-   "nombre_esperado": "PARAQUAT SIGMA",
+   "nombre_esperado": "Paraquat sigma",
    "accion": "CORREGIR_TODO",
    "registro_fuente": "38086",
    "cambios": {
@@ -953,11 +1304,12 @@
   },
   {
    "id_producto": 103,
-   "nombre_esperado": "PERCUTOR",
+   "nombre_esperado": "Percutor",
    "accion": "CORREGIR_TODO",
    "registro_fuente": "37300",
    "cambios": {
     "registro_senasa": "37300",
+    "nombre_comercial": "PERCUTOR",
     "empresa": "AGRO BAYER S. R. L.",
     "familia": "HRAC 2",
     "principio_activo": "IODO SULFURON METIL SODIO 6% + TIENCARBAZONE METIL 45%"
@@ -966,11 +1318,12 @@
   },
   {
    "id_producto": 104,
-   "nombre_esperado": "PICLORAM 24 SL ACA",
+   "nombre_esperado": "Picloram 24 sl aca",
    "accion": "CORREGIR_TODO",
    "registro_fuente": "38985",
    "cambios": {
     "registro_senasa": "38985",
+    "nombre_comercial": "PICLORAM 24 SL ACA",
     "empresa": "ASOCIACION DE COOPERATIVAS ARGENTINAS - COOP. LTDA.",
     "familia": "HRAC 4",
     "principio_activo": "PICLORAM SAL POTASICA 27,8% (EA 24%)"
@@ -979,11 +1332,12 @@
   },
   {
    "id_producto": 105,
-   "nombre_esperado": "PICLORAM NOVA",
+   "nombre_esperado": "Picloram nova",
    "accion": "CORREGIR_TODO",
    "registro_fuente": "38470",
    "cambios": {
     "registro_senasa": "38470",
+    "nombre_comercial": "PICLORAM NOVA",
     "empresa": "NOVA S. A. U.",
     "familia": "HRAC 4",
     "principio_activo": "PICLORAM SAL POTASICA 27,7% (EA 24%)"
@@ -992,7 +1346,7 @@
   },
   {
    "id_producto": 106,
-   "nombre_esperado": "PICLORAM SIGMA",
+   "nombre_esperado": "Picloram sigma",
    "accion": "CORREGIR_TODO",
    "registro_fuente": "40911",
    "cambios": {
@@ -1006,7 +1360,7 @@
   },
   {
    "id_producto": 107,
-   "nombre_esperado": "PINAR",
+   "nombre_esperado": "Pinar",
    "accion": "CORREGIR_TODO",
    "registro_fuente": "37928",
    "cambios": {
@@ -1019,12 +1373,23 @@
    "nota": ""
   },
   {
+   "id_producto": 108,
+   "nombre_esperado": "Power plus",
+   "accion": "MAYUSCULAS",
+   "registro_fuente": null,
+   "cambios": {
+    "nombre_comercial": "POWER PLUS"
+   },
+   "nota": ""
+  },
+  {
    "id_producto": 109,
-   "nombre_esperado": "PRIAXOR",
+   "nombre_esperado": "Priaxor",
    "accion": "CORREGIR_TODO",
    "registro_fuente": "37924",
    "cambios": {
     "registro_senasa": "37924",
+    "nombre_comercial": "PRIAXOR",
     "empresa": "BASF AGRICULTURAL SOLUTIONS ARGENTINA S.A.",
     "formulacion": "SC",
     "familia": "FRAC 11 + FRAC 7",
@@ -1034,11 +1399,12 @@
   },
   {
    "id_producto": 110,
-   "nombre_esperado": "RAMEX ELITE",
+   "nombre_esperado": "Ramex elite",
    "accion": "CORREGIR_TODO",
    "registro_fuente": "40174",
    "cambios": {
     "registro_senasa": "40174",
+    "nombre_comercial": "RAMEX ELITE",
     "empresa": "SUMMIT AGRO ARGENTINA S A",
     "familia": "HRAC 4",
     "principio_activo": "2,4 D (SAL/ESTER SIN DETERMINAR) 30%"
@@ -1047,11 +1413,12 @@
   },
   {
    "id_producto": 111,
-   "nombre_esperado": "RIZO OIL",
+   "nombre_esperado": "Rizo oil",
    "accion": "CORREGIR_TODO",
    "registro_fuente": "35537",
    "cambios": {
     "registro_senasa": "35537",
+    "nombre_comercial": "RIZO OIL",
     "empresa": "RIZOBACTER ARGENTINA S A",
     "familia": null,
     "principio_activo": "ACEITE DE SOJA 85%"
@@ -1060,7 +1427,7 @@
   },
   {
    "id_producto": 112,
-   "nombre_esperado": "ROCIO",
+   "nombre_esperado": "Rocio",
    "accion": "CORREGIR_TODO",
    "registro_fuente": "39194",
    "cambios": {
@@ -1074,7 +1441,7 @@
   },
   {
    "id_producto": 113,
-   "nombre_esperado": "ROUNDUP CONTROL MAX",
+   "nombre_esperado": "Roundup control max",
    "accion": "CORREGIR_TODO",
    "registro_fuente": "38105",
    "cambios": {
@@ -1088,11 +1455,12 @@
   },
   {
    "id_producto": 114,
-   "nombre_esperado": "SALTUM",
+   "nombre_esperado": "Saltum",
    "accion": "CORREGIR_TODO",
    "registro_fuente": "38579",
    "cambios": {
     "registro_senasa": "38579",
+    "nombre_comercial": "SALTUM",
     "empresa": "ASOCIACION DE COOPERATIVAS ARGENTINAS - COOP. LTDA.",
     "formulacion": "SC",
     "familia": "HRAC 14",
@@ -1102,11 +1470,12 @@
   },
   {
    "id_producto": 115,
-   "nombre_esperado": "SELECT",
+   "nombre_esperado": "Select",
    "accion": "CORREGIR_TODO",
    "registro_fuente": "30461",
    "cambios": {
     "registro_senasa": "30461",
+    "nombre_comercial": "SELECT",
     "empresa": "UPL ARGENTINA S. A.",
     "familia": "HRAC 1",
     "principio_activo": "CLETODIM 24%"
@@ -1115,7 +1484,7 @@
   },
   {
    "id_producto": 116,
-   "nombre_esperado": "SELECT 36",
+   "nombre_esperado": "Select 36",
    "accion": "CORREGIR_TODO",
    "registro_fuente": "39649",
    "cambios": {
@@ -1128,12 +1497,33 @@
    "nota": ""
   },
   {
+   "id_producto": 117,
+   "nombre_esperado": "Siliconado arn ebc",
+   "accion": "MAYUSCULAS",
+   "registro_fuente": null,
+   "cambios": {
+    "nombre_comercial": "SILICONADO ARN EBC"
+   },
+   "nota": ""
+  },
+  {
+   "id_producto": 118,
+   "nombre_esperado": "Smart foil",
+   "accion": "MAYUSCULAS",
+   "registro_fuente": null,
+   "cambios": {
+    "nombre_comercial": "SMART FOIL"
+   },
+   "nota": ""
+  },
+  {
    "id_producto": 119,
-   "nombre_esperado": "S-METOLACLORO CONTROLER",
+   "nombre_esperado": "S-metolacloro controler",
    "accion": "CORREGIR_TODO",
    "registro_fuente": "41257",
    "cambios": {
     "registro_senasa": "41257",
+    "nombre_comercial": "S-METOLACLORO CONTROLER",
     "empresa": "AGROFACIL S A",
     "familia": "HRAC 15",
     "principio_activo": "S-METOLACLORO 96%"
@@ -1142,7 +1532,7 @@
   },
   {
    "id_producto": 120,
-   "nombre_esperado": "S-METOLACLORO EBC",
+   "nombre_esperado": "S-metolacloro ebc",
    "accion": "CORREGIR_TODO",
    "registro_fuente": "41409",
    "cambios": {
@@ -1156,7 +1546,7 @@
   },
   {
    "id_producto": 121,
-   "nombre_esperado": "SNIPER II",
+   "nombre_esperado": "Sniper ii",
    "accion": "CORREGIR_TODO",
    "registro_fuente": "34028",
    "cambios": {
@@ -1169,12 +1559,23 @@
    "nota": ""
   },
   {
+   "id_producto": 122,
+   "nombre_esperado": "Solomon q tec",
+   "accion": "MAYUSCULAS",
+   "registro_fuente": null,
+   "cambios": {
+    "nombre_comercial": "SOLOMON Q TEC"
+   },
+   "nota": ""
+  },
+  {
    "id_producto": 123,
-   "nombre_esperado": "SPIDER",
+   "nombre_esperado": "Spider",
    "accion": "CORREGIR_TODO",
    "registro_fuente": "33101",
    "cambios": {
     "registro_senasa": "33101",
+    "nombre_comercial": "SPIDER",
     "empresa": "CORTEVA AGRISCIENCE ARGENTINA SRL",
     "familia": "HRAC 2",
     "principio_activo": "DICLOSULAM 84%"
@@ -1182,12 +1583,23 @@
    "nota": "nombre exacto en SENASA"
   },
   {
+   "id_producto": 124,
+   "nombre_esperado": "Sps ca",
+   "accion": "MAYUSCULAS",
+   "registro_fuente": null,
+   "cambios": {
+    "nombre_comercial": "SPS CA"
+   },
+   "nota": ""
+  },
+  {
    "id_producto": 125,
-   "nombre_esperado": "STAGGER",
+   "nombre_esperado": "Stagger",
    "accion": "CORREGIR_TODO",
    "registro_fuente": "36351",
    "cambios": {
     "registro_senasa": "36351",
+    "nombre_comercial": "STAGGER",
     "empresa": "SUMMIT AGRO ARGENTINA S A",
     "familia": "HRAC 14",
     "principio_activo": "PIRAFLUFEN ETIL 2,5%"
@@ -1196,7 +1608,7 @@
   },
   {
    "id_producto": 126,
-   "nombre_esperado": "STRIM",
+   "nombre_esperado": "Strim",
    "accion": "CORREGIR_TODO",
    "registro_fuente": "38178",
    "cambios": {
@@ -1209,8 +1621,18 @@
    "nota": ""
   },
   {
+   "id_producto": 127,
+   "nombre_esperado": "Sulfato de amonio",
+   "accion": "MAYUSCULAS",
+   "registro_fuente": null,
+   "cambios": {
+    "nombre_comercial": "SULFATO DE AMONIO"
+   },
+   "nota": ""
+  },
+  {
    "id_producto": 128,
-   "nombre_esperado": "SULFENTRAZONE EBC",
+   "nombre_esperado": "Sulfentrazone ebc",
    "accion": "CORREGIR_TODO",
    "registro_fuente": "40315",
    "cambios": {
@@ -1225,7 +1647,7 @@
   },
   {
    "id_producto": 129,
-   "nombre_esperado": "SULFOSATO ",
+   "nombre_esperado": "Sulfosato",
    "accion": "CORREGIR_TODO",
    "registro_fuente": "33566",
    "cambios": {
@@ -1239,7 +1661,7 @@
   },
   {
    "id_producto": 130,
-   "nombre_esperado": "SUPER ESTRELLA 2",
+   "nombre_esperado": "Super estrella 2",
    "accion": "CORREGIR_TODO",
    "registro_fuente": "34926",
    "cambios": {
@@ -1253,21 +1675,33 @@
   },
   {
    "id_producto": 131,
-   "nombre_esperado": "SUPER ESTRELLA GR 79,2",
+   "nombre_esperado": "Super estrella gr 79,2",
    "accion": "VINCULAR",
    "registro_fuente": null,
    "cambios": {
-    "registro_senasa": "30450 | 38429"
+    "registro_senasa": "30450 | 38429",
+    "nombre_comercial": "SUPER ESTRELLA GR 79,2"
+   },
+   "nota": ""
+  },
+  {
+   "id_producto": 132,
+   "nombre_esperado": "Super fosfato simple de ca",
+   "accion": "MAYUSCULAS",
+   "registro_fuente": null,
+   "cambios": {
+    "nombre_comercial": "SUPER FOSFATO SIMPLE DE CA"
    },
    "nota": ""
   },
   {
    "id_producto": 133,
-   "nombre_esperado": "TALSTAR",
+   "nombre_esperado": "Talstar",
    "accion": "CORREGIR_TODO",
    "registro_fuente": "31090",
    "cambios": {
     "registro_senasa": "31090",
+    "nombre_comercial": "TALSTAR",
     "empresa": "FMC QUIMICA S. A.",
     "familia": "IRAC 3A",
     "principio_activo": "BIFENTRIN 10%"
@@ -1276,11 +1710,12 @@
   },
   {
    "id_producto": 134,
-   "nombre_esperado": "TEMPUS",
+   "nombre_esperado": "Tempus",
    "accion": "CORREGIR_TODO",
    "registro_fuente": "38640",
    "cambios": {
     "registro_senasa": "38640",
+    "nombre_comercial": "TEMPUS",
     "empresa": "ASOCIACION DE COOPERATIVAS ARGENTINAS - COOP. LTDA.",
     "formulacion": "SC",
     "familia": "FRAC 11 + FRAC 3",
@@ -1290,11 +1725,12 @@
   },
   {
    "id_producto": 135,
-   "nombre_esperado": "TENDAL",
+   "nombre_esperado": "Tendal",
    "accion": "CORREGIR_TODO",
    "registro_fuente": "36916",
    "cambios": {
     "registro_senasa": "36916",
+    "nombre_comercial": "TENDAL",
     "empresa": "ASOCIACION DE COOPERATIVAS ARGENTINAS - COOP. LTDA.",
     "familia": "IRAC 3A",
     "principio_activo": "BIFENTRIN 10%"
@@ -1303,11 +1739,12 @@
   },
   {
    "id_producto": 136,
-   "nombre_esperado": "TERBYNE",
+   "nombre_esperado": "Terbyne",
    "accion": "CORREGIR_TODO",
    "registro_fuente": "39661",
    "cambios": {
     "registro_senasa": "39661",
+    "nombre_comercial": "TERBYNE",
     "empresa": "SIPCAM ARGENTINA S.R.L.",
     "familia": "HRAC 5",
     "principio_activo": "TERBUTILAZINA 75%"
@@ -1315,12 +1752,23 @@
    "nota": "nombre exacto en SENASA"
   },
   {
+   "id_producto": 137,
+   "nombre_esperado": "Toke plus",
+   "accion": "MAYUSCULAS",
+   "registro_fuente": null,
+   "cambios": {
+    "nombre_comercial": "TOKE PLUS"
+   },
+   "nota": ""
+  },
+  {
    "id_producto": 138,
-   "nombre_esperado": "TORNADO",
+   "nombre_esperado": "Tornado",
    "accion": "CORREGIR_TODO",
    "registro_fuente": "39199",
    "cambios": {
     "registro_senasa": "39199",
+    "nombre_comercial": "TORNADO",
     "empresa": "UPL ARGENTINA S. A.",
     "familia": "HRAC 4",
     "principio_activo": "2,4 D ESTER ETILHEXILICO 89% (EA 59%)"
@@ -1329,11 +1777,12 @@
   },
   {
    "id_producto": 139,
-   "nombre_esperado": "TOUCHDOWN MAX",
+   "nombre_esperado": "Touchdown max",
    "accion": "CORREGIR_TODO",
    "registro_fuente": "41671",
    "cambios": {
     "registro_senasa": "41671",
+    "nombre_comercial": "TOUCHDOWN MAX",
     "empresa": "SYNGENTA AGRO SOCIEDAD ANONIMA",
     "unidad_medida": "Kg",
     "familia": "HRAC 9",
@@ -1343,7 +1792,7 @@
   },
   {
    "id_producto": 140,
-   "nombre_esperado": "TRAC 50",
+   "nombre_esperado": "Trac 50",
    "accion": "CORREGIR_TODO",
    "registro_fuente": "30228",
    "cambios": {
@@ -1358,7 +1807,7 @@
   },
   {
    "id_producto": 141,
-   "nombre_esperado": "TRAC 90",
+   "nombre_esperado": "Trac 90",
    "accion": "CORREGIR_TODO",
    "registro_fuente": "36755",
    "cambios": {
@@ -1371,12 +1820,23 @@
    "nota": ""
   },
   {
+   "id_producto": 142,
+   "nombre_esperado": "Urea aca",
+   "accion": "MAYUSCULAS",
+   "registro_fuente": null,
+   "cambios": {
+    "nombre_comercial": "UREA ACA"
+   },
+   "nota": ""
+  },
+  {
    "id_producto": 143,
-   "nombre_esperado": "VESDUA",
+   "nombre_esperado": "Vesdua",
    "accion": "CORREGIR_TODO",
    "registro_fuente": "41622",
    "cambios": {
     "registro_senasa": "41622",
+    "nombre_comercial": "VESDUA",
     "empresa": "SYNGENTA AGRO SOCIEDAD ANONIMA",
     "formulacion": "SC",
     "familia": "HRAC 14",
@@ -1385,8 +1845,18 @@
    "nota": "nombre exacto en SENASA"
   },
   {
+   "id_producto": 144,
+   "nombre_esperado": "Vicia",
+   "accion": "MAYUSCULAS",
+   "registro_fuente": null,
+   "cambios": {
+    "nombre_comercial": "VICIA"
+   },
+   "nota": ""
+  },
+  {
    "id_producto": 145,
-   "nombre_esperado": "VIRANTRA",
+   "nombre_esperado": "Virantra",
    "accion": "CORREGIR_TODO",
    "registro_fuente": "40620",
    "cambios": {
@@ -1401,11 +1871,12 @@
   },
   {
    "id_producto": 146,
-   "nombre_esperado": "VOLERIS",
+   "nombre_esperado": "Voleris",
    "accion": "CORREGIR_TODO",
    "registro_fuente": "40917",
    "cambios": {
     "registro_senasa": "40917",
+    "nombre_comercial": "VOLERIS",
     "empresa": "SYNGENTA AGRO SOCIEDAD ANONIMA",
     "familia": "HRAC 4",
     "principio_activo": "2,4 D ESTER ETILHEXILICO 89%"
@@ -1414,11 +1885,12 @@
   },
   {
    "id_producto": 147,
-   "nombre_esperado": "YAMATO TOP",
+   "nombre_esperado": "Yamato top",
    "accion": "CORREGIR_TODO",
    "registro_fuente": "40658",
    "cambios": {
     "registro_senasa": "40658",
+    "nombre_comercial": "YAMATO TOP",
     "empresa": "SUMMIT AGRO ARGENTINA S A",
     "formulacion": "SC",
     "familia": "HRAC 15",
@@ -1428,6 +1900,541 @@
   },
   {
    "id_producto": 148,
+   "nombre_esperado": "Mulan",
+   "accion": "CORREGIR_TODO",
+   "registro_fuente": "40426",
+   "cambios": {
+    "registro_senasa": "40426 | 36787",
+    "nombre_comercial": "MULAN 48",
+    "empresa": "AGROFINA S A",
+    "familia": "HRAC 2",
+    "principio_activo": "FLUMETSULAM 48%"
+   },
+   "nota": ""
+  },
+  {
+   "id_producto": 149,
+   "nombre_esperado": "Venceweed extra",
+   "accion": "CORREGIR_TODO",
+   "registro_fuente": "37604",
+   "cambios": {
+    "registro_senasa": "37604 | 30230",
+    "nombre_comercial": "VENCEWEED EXTRA D",
+    "empresa": "ATANOR SOCIEDAD EN COMANDITA POR ACCIONES",
+    "familia": "HRAC 4",
+    "principio_activo": "2,4-DB (SAL/ESTER SIN DETERMINAR) 93,1% (EA 76%)"
+   },
+   "nota": ""
+  },
+  {
+   "id_producto": 150,
+   "nombre_esperado": "Latium super",
+   "accion": "CORREGIR_TODO",
+   "registro_fuente": "39189",
+   "cambios": {
+    "registro_senasa": "39189 | 39242",
+    "nombre_comercial": "LATIUM SUPER",
+    "empresa": "AGRO BAYER S. R. L.",
+    "familia": "HRAC 1",
+    "principio_activo": "CLETODIM 36%"
+   },
+   "nota": "confirmado: mismo producto"
+  },
+  {
+   "id_producto": 151,
+   "nombre_esperado": "Phillambda 25 me",
+   "accion": "CORREGIR_TODO",
+   "registro_fuente": "38092",
+   "cambios": {
+    "registro_senasa": "38092",
+    "nombre_comercial": "PHILLAMBDA 25 ME",
+    "empresa": "PHILAGRO S.A",
+    "familia": "IRAC 3A",
+    "principio_activo": "LAMBDA-CIALOTRINA 25%"
+   },
+   "nota": "nombre exacto en SENASA"
+  },
+  {
+   "id_producto": 152,
+   "nombre_esperado": "Gold list (bio estimulante)",
+   "accion": "MAYUSCULAS",
+   "registro_fuente": null,
+   "cambios": {
+    "nombre_comercial": "GOLD LIST (BIO ESTIMULANTE)"
+   },
+   "nota": ""
+  },
+  {
+   "id_producto": 153,
+   "nombre_esperado": "La tijereta box",
+   "accion": "CORREGIR_TODO",
+   "registro_fuente": "38279",
+   "cambios": {
+    "registro_senasa": "38279 | 41222",
+    "nombre_comercial": "LA TIJERETA BOX L",
+    "empresa": "AGRO BAYER S. R. L.",
+    "unidad_medida": "Kg",
+    "familia": "HRAC 9",
+    "principio_activo": "GLIFOSATO SAL MONOAMONICA 79,2% (EA 72%)"
+   },
+   "nota": "confirmado: mismo producto"
+  },
+  {
+   "id_producto": 154,
+   "nombre_esperado": "Talis",
+   "accion": "CORREGIR_TODO",
+   "registro_fuente": "34720",
+   "cambios": {
+    "registro_senasa": "34720",
+    "nombre_comercial": "TALIS",
+    "empresa": "AGROFINA S A",
+    "familia": "HRAC 12",
+    "principio_activo": "FLUROCLORIDONA 25%"
+   },
+   "nota": "nombre exacto en SENASA"
+  },
+  {
+   "id_producto": 155,
+   "nombre_esperado": "Finesse wg",
+   "accion": "CORREGIR_TODO",
+   "registro_fuente": "34319",
+   "cambios": {
+    "registro_senasa": "34319 | 36669",
+    "nombre_comercial": "FINESSE",
+    "empresa": "FMC QUIMICA S. A.",
+    "unidad_medida": "Kg",
+    "familia": "HRAC 2",
+    "principio_activo": "CLORSULFURON 62,5% + METSULFURON METIL 12,5%"
+   },
+   "nota": ""
+  },
+  {
+   "id_producto": 156,
+   "nombre_esperado": "Glifosato max sigma",
+   "accion": "CORREGIR_TODO",
+   "registro_fuente": "38620",
+   "cambios": {
+    "registro_senasa": "38620",
+    "nombre_comercial": "GLIFOSATO MAX SIGMA",
+    "empresa": "SIGMA AGRO S.A",
+    "formulacion": "SG",
+    "familia": "HRAC 9",
+    "principio_activo": "GLIFOSATO SAL MONOAMONICA 75,7% (EA 68,8%)"
+   },
+   "nota": "nombre exacto en SENASA"
+  },
+  {
+   "id_producto": 157,
+   "nombre_esperado": "2,4 d lv 89 sigma",
+   "accion": "CORREGIR_TODO",
+   "registro_fuente": "41083",
+   "cambios": {
+    "registro_senasa": "41083 | 40141",
+    "nombre_comercial": "2,4D LV 89 EZ SIGMA",
+    "empresa": "SIGMA AGRO S.A",
+    "familia": "HRAC 4",
+    "principio_activo": "2,4 D ESTER ETILHEXILICO 89%"
+   },
+   "nota": "sal/éster tomada de la app"
+  },
+  {
+   "id_producto": 158,
+   "nombre_esperado": "Premerge",
+   "accion": "VINCULAR",
+   "registro_fuente": null,
+   "cambios": {
+    "registro_senasa": "32779",
+    "nombre_comercial": "PREMERGE"
+   },
+   "nota": ""
+  },
+  {
+   "id_producto": 159,
+   "nombre_esperado": "Lontrel",
+   "accion": "CORREGIR_TODO",
+   "registro_fuente": "33572",
+   "cambios": {
+    "registro_senasa": "33572",
+    "nombre_comercial": "LONTREL",
+    "empresa": "CORTEVA AGRISCIENCE ARGENTINA SRL",
+    "familia": "HRAC 4",
+    "principio_activo": "CLOPYRALID 47,5%"
+   },
+   "nota": "nombre exacto en SENASA"
+  },
+  {
+   "id_producto": 160,
+   "nombre_esperado": "Sigma gold",
+   "accion": "MAYUSCULAS",
+   "registro_fuente": null,
+   "cambios": {
+    "nombre_comercial": "SIGMA GOLD"
+   },
+   "nota": ""
+  },
+  {
+   "id_producto": 161,
+   "nombre_esperado": "Rcp",
+   "accion": "CORREGIR_TODO",
+   "registro_fuente": "42006",
+   "cambios": {
+    "registro_senasa": "42006",
+    "nombre_comercial": "#RCP",
+    "empresa": "ARROWWS ARGENTINA S. R. L.",
+    "principio_activo": "ALCOHOL LAURICO ETOXILADO 30%"
+   },
+   "nota": "nombre exacto en SENASA"
+  },
+  {
+   "id_producto": 162,
+   "nombre_esperado": "Nyambi flo",
+   "accion": "CORREGIR_TODO",
+   "registro_fuente": "39234",
+   "cambios": {
+    "registro_senasa": "39234",
+    "nombre_comercial": "NYAMBI FLO",
+    "empresa": "SUMMIT AGRO ARGENTINA S A",
+    "formulacion": "SC",
+    "familia": "HRAC 14",
+    "principio_activo": "FLUMIOXAZIN 48%"
+   },
+   "nota": "nombre exacto en SENASA"
+  },
+  {
+   "id_producto": 163,
+   "nombre_esperado": "2,4 d nova me",
+   "accion": "VINCULAR",
+   "registro_fuente": null,
+   "cambios": {
+    "registro_senasa": "41226 | 40280",
+    "nombre_comercial": "2,4 D NOVA ME"
+   },
+   "nota": ""
+  },
+  {
+   "id_producto": 164,
+   "nombre_esperado": "Glifosato GR EBC",
+   "accion": "MAYUSCULAS",
+   "registro_fuente": null,
+   "cambios": {
+    "nombre_comercial": "GLIFOSATO GR EBC"
+   },
+   "nota": ""
+  },
+  {
+   "id_producto": 165,
+   "nombre_esperado": "Cletodim sigma",
+   "accion": "VINCULAR",
+   "registro_fuente": null,
+   "cambios": {
+    "registro_senasa": "41348 | 40161 | 38707",
+    "nombre_comercial": "CLETODIM SIGMA"
+   },
+   "nota": ""
+  },
+  {
+   "id_producto": 166,
+   "nombre_esperado": "Latium",
+   "accion": "MAYUSCULAS",
+   "registro_fuente": null,
+   "cambios": {
+    "nombre_comercial": "LATIUM"
+   },
+   "nota": ""
+  },
+  {
+   "id_producto": 167,
+   "nombre_esperado": "Stern",
+   "accion": "CORREGIR_TODO",
+   "registro_fuente": "37913",
+   "cambios": {
+    "registro_senasa": "37913",
+    "nombre_comercial": "STERN",
+    "empresa": "FMC QUIMICA S. A.",
+    "familia": "HRAC 2",
+    "principio_activo": "CLORSULFURON 62,5% + METSULFURON METIL 12,5%"
+   },
+   "nota": "nombre exacto en SENASA"
+  },
+  {
+   "id_producto": 168,
+   "nombre_esperado": "Shark",
+   "accion": "VINCULAR",
+   "registro_fuente": null,
+   "cambios": {
+    "registro_senasa": "33747",
+    "nombre_comercial": "SHARK"
+   },
+   "nota": ""
+  },
+  {
+   "id_producto": 169,
+   "nombre_esperado": "Picloran rainbow",
+   "accion": "CORREGIR_TODO",
+   "registro_fuente": "37389",
+   "cambios": {
+    "registro_senasa": "37389",
+    "nombre_comercial": "PICLORAM 24 RAINBOW",
+    "empresa": "RAINBOW AGROSCIENSES SA",
+    "familia": "HRAC 4",
+    "principio_activo": "PICLORAM SAL POTASICA 27,8% (EA 24%)"
+   },
+   "nota": ""
+  },
+  {
+   "id_producto": 170,
+   "nombre_esperado": "Tuken",
+   "accion": "CORREGIR_TODO",
+   "registro_fuente": "40647",
+   "cambios": {
+    "registro_senasa": "40647 | 38505",
+    "nombre_comercial": "TUKEN SC",
+    "empresa": "ATANOR SOCIEDAD EN COMANDITA POR ACCIONES",
+    "familia": "HRAC 12",
+    "principio_activo": "DIFLUFENICAN 50%"
+   },
+   "nota": "confirmado: mismo producto"
+  },
+  {
+   "id_producto": 171,
+   "nombre_esperado": "Ligate",
+   "accion": "CORREGIR_TODO",
+   "registro_fuente": "36831",
+   "cambios": {
+    "registro_senasa": "36831",
+    "nombre_comercial": "LIGATE",
+    "empresa": "CORTEVA AGRISCIENCE ARGENTINA SRL",
+    "familia": "HRAC 2",
+    "principio_activo": "CLORIMURON ETIL 20% + SULFOMETURON METIL 15%"
+   },
+   "nota": "nombre exacto en SENASA"
+  },
+  {
+   "id_producto": 172,
+   "nombre_esperado": "Effectux",
+   "accion": "CORREGIR_TODO",
+   "registro_fuente": "41552",
+   "cambios": {
+    "registro_senasa": "41552",
+    "nombre_comercial": "EFFECTUX",
+    "empresa": "SIPCAM ARGENTINA S.R.L.",
+    "familia": "HRAC 4",
+    "principio_activo": "DICAMBA (SAL/ESTER SIN DETERMINAR) 4,8% + 2,4 D (SAL/ESTER SIN DETERMINAR) 30%"
+   },
+   "nota": "nombre exacto en SENASA"
+  },
+  {
+   "id_producto": 173,
+   "nombre_esperado": "Power spray lv",
+   "accion": "CORREGIR_TODO",
+   "registro_fuente": "39449",
+   "cambios": {
+    "registro_senasa": "39449",
+    "nombre_comercial": "POWERSPRAY LV",
+    "empresa": "AGRO BAYER S. R. L.",
+    "familia": "HRAC 4",
+    "principio_activo": "2,4 D ESTER ETILHEXILICO 102,5% (EA 68%)"
+   },
+   "nota": "nombre exacto en SENASA"
+  },
+  {
+   "id_producto": 174,
+   "nombre_esperado": "Clopyralid nova",
+   "accion": "CORREGIR_TODO",
+   "registro_fuente": "38596",
+   "cambios": {
+    "registro_senasa": "38596",
+    "nombre_comercial": "CLOPYRALID NOVA",
+    "empresa": "NOVA S. A. U.",
+    "formulacion": "SL",
+    "familia": "HRAC 4",
+    "principio_activo": "CLOPYRALID 47,51%"
+   },
+   "nota": "nombre exacto en SENASA"
+  },
+  {
+   "id_producto": 175,
+   "nombre_esperado": "Kamba",
+   "accion": "CORREGIR_TODO",
+   "registro_fuente": "34791",
+   "cambios": {
+    "registro_senasa": "34791",
+    "nombre_comercial": "KAMBA",
+    "empresa": "SUMITOMO CHEMICAL ARGENTINA S.A.",
+    "familia": "HRAC 4",
+    "principio_activo": "DICAMBA SAL DIMETILAMINA (DMA) 57,71% (EA 48%)"
+   },
+   "nota": "nombre exacto en SENASA"
+  },
+  {
+   "id_producto": 176,
+   "nombre_esperado": "Sniper dry",
+   "accion": "CORREGIR_TODO",
+   "registro_fuente": "38677",
+   "cambios": {
+    "registro_senasa": "38677 | 41221",
+    "nombre_comercial": "SNIPER DRY",
+    "empresa": "AGRO BAYER S. R. L.",
+    "formulacion": "SG",
+    "familia": "HRAC 9",
+    "principio_activo": "GLIFOSATO SAL MONOAMONICA 79,2% (EA 72%)"
+   },
+   "nota": "confirmado: mismo producto"
+  },
+  {
+   "id_producto": 177,
+   "nombre_esperado": "Diflu 50 rinder",
+   "accion": "MAYUSCULAS",
+   "registro_fuente": null,
+   "cambios": {
+    "nombre_comercial": "DIFLU 50 RINDER"
+   },
+   "nota": ""
+  },
+  {
+   "id_producto": 178,
+   "nombre_esperado": "Clorimuron 75 max sigma",
+   "accion": "CORREGIR_TODO",
+   "registro_fuente": "38863",
+   "cambios": {
+    "registro_senasa": "38863",
+    "nombre_comercial": "CLORIMURON 75 MAX SIGMA",
+    "empresa": "SIGMA AGRO S.A",
+    "familia": "HRAC 2",
+    "principio_activo": "CLORIMURON ETIL 75%"
+   },
+   "nota": "nombre exacto en SENASA"
+  },
+  {
+   "id_producto": 179,
+   "nombre_esperado": "Allgram 2,4-d 89 ester",
+   "accion": "CORREGIR_TODO",
+   "registro_fuente": "39928",
+   "cambios": {
+    "registro_senasa": "39928",
+    "nombre_comercial": "ALLGRAM 2,4D 89 ESTER",
+    "empresa": "FARMCHEM SA",
+    "familia": "HRAC 4",
+    "principio_activo": "2,4 D ESTER ETILHEXILICO 89% (EA 59%)"
+   },
+   "nota": "nombre exacto en SENASA"
+  },
+  {
+   "id_producto": 180,
+   "nombre_esperado": "Adengo",
+   "accion": "CORREGIR_TODO",
+   "registro_fuente": "36254",
+   "cambios": {
+    "registro_senasa": "36254",
+    "nombre_comercial": "ADENGO",
+    "empresa": "AGRO BAYER S. R. L.",
+    "familia": "HRAC 27 + HRAC 2",
+    "principio_activo": "ISOXAFLUTOLE 22,5% + CIPROSULFAMIDE 15% + TIENCARBAZONE METIL 9%"
+   },
+   "nota": "nombre exacto en SENASA"
+  },
+  {
+   "id_producto": 181,
+   "nombre_esperado": "Dicamba Sigma",
+   "accion": "CORREGIR_TODO",
+   "registro_fuente": "38176",
+   "cambios": {
+    "registro_senasa": "38176",
+    "nombre_comercial": "DICAMBA SIGMA",
+    "empresa": "SIGMA AGRO S.A",
+    "familia": "HRAC 4",
+    "principio_activo": "DICAMBA SAL DIMETILAMINA (DMA) 57,8% (EA 48%)"
+   },
+   "nota": "nombre exacto en SENASA"
+  },
+  {
+   "id_producto": 182,
+   "nombre_esperado": "Pelican L",
+   "accion": "VINCULAR",
+   "registro_fuente": null,
+   "cambios": {
+    "registro_senasa": "34250",
+    "nombre_comercial": "PELICAN L"
+   },
+   "nota": ""
+  },
+  {
+   "id_producto": 183,
+   "nombre_esperado": "Traspect",
+   "accion": "VINCULAR",
+   "registro_fuente": null,
+   "cambios": {
+    "registro_senasa": "39967",
+    "nombre_comercial": "TRASPECT"
+   },
+   "nota": ""
+  },
+  {
+   "id_producto": 184,
+   "nombre_esperado": "One Drop Bio",
+   "accion": "CORREGIR_TODO",
+   "registro_fuente": "38198",
+   "cambios": {
+    "registro_senasa": "38198",
+    "nombre_comercial": "ONEDROP BIO",
+    "empresa": "ARROWWS ARGENTINA S. R. L.",
+    "formulacion": "SL",
+    "principio_activo": "ALCOHOL LAURICO ETOXILADO 32,7%"
+   },
+   "nota": "nombre exacto en SENASA"
+  },
+  {
+   "id_producto": 185,
+   "nombre_esperado": "ATANOR | FLUMIOXAZIN 48% SC",
+   "accion": "VINCULAR",
+   "registro_fuente": null,
+   "cambios": {
+    "registro_senasa": "41483 | 40586"
+   },
+   "nota": ""
+  },
+  {
+   "id_producto": 186,
+   "nombre_esperado": "Oxalis",
+   "accion": "VINCULAR",
+   "registro_fuente": null,
+   "cambios": {
+    "registro_senasa": "38478",
+    "nombre_comercial": "OXALIS"
+   },
+   "nota": ""
+  },
+  {
+   "id_producto": 187,
+   "nombre_esperado": "Roundup Top",
+   "accion": "CORREGIR_TODO",
+   "registro_fuente": "40678",
+   "cambios": {
+    "registro_senasa": "40678",
+    "nombre_comercial": "ROUNDUP TOP",
+    "empresa": "AGRO BAYER S. R. L.",
+    "familia": "HRAC 9",
+    "principio_activo": "GLIFOSATO SAL POTASICA 70,5%"
+   },
+   "nota": "nombre exacto en SENASA; sal/éster tomada de la app"
+  },
+  {
+   "id_producto": 188,
+   "nombre_esperado": "Enelan",
+   "accion": "CORREGIR_TODO",
+   "registro_fuente": "40226",
+   "cambios": {
+    "registro_senasa": "40226",
+    "nombre_comercial": "ENELAN",
+    "empresa": "SYNGENTA AGRO SOCIEDAD ANONIMA",
+    "formulacion": "SC",
+    "familia": "HRAC 14",
+    "principio_activo": "SULFENTRAZONE 50%"
+   },
+   "nota": "nombre exacto en SENASA"
+  },
+  {
+   "id_producto": 189,
    "nombre_esperado": "CAMBIUM",
    "accion": "CORREGIR_TODO",
    "registro_fuente": "40101",
@@ -1440,7 +2447,7 @@
    "nota": "nombre exacto en SENASA"
   },
   {
-   "id_producto": 149,
+   "id_producto": 190,
    "nombre_esperado": "RESOLUTOR ACA",
    "accion": "CORREGIR_TODO",
    "registro_fuente": "39824",
@@ -1454,7 +2461,7 @@
    "nota": ""
   },
   {
-   "id_producto": 150,
+   "id_producto": 191,
    "nombre_esperado": "FLUMINENS",
    "accion": "CORREGIR_TODO",
    "registro_fuente": "40885",
@@ -1466,12 +2473,344 @@
     "principio_activo": "FLUMIOXAZIN 48%"
    },
    "nota": ""
+  },
+  {
+   "id_producto": 192,
+   "nombre_esperado": "Milenial SC",
+   "accion": "CORREGIR_TODO",
+   "registro_fuente": "39103",
+   "cambios": {
+    "registro_senasa": "39103",
+    "nombre_comercial": "MILENIAL SC",
+    "empresa": "ATANOR SOCIEDAD EN COMANDITA POR ACCIONES",
+    "familia": "HRAC 14",
+    "principio_activo": "SULFENTRAZONE 50%"
+   },
+   "nota": "nombre exacto en SENASA"
+  },
+  {
+   "id_producto": 193,
+   "nombre_esperado": "Biofilm corrector",
+   "accion": "MAYUSCULAS",
+   "registro_fuente": null,
+   "cambios": {
+    "nombre_comercial": "BIOFILM CORRECTOR"
+   },
+   "nota": ""
+  },
+  {
+   "id_producto": 196,
+   "nombre_esperado": "V6 Biofilm",
+   "accion": "MAYUSCULAS",
+   "registro_fuente": null,
+   "cambios": {
+    "nombre_comercial": "V6 BIOFILM"
+   },
+   "nota": ""
+  },
+  {
+   "id_producto": 197,
+   "nombre_esperado": "FURY 20EW",
+   "accion": "CORREGIR_TODO",
+   "registro_fuente": "35047",
+   "cambios": {
+    "registro_senasa": "35047",
+    "nombre_comercial": "FURY 20 EW",
+    "empresa": "FMC QUIMICA S. A.",
+    "familia": "IRAC 3A",
+    "principio_activo": "ZETAMETRINA 20%"
+   },
+   "nota": "nombre exacto en SENASA"
+  },
+  {
+   "id_producto": 198,
+   "nombre_esperado": "Power Maxx",
+   "accion": "CORREGIR_TODO",
+   "registro_fuente": "40052",
+   "cambios": {
+    "registro_senasa": "40052 | 38322 | 41672 | 38550 | 40897",
+    "nombre_comercial": "POWER MAXX 75,7 SG",
+    "empresa": "ATANOR SOCIEDAD EN COMANDITA POR ACCIONES",
+    "familia": "HRAC 9",
+    "principio_activo": "GLIFOSATO SAL MONOAMONICA 75,7% (EA 68,8%)"
+   },
+   "nota": "confirmado: mismo producto"
+  },
+  {
+   "id_producto": 199,
+   "nombre_esperado": "Pixar 48 ",
+   "accion": "VINCULAR",
+   "registro_fuente": null,
+   "cambios": {
+    "registro_senasa": "41914",
+    "nombre_comercial": "PIXAR 48"
+   },
+   "nota": ""
+  },
+  {
+   "id_producto": 200,
+   "nombre_esperado": "BLADE",
+   "accion": "CORREGIR_TODO",
+   "registro_fuente": "38552",
+   "cambios": {
+    "registro_senasa": "38552",
+    "empresa": "NOVA S. A. U.",
+    "familia": "HRAC 4",
+    "principio_activo": "FLUROXIPIR MEPTIL 48%"
+   },
+   "nota": "nombre exacto en SENASA"
+  },
+  {
+   "id_producto": 201,
+   "nombre_esperado": "LOCSUFON XTRA",
+   "accion": "CORREGIR_TODO",
+   "registro_fuente": "41736",
+   "cambios": {
+    "registro_senasa": "41736",
+    "empresa": "RAINBOW AGROSCIENSES SA",
+    "formulacion": "WG",
+    "unidad_medida": "Kg",
+    "familia": "HRAC 15",
+    "principio_activo": "PIROXASULFONE 85%"
+   },
+   "nota": "nombre exacto en SENASA"
+  },
+  {
+   "id_producto": 202,
+   "nombre_esperado": "SULFENTRAZONE",
+   "accion": "VINCULAR",
+   "registro_fuente": null,
+   "cambios": {
+    "registro_senasa": "39754"
+   },
+   "nota": ""
+  },
+  {
+   "id_producto": 203,
+   "nombre_esperado": "BRODAL",
+   "accion": "VINCULAR",
+   "registro_fuente": null,
+   "cambios": {
+    "registro_senasa": "32478"
+   },
+   "nota": ""
+  },
+  {
+   "id_producto": 204,
+   "nombre_esperado": "Bromoxinil",
+   "accion": "MAYUSCULAS",
+   "registro_fuente": null,
+   "cambios": {
+    "nombre_comercial": "BROMOXINIL"
+   },
+   "nota": ""
+  },
+  {
+   "id_producto": 206,
+   "nombre_esperado": "PANZER GOLD",
+   "accion": "CORREGIR_TODO",
+   "registro_fuente": "34928",
+   "cambios": {
+    "registro_senasa": "34928 | 37176",
+    "empresa": "CORTEVA AGRISCIENCE ARGENTINA SRL",
+    "familia": "HRAC 9",
+    "principio_activo": "GLIFOSATO SAL DIMETILAMINA 60,8% (EA 48%)"
+   },
+   "nota": "confirmado: mismo producto"
+  },
+  {
+   "id_producto": 207,
+   "nombre_esperado": "BEMUS",
+   "accion": "CORREGIR_TODO",
+   "registro_fuente": "35637",
+   "cambios": {
+    "registro_senasa": "35637",
+    "empresa": "HELM ARGENTINA S. R. L.",
+    "formulacion": "SL",
+    "familia": "HRAC 4",
+    "principio_activo": "DICAMBA (SAL/ESTER SIN DETERMINAR) 57,8%"
+   },
+   "nota": "nombre exacto en SENASA"
+  },
+  {
+   "id_producto": 208,
+   "nombre_esperado": "Affinity",
+   "accion": "CORREGIR_TODO",
+   "registro_fuente": "34130",
+   "cambios": {
+    "registro_senasa": "34130",
+    "nombre_comercial": "AFFINITY",
+    "empresa": "FMC QUIMICA S. A.",
+    "familia": "HRAC 14",
+    "principio_activo": "CARFENTRAZONE ETIL 40%"
+   },
+   "nota": "nombre exacto en SENASA"
+  },
+  {
+   "id_producto": 209,
+   "nombre_esperado": "Glifosato Macro Protect",
+   "accion": "CORREGIR_TODO",
+   "registro_fuente": "41418",
+   "cambios": {
+    "registro_senasa": "41418 | 42256",
+    "nombre_comercial": "GLIFOSATO MACRO PROTECT 66.2%",
+    "empresa": "LDC ARGENTINA S.A.",
+    "formulacion": "SL",
+    "familia": "HRAC 9",
+    "principio_activo": "GLIFOSATO SAL POTASICA 66,2% (EA 54%)"
+   },
+   "nota": "confirmado: mismo producto"
+  },
+  {
+   "id_producto": 210,
+   "nombre_esperado": "2,4-D ETHIL HEXIL 97% MACRO PROTEC",
+   "accion": "CORREGIR_TODO",
+   "registro_fuente": "41868",
+   "cambios": {
+    "registro_senasa": "41868",
+    "empresa": "LDC ARGENTINA S.A.",
+    "familia": "HRAC 4",
+    "principio_activo": "2,4 D ESTER ETILHEXILICO 97% (EA 64,3%)"
+   },
+   "nota": "nombre exacto en SENASA"
+  },
+  {
+   "id_producto": 211,
+   "nombre_esperado": "Authence",
+   "accion": "VINCULAR",
+   "registro_fuente": null,
+   "cambios": {
+    "registro_senasa": "42539",
+    "nombre_comercial": "AUTHENCE"
+   },
+   "nota": ""
+  },
+  {
+   "id_producto": 212,
+   "nombre_esperado": "MACROPROTEC CLETODIM",
+   "accion": "CORREGIR_TODO",
+   "registro_fuente": "42629",
+   "cambios": {
+    "registro_senasa": "42629",
+    "nombre_comercial": "MACROPROTECT CLETODIM 24",
+    "empresa": "LDC ARGENTINA S.A.",
+    "familia": "HRAC 1",
+    "principio_activo": "CLETODIM 24%"
+   },
+   "nota": "confirmado: mismo producto"
+  },
+  {
+   "id_producto": 213,
+   "nombre_esperado": "Sativis",
+   "accion": "VINCULAR",
+   "registro_fuente": null,
+   "cambios": {
+    "registro_senasa": "39815 | 41301 | 39597",
+    "nombre_comercial": "SATIVIS"
+   },
+   "nota": ""
+  },
+  {
+   "id_producto": 214,
+   "nombre_esperado": "STRIM UPL",
+   "accion": "CORREGIR_TODO",
+   "registro_fuente": "38178",
+   "cambios": {
+    "registro_senasa": "38178",
+    "empresa": "UPL ARGENTINA S. A.",
+    "familia": "HRAC 15",
+    "principio_activo": "S-METOLACLORO 96%"
+   },
+   "nota": "nombre exacto en SENASA"
+  },
+  {
+   "id_producto": 216,
+   "nombre_esperado": "Mextrol",
+   "accion": "CORREGIR_TODO",
+   "registro_fuente": "33953",
+   "cambios": {
+    "registro_senasa": "33953",
+    "nombre_comercial": "MEXTROL",
+    "empresa": "SUMITOMO CHEMICAL ARGENTINA S.A.",
+    "familia": "HRAC 6",
+    "principio_activo": "BROMOXINIL OCTONOATO 34,2%"
+   },
+   "nota": "nombre exacto en SENASA"
+  },
+  {
+   "id_producto": 217,
+   "nombre_esperado": "RAINBOW",
+   "accion": "VINCULAR",
+   "registro_fuente": null,
+   "cambios": {
+    "registro_senasa": "31389 | 38476"
+   },
+   "nota": ""
+  },
+  {
+   "id_producto": 219,
+   "nombre_esperado": "Cletodim NOVA",
+   "accion": "VINCULAR",
+   "registro_fuente": null,
+   "cambios": {
+    "registro_senasa": "38438 | 39468 | 40409 | 41841",
+    "nombre_comercial": "CLETODIM NOVA"
+   },
+   "nota": ""
+  },
+  {
+   "id_producto": 220,
+   "nombre_esperado": "pixxaro",
+   "accion": "CORREGIR_TODO",
+   "registro_fuente": "40386",
+   "cambios": {
+    "registro_senasa": "40386",
+    "nombre_comercial": "PIXXARO",
+    "empresa": "CORTEVA AGRISCIENCE ARGENTINA SRL",
+    "familia": "HRAC 4",
+    "principio_activo": "CLOQUINTOCET MEXIL 1,6% + FLUROXIPIR MEPTIL 36% + HALAUXIFEN METIL 1,7%"
+   },
+   "nota": "nombre exacto en SENASA"
+  },
+  {
+   "id_producto": 221,
+   "nombre_esperado": "2,4d",
+   "accion": "MAYUSCULAS",
+   "registro_fuente": null,
+   "cambios": {
+    "nombre_comercial": "2,4D"
+   },
+   "nota": ""
+  },
+  {
+   "id_producto": 222,
+   "nombre_esperado": "FENTRA",
+   "accion": "CORREGIR_TODO",
+   "registro_fuente": "41434",
+   "cambios": {
+    "registro_senasa": "41434",
+    "empresa": "SINER S A",
+    "familia": "HRAC 14",
+    "principio_activo": "SULFENTRAZONE 50%"
+   },
+   "nota": "nombre exacto en SENASA"
+  },
+  {
+   "id_producto": 223,
+   "nombre_esperado": "Symphony",
+   "accion": "VINCULAR",
+   "registro_fuente": null,
+   "cambios": {
+    "registro_senasa": "42349 | 39713 | 39563 | 39712 | 39716",
+    "nombre_comercial": "SYMPHONY"
+   },
+   "nota": ""
   }
  ],
  "ocultar": [
   {
    "id_producto": 13,
-   "nombre_esperado": "ATRATOP 90",
+   "nombre_esperado": "Atratop 90",
    "motivo": "ATRATOP 90 duplicado de id 12"
   }
  ],
@@ -1495,16 +2834,6 @@
    "principio_activo": "ACETAMIPRID 8% + NOVALURON 10%",
    "unidad_medida": "L",
    "familia": "IRAC 4A + IRAC 15"
-  },
-  {
-   "registro_senasa": "42006",
-   "nombre_comercial": "#RCP",
-   "categoria": "ADYUVANTE",
-   "empresa": "ARROWWS ARGENTINA S. R. L.",
-   "formulacion": "SL",
-   "principio_activo": "ALCOHOL LAURICO ETOXILADO 30%",
-   "unidad_medida": "L",
-   "familia": null
   },
   {
    "registro_senasa": "42114",
@@ -1641,16 +2970,6 @@
    "nombre_comercial": "2,4 D HEXIL 890 FORMULAGRO",
    "categoria": "HERBICIDA",
    "empresa": "FORMULAGRO SOCIEDAD RESPONSABILIDAD LIMITADA",
-   "formulacion": "EC",
-   "principio_activo": "2,4 D ESTER ETILHEXILICO 89% (EA 59%)",
-   "unidad_medida": "L",
-   "familia": "HRAC 4"
-  },
-  {
-   "registro_senasa": "40141",
-   "nombre_comercial": "2,4 D LV 89 SIGMA",
-   "categoria": "HERBICIDA",
-   "empresa": "SIGMA AGRO S.A",
    "formulacion": "EC",
    "principio_activo": "2,4 D ESTER ETILHEXILICO 89% (EA 59%)",
    "unidad_medida": "L",
@@ -1897,16 +3216,6 @@
    "familia": "HRAC 4"
   },
   {
-   "registro_senasa": "41868",
-   "nombre_comercial": "2,4-D ETHIL HEXIL 97% MACRO PROTEC",
-   "categoria": "HERBICIDA",
-   "empresa": "LDC ARGENTINA S.A.",
-   "formulacion": "EC",
-   "principio_activo": "2,4 D ESTER ETILHEXILICO 97% (EA 64,3%)",
-   "unidad_medida": "L",
-   "familia": "HRAC 4"
-  },
-  {
    "registro_senasa": "40399",
    "nombre_comercial": "2,4-D ETIL FLEXIL 97 DELTA AGRO",
    "categoria": "HERBICIDA",
@@ -1981,26 +3290,6 @@
    "nombre_comercial": "2,4-D ME L D",
    "categoria": "HERBICIDA",
    "empresa": "3 LOMAS S.A.",
-   "formulacion": "ME",
-   "principio_activo": "2,4 D (SAL/ESTER SIN DETERMINAR) 30%",
-   "unidad_medida": "L",
-   "familia": "HRAC 4"
-  },
-  {
-   "registro_senasa": "40280",
-   "nombre_comercial": "2,4-D NOVA ME",
-   "categoria": "HERBICIDA",
-   "empresa": "NOVA S. A. U.",
-   "formulacion": "ME",
-   "principio_activo": "2,4 D (SAL/ESTER SIN DETERMINAR) 30%",
-   "unidad_medida": "L",
-   "familia": "HRAC 4"
-  },
-  {
-   "registro_senasa": "41226",
-   "nombre_comercial": "2,4-D NOVA ME 30",
-   "categoria": "HERBICIDA",
-   "empresa": "NOVA S. A. U.",
    "formulacion": "ME",
    "principio_activo": "2,4 D (SAL/ESTER SIN DETERMINAR) 30%",
    "unidad_medida": "L",
@@ -2193,16 +3482,6 @@
    "empresa": "CARGILL SOCIEDAD ANONIMA COMERCIAL E INDUSTRIAL",
    "formulacion": "EC",
    "principio_activo": "2,4 D ESTER ETILHEXILICO 97% (EA 64,3%)",
-   "unidad_medida": "L",
-   "familia": "HRAC 4"
-  },
-  {
-   "registro_senasa": "39418",
-   "nombre_comercial": "2,4D ACTION",
-   "categoria": "HERBICIDA",
-   "empresa": "ASOCIACION DE COOPERATIVAS ARGENTINAS - COOP. LTDA.",
-   "formulacion": "EC",
-   "principio_activo": "2,4 D ESTER ETILHEXILICO 89% (EA 59%)",
    "unidad_medida": "L",
    "familia": "HRAC 4"
   },
@@ -2623,16 +3902,6 @@
    "empresa": "LANTHER QUIMICA S. A.",
    "formulacion": "EC",
    "principio_activo": "2,4 D ESTER ETILHEXILICO 89% (EA 59%)",
-   "unidad_medida": "L",
-   "familia": "HRAC 4"
-  },
-  {
-   "registro_senasa": "41083",
-   "nombre_comercial": "2,4D LV 89 EZ SIGMA",
-   "categoria": "HERBICIDA",
-   "empresa": "SIGMA AGRO S.A",
-   "formulacion": "EC",
-   "principio_activo": "2,4 D (SAL/ESTER SIN DETERMINAR) 89%",
    "unidad_medida": "L",
    "familia": "HRAC 4"
   },
@@ -4937,16 +6206,6 @@
    "familia": "IRAC 15"
   },
   {
-   "registro_senasa": "32779",
-   "nombre_comercial": "ADAMA ESSENTIALS PREMERGE",
-   "categoria": "HERBICIDA",
-   "empresa": "ADAMA ARGENTINA SOCIEDAD ANONIMA",
-   "formulacion": "EC",
-   "principio_activo": "TRIFLURALINA 60%",
-   "unidad_medida": "L",
-   "familia": "HRAC 3"
-  },
-  {
    "registro_senasa": "32116",
    "nombre_comercial": "ADAMA ESSENTIALS PROMETREX FW",
    "categoria": "HERBICIDA",
@@ -4955,26 +6214,6 @@
    "principio_activo": "PROMETRINA 50%",
    "unidad_medida": "L",
    "familia": "HRAC 5"
-  },
-  {
-   "registro_senasa": "31389",
-   "nombre_comercial": "ADAMA ESSENTIALS RAINBOW",
-   "categoria": "HERBICIDA",
-   "empresa": "ADAMA ARGENTINA SOCIEDAD ANONIMA",
-   "formulacion": "EC",
-   "principio_activo": "FLUROCLORIDONA 25%",
-   "unidad_medida": "L",
-   "familia": "HRAC 12"
-  },
-  {
-   "registro_senasa": "38476",
-   "nombre_comercial": "ADAMA ESSENTIALS RAINBOW EC",
-   "categoria": "HERBICIDA",
-   "empresa": "ADAMA ARGENTINA SOCIEDAD ANONIMA",
-   "formulacion": "EC",
-   "principio_activo": "FLUROCLORIDONA 25%",
-   "unidad_medida": "L",
-   "familia": "HRAC 12"
   },
   {
    "registro_senasa": "38162",
@@ -5225,16 +6464,6 @@
    "principio_activo": "IMAZAPIC (SAL/ESTER SIN DETERMINAR) 31,8% (EA 26,2%) + IMAZAPIR SAL ISOPROPILAMINA 10,7% (EA 8,7%)",
    "unidad_medida": "L",
    "familia": "HRAC 2"
-  },
-  {
-   "registro_senasa": "38478",
-   "nombre_comercial": "ADAMA OXALIS 48 SC",
-   "categoria": "HERBICIDA",
-   "empresa": "ADAMA ARGENTINA SOCIEDAD ANONIMA",
-   "formulacion": "SC",
-   "principio_activo": "FLUMIOXAZIN 48%",
-   "unidad_medida": "L",
-   "familia": "HRAC 14"
   },
   {
    "registro_senasa": "37550",
@@ -5567,16 +6796,6 @@
    "familia": null
   },
   {
-   "registro_senasa": "36254",
-   "nombre_comercial": "ADENGO",
-   "categoria": "HERBICIDA",
-   "empresa": "AGRO BAYER S. R. L.",
-   "formulacion": "SC",
-   "principio_activo": "ISOXAFLUTOLE 22,5% + CIPROSULFAMIDE 15% + TIENCARBAZONE METIL 9%",
-   "unidad_medida": "L",
-   "familia": "HRAC 27 + HRAC 2"
-  },
-  {
    "registro_senasa": "36103",
    "nombre_comercial": "ADERGREEN",
    "categoria": "ADYUVANTE",
@@ -5787,16 +7006,6 @@
    "familia": null
   },
   {
-   "registro_senasa": "34130",
-   "nombre_comercial": "AFFINITY",
-   "categoria": "HERBICIDA",
-   "empresa": "FMC QUIMICA S. A.",
-   "formulacion": "EC",
-   "principio_activo": "CARFENTRAZONE ETIL 40%",
-   "unidad_medida": "L",
-   "familia": "HRAC 14"
-  },
-  {
    "registro_senasa": "30140",
    "nombre_comercial": "AFICIDA",
    "categoria": "INSECTICIDA",
@@ -5907,16 +7116,6 @@
    "familia": "IRAC 6"
   },
   {
-   "registro_senasa": "39544",
-   "nombre_comercial": "AGRINOVO",
-   "categoria": "INSECTICIDA",
-   "empresa": "SHARDA CROPCHEM LIMITED SUC.EMP.EXT.",
-   "formulacion": "WP",
-   "principio_activo": "ACETAMIPRID 70%",
-   "unidad_medida": "Kg",
-   "familia": "IRAC 4A"
-  },
-  {
    "registro_senasa": "42259",
    "nombre_comercial": "AGRINOVO",
    "categoria": "INSECTICIDA",
@@ -5925,6 +7124,16 @@
    "principio_activo": "SPIROTETRAMAT 15%",
    "unidad_medida": "L",
    "familia": "IRAC 23"
+  },
+  {
+   "registro_senasa": "39544",
+   "nombre_comercial": "AGRINOVO",
+   "categoria": "INSECTICIDA",
+   "empresa": "SHARDA CROPCHEM LIMITED SUC.EMP.EXT.",
+   "formulacion": "WP",
+   "principio_activo": "ACETAMIPRID 70%",
+   "unidad_medida": "Kg",
+   "familia": "IRAC 4A"
   },
   {
    "registro_senasa": "37898",
@@ -6807,16 +8016,6 @@
    "familia": "FRAC 3 + FRAC 11"
   },
   {
-   "registro_senasa": "39928",
-   "nombre_comercial": "ALLGRAM 2,4D 89 ESTER",
-   "categoria": "HERBICIDA",
-   "empresa": "FARMCHEM SA",
-   "formulacion": "EC",
-   "principio_activo": "2,4 D ESTER ETILHEXILICO 89% (EA 59%)",
-   "unidad_medida": "L",
-   "familia": "HRAC 4"
-  },
-  {
    "registro_senasa": "38168",
    "nombre_comercial": "ALLGRAM 2,4D SDA 60",
    "categoria": "HERBICIDA",
@@ -7467,22 +8666,22 @@
    "familia": "HRAC 1"
   },
   {
-   "registro_senasa": "38510",
-   "nombre_comercial": "AR WATER ACONDICIONADOR DE AGUAS",
-   "categoria": "ADYUVANTE",
-   "empresa": "SERV - QUIM S.A.",
-   "formulacion": "SL",
-   "principio_activo": "NONIL FENOL ETOXILADO 19%",
-   "unidad_medida": "L",
-   "familia": null
-  },
-  {
    "registro_senasa": "41355",
    "nombre_comercial": "AR WATER ACONDICIONADOR DE AGUAS",
    "categoria": "ADYUVANTE",
    "empresa": "SERV - QUIM S.A.",
    "formulacion": "SL",
    "principio_activo": "ACIDO FOSFORICO 40%",
+   "unidad_medida": "L",
+   "familia": null
+  },
+  {
+   "registro_senasa": "38510",
+   "nombre_comercial": "AR WATER ACONDICIONADOR DE AGUAS",
+   "categoria": "ADYUVANTE",
+   "empresa": "SERV - QUIM S.A.",
+   "formulacion": "SL",
+   "principio_activo": "NONIL FENOL ETOXILADO 19%",
    "unidad_medida": "L",
    "familia": null
   },
@@ -8735,26 +9934,6 @@
    "principio_activo": "FLUBENDIAMIDE 22,2%",
    "unidad_medida": "L",
    "familia": "IRAC 28"
-  },
-  {
-   "registro_senasa": "40586",
-   "nombre_comercial": "ATANOR FLUMIOXAZIN 48 SC",
-   "categoria": "HERBICIDA",
-   "empresa": "ATANOR SOCIEDAD EN COMANDITA POR ACCIONES",
-   "formulacion": "SC",
-   "principio_activo": "FLUMIOXAZIN 48%",
-   "unidad_medida": "L",
-   "familia": "HRAC 14"
-  },
-  {
-   "registro_senasa": "41483",
-   "nombre_comercial": "ATANOR FLUMIOXAZIN 48 SC HH",
-   "categoria": "HERBICIDA",
-   "empresa": "ATANOR SOCIEDAD EN COMANDITA POR ACCIONES",
-   "formulacion": "SC",
-   "principio_activo": "FLUMIOXAZIN 48%",
-   "unidad_medida": "L",
-   "familia": "HRAC 14"
   },
   {
    "registro_senasa": "39818",
@@ -10017,16 +11196,6 @@
    "familia": "HRAC 9"
   },
   {
-   "registro_senasa": "42539",
-   "nombre_comercial": "AUTHENCE CON TECNOLOGIA VIRESTINA",
-   "categoria": "HERBICIDA",
-   "empresa": "SYNGENTA AGRO SOCIEDAD ANONIMA",
-   "formulacion": "EC",
-   "principio_activo": "METPROXYBICYCLONA 20%",
-   "unidad_medida": "L",
-   "familia": "HRAC 1"
-  },
-  {
    "registro_senasa": "37181",
    "nombre_comercial": "AVAL DOBLE",
    "categoria": "INSECTICIDA",
@@ -10777,16 +11946,6 @@
    "familia": "IRAC 3A"
   },
   {
-   "registro_senasa": "35942",
-   "nombre_comercial": "BAGUAL",
-   "categoria": "ADYUVANTE",
-   "empresa": "FACYT I + D SA",
-   "formulacion": "SL",
-   "principio_activo": "DODECIL BENCEN SULFONICO 13,5%",
-   "unidad_medida": "L",
-   "familia": null
-  },
-  {
    "registro_senasa": "35883",
    "nombre_comercial": "BAGUAL",
    "categoria": "HERBICIDA",
@@ -10795,6 +11954,16 @@
    "principio_activo": "METOLACLORO 96%",
    "unidad_medida": "L",
    "familia": "HRAC 15"
+  },
+  {
+   "registro_senasa": "35942",
+   "nombre_comercial": "BAGUAL",
+   "categoria": "ADYUVANTE",
+   "empresa": "FACYT I + D SA",
+   "formulacion": "SL",
+   "principio_activo": "DODECIL BENCEN SULFONICO 13,5%",
+   "unidad_medida": "L",
+   "familia": null
   },
   {
    "registro_senasa": "41175",
@@ -11265,16 +12434,6 @@
    "principio_activo": "PIRACLOSTROBIN 17,8% + FLUXAPIROXAD 8,9% + MEFENTRIFLUCONAZOLE 13,3%",
    "unidad_medida": "L",
    "familia": "FRAC 11 + FRAC 7 + FRAC 3"
-  },
-  {
-   "registro_senasa": "35637",
-   "nombre_comercial": "BEMUS",
-   "categoria": "HERBICIDA",
-   "empresa": "HELM ARGENTINA S. R. L.",
-   "formulacion": "SL",
-   "principio_activo": "DICAMBA (SAL/ESTER SIN DETERMINAR) 57,8%",
-   "unidad_medida": "L",
-   "familia": "HRAC 4"
   },
   {
    "registro_senasa": "40402",
@@ -12617,22 +13776,22 @@
    "familia": null
   },
   {
-   "registro_senasa": "40360",
-   "nombre_comercial": "BIOULTIMATE MAGNA",
-   "categoria": "ADYUVANTE",
-   "empresa": "NUPROAGRO S.A.",
-   "formulacion": "EC",
-   "principio_activo": "ESTERES METILICOS DE ACIDOS GRASOS DE ACEITE DE SOJA 80%",
-   "unidad_medida": "L",
-   "familia": null
-  },
-  {
    "registro_senasa": "38266",
    "nombre_comercial": "BIOULTIMATE MAGNA",
    "categoria": "ADYUVANTE",
    "empresa": "FRAGARIA S.A.",
    "formulacion": "EC",
    "principio_activo": "ESTERES METILICOS DE ACIDOS GRASOS DE ACEITE VEGETAL 76%",
+   "unidad_medida": "L",
+   "familia": null
+  },
+  {
+   "registro_senasa": "40360",
+   "nombre_comercial": "BIOULTIMATE MAGNA",
+   "categoria": "ADYUVANTE",
+   "empresa": "NUPROAGRO S.A.",
+   "formulacion": "EC",
+   "principio_activo": "ESTERES METILICOS DE ACIDOS GRASOS DE ACEITE DE SOJA 80%",
    "unidad_medida": "L",
    "familia": null
   },
@@ -12705,16 +13864,6 @@
    "principio_activo": "ZETAMETRINA 20%",
    "unidad_medida": "L",
    "familia": "IRAC 3A"
-  },
-  {
-   "registro_senasa": "38552",
-   "nombre_comercial": "BLADE",
-   "categoria": "HERBICIDA",
-   "empresa": "NOVA S. A. U.",
-   "formulacion": "EC",
-   "principio_activo": "FLUROXIPIR MEPTIL 48%",
-   "unidad_medida": "L",
-   "familia": "HRAC 4"
   },
   {
    "registro_senasa": "42502",
@@ -13185,16 +14334,6 @@
    "principio_activo": "BROMOXINIL OCTONOATO 34,9%",
    "unidad_medida": "L",
    "familia": "HRAC 6"
-  },
-  {
-   "registro_senasa": "32478",
-   "nombre_comercial": "BRODAL 50 SC",
-   "categoria": "HERBICIDA",
-   "empresa": "AGRO BAYER S. R. L.",
-   "formulacion": "SC",
-   "principio_activo": "DIFLUFENICAN 50%",
-   "unidad_medida": "L",
-   "familia": "HRAC 12"
   },
   {
    "registro_senasa": "40536",
@@ -16307,16 +17446,6 @@
    "familia": "HRAC 1"
   },
   {
-   "registro_senasa": "41348",
-   "nombre_comercial": "CLETO SIGMA",
-   "categoria": "HERBICIDA",
-   "empresa": "SIGMA AGRO S.A",
-   "formulacion": "EC",
-   "principio_activo": "CLETODIM 24%",
-   "unidad_medida": "L",
-   "familia": "HRAC 1"
-  },
-  {
    "registro_senasa": "40726",
    "nombre_comercial": "CLETO SURCROPS",
    "categoria": "HERBICIDA",
@@ -16427,16 +17556,6 @@
    "familia": "HRAC 1"
   },
   {
-   "registro_senasa": "40161",
-   "nombre_comercial": "CLETODIM 24 EC SIGMA",
-   "categoria": "HERBICIDA",
-   "empresa": "SIGMA AGRO S.A",
-   "formulacion": "EC",
-   "principio_activo": "CLETODIM 24%",
-   "unidad_medida": "L",
-   "familia": "HRAC 1"
-  },
-  {
    "registro_senasa": "40751",
    "nombre_comercial": "CLETODIM 24 JLB",
    "categoria": "HERBICIDA",
@@ -16481,16 +17600,6 @@
    "nombre_comercial": "CLETODIM 24 NEXORA",
    "categoria": "HERBICIDA",
    "empresa": "3 LOMAS S.A.",
-   "formulacion": "EC",
-   "principio_activo": "CLETODIM 24%",
-   "unidad_medida": "L",
-   "familia": "HRAC 1"
-  },
-  {
-   "registro_senasa": "38438",
-   "nombre_comercial": "CLETODIM 24 NOVA",
-   "categoria": "HERBICIDA",
-   "empresa": "NOVA S. A. U.",
    "formulacion": "EC",
    "principio_activo": "CLETODIM 24%",
    "unidad_medida": "L",
@@ -16797,36 +17906,6 @@
    "familia": "HRAC 1"
   },
   {
-   "registro_senasa": "41841",
-   "nombre_comercial": "CLETODIM NOVA",
-   "categoria": "HERBICIDA",
-   "empresa": "NOVA S. A. U.",
-   "formulacion": "EC",
-   "principio_activo": "CLETODIM 24%",
-   "unidad_medida": "L",
-   "familia": "HRAC 1"
-  },
-  {
-   "registro_senasa": "39468",
-   "nombre_comercial": "CLETODIM NOVA 24",
-   "categoria": "HERBICIDA",
-   "empresa": "NOVA S. A. U.",
-   "formulacion": "EC",
-   "principio_activo": "CLETODIM 24%",
-   "unidad_medida": "L",
-   "familia": "HRAC 1"
-  },
-  {
-   "registro_senasa": "40409",
-   "nombre_comercial": "CLETODIM NOVA EC",
-   "categoria": "HERBICIDA",
-   "empresa": "NOVA S. A. U.",
-   "formulacion": "EC",
-   "principio_activo": "CLETODIM 24%",
-   "unidad_medida": "L",
-   "familia": "HRAC 1"
-  },
-  {
    "registro_senasa": "41048",
    "nombre_comercial": "CLETODIM PLUS SIGMA",
    "categoria": "HERBICIDA",
@@ -16851,16 +17930,6 @@
    "nombre_comercial": "CLETODIM RURALCO 24 EC",
    "categoria": "HERBICIDA",
    "empresa": "RURALCO SOLUCIONES S.A.",
-   "formulacion": "EC",
-   "principio_activo": "CLETODIM 24%",
-   "unidad_medida": "L",
-   "familia": "HRAC 1"
-  },
-  {
-   "registro_senasa": "38707",
-   "nombre_comercial": "CLETODIM SIGMA",
-   "categoria": "HERBICIDA",
-   "empresa": "SIGMA AGRO S.A",
    "formulacion": "EC",
    "principio_activo": "CLETODIM 24%",
    "unidad_medida": "L",
@@ -17133,16 +18202,6 @@
    "empresa": "AGROINSUMOS B Y L S.A.",
    "formulacion": "SL",
    "principio_activo": "CLOPYRALID 59,89% (EA 30%)",
-   "unidad_medida": "L",
-   "familia": "HRAC 4"
-  },
-  {
-   "registro_senasa": "38596",
-   "nombre_comercial": "CLOPYRALID NOVA",
-   "categoria": "HERBICIDA",
-   "empresa": "NOVA S. A. U.",
-   "formulacion": "SL",
-   "principio_activo": "CLOPYRALID 47,51%",
    "unidad_medida": "L",
    "familia": "HRAC 4"
   },
@@ -17441,16 +18500,6 @@
    "nombre_comercial": "CLORIMURON 75 FENDER",
    "categoria": "HERBICIDA",
    "empresa": "PRO CROP S.A.",
-   "formulacion": "WG",
-   "principio_activo": "CLORIMURON ETIL 75%",
-   "unidad_medida": "Kg",
-   "familia": "HRAC 2"
-  },
-  {
-   "registro_senasa": "38863",
-   "nombre_comercial": "CLORIMURON 75 MAX SIGMA",
-   "categoria": "HERBICIDA",
-   "empresa": "SIGMA AGRO S.A",
    "formulacion": "WG",
    "principio_activo": "CLORIMURON ETIL 75%",
    "unidad_medida": "Kg",
@@ -21617,16 +22666,6 @@
    "familia": "HRAC 4"
   },
   {
-   "registro_senasa": "38176",
-   "nombre_comercial": "DICAMBA SIGMA",
-   "categoria": "HERBICIDA",
-   "empresa": "SIGMA AGRO S.A",
-   "formulacion": "SL",
-   "principio_activo": "DICAMBA SAL DIMETILAMINA (DMA) 57,8% (EA 48%)",
-   "unidad_medida": "L",
-   "familia": "HRAC 4"
-  },
-  {
    "registro_senasa": "40091",
    "nombre_comercial": "DICAMBA SIP",
    "categoria": "HERBICIDA",
@@ -23777,16 +24816,6 @@
    "familia": "IRAC 28"
   },
   {
-   "registro_senasa": "41552",
-   "nombre_comercial": "EFFECTUX",
-   "categoria": "HERBICIDA",
-   "empresa": "SIPCAM ARGENTINA S.R.L.",
-   "formulacion": "ME",
-   "principio_activo": "DICAMBA (SAL/ESTER SIN DETERMINAR) 4,8% + 2,4 D (SAL/ESTER SIN DETERMINAR) 30%",
-   "unidad_medida": "L",
-   "familia": "HRAC 4"
-  },
-  {
    "registro_senasa": "40330",
    "nombre_comercial": "EFFECTUX XTREME",
    "categoria": "HERBICIDA",
@@ -24555,16 +25584,6 @@
    "principio_activo": "ESTERES METILICOS DE ACIDOS GRASOS DE ACEITE DE SOJA 76,6% (EA 86,1%)",
    "unidad_medida": "L",
    "familia": null
-  },
-  {
-   "registro_senasa": "40226",
-   "nombre_comercial": "ENELAN",
-   "categoria": "HERBICIDA",
-   "empresa": "SYNGENTA AGRO SOCIEDAD ANONIMA",
-   "formulacion": "SC",
-   "principio_activo": "SULFENTRAZONE 50%",
-   "unidad_medida": "L",
-   "familia": "HRAC 14"
   },
   {
    "registro_senasa": "38314",
@@ -26257,16 +27276,6 @@
    "familia": "IRAC 3A"
   },
   {
-   "registro_senasa": "41434",
-   "nombre_comercial": "FENTRA",
-   "categoria": "HERBICIDA",
-   "empresa": "SINER S A",
-   "formulacion": "SC",
-   "principio_activo": "SULFENTRAZONE 50%",
-   "unidad_medida": "L",
-   "familia": "HRAC 14"
-  },
-  {
    "registro_senasa": "36518",
    "nombre_comercial": "FENTROL",
    "categoria": "INSECTICIDA",
@@ -26937,26 +27946,6 @@
    "familia": "HRAC 10"
   },
   {
-   "registro_senasa": "34319",
-   "nombre_comercial": "FINESSE",
-   "categoria": "HERBICIDA",
-   "empresa": "FMC QUIMICA S. A.",
-   "formulacion": "WG",
-   "principio_activo": "CLORSULFURON 62,5% + METSULFURON METIL 12,5%",
-   "unidad_medida": "Kg",
-   "familia": "HRAC 2"
-  },
-  {
-   "registro_senasa": "36669",
-   "nombre_comercial": "FINESSE WG",
-   "categoria": "HERBICIDA",
-   "empresa": "FMC QUIMICA S. A.",
-   "formulacion": "WG",
-   "principio_activo": "CLORSULFURON 62,5% + METSULFURON METIL 12,5%",
-   "unidad_medida": "Kg",
-   "familia": "HRAC 2"
-  },
-  {
    "registro_senasa": "42541",
    "nombre_comercial": "FIPRO 20 DELTA AGRO",
    "categoria": "INSECTICIDA",
@@ -27097,16 +28086,6 @@
    "familia": "HRAC 14"
   },
   {
-   "registro_senasa": "38878",
-   "nombre_comercial": "FLECHA",
-   "categoria": "HERBICIDA",
-   "empresa": "INDUAGRO SRL",
-   "formulacion": "EC",
-   "principio_activo": "HALOXIFOP-P METIL 54%",
-   "unidad_medida": "L",
-   "familia": "HRAC 1"
-  },
-  {
    "registro_senasa": "37482",
    "nombre_comercial": "FLECHA",
    "categoria": "ADYUVANTE",
@@ -27115,6 +28094,16 @@
    "principio_activo": "ACIDO CITRICO 31%",
    "unidad_medida": "L",
    "familia": null
+  },
+  {
+   "registro_senasa": "38878",
+   "nombre_comercial": "FLECHA",
+   "categoria": "HERBICIDA",
+   "empresa": "INDUAGRO SRL",
+   "formulacion": "EC",
+   "principio_activo": "HALOXIFOP-P METIL 54%",
+   "unidad_medida": "L",
+   "familia": "HRAC 1"
   },
   {
    "registro_senasa": "42474",
@@ -29557,16 +30546,6 @@
    "familia": "IRAC 3A"
   },
   {
-   "registro_senasa": "35047",
-   "nombre_comercial": "FURY 20 EW",
-   "categoria": "INSECTICIDA",
-   "empresa": "FMC QUIMICA S. A.",
-   "formulacion": "EW",
-   "principio_activo": "ZETAMETRINA 20%",
-   "unidad_medida": "L",
-   "familia": "IRAC 3A"
-  },
-  {
    "registro_senasa": "41153",
    "nombre_comercial": "FUSSA",
    "categoria": "HERBICIDA",
@@ -31527,16 +32506,6 @@
    "familia": "HRAC 9"
   },
   {
-   "registro_senasa": "42256",
-   "nombre_comercial": "GLIFOSATO MACRO PROTEC",
-   "categoria": "HERBICIDA",
-   "empresa": "LDC ARGENTINA S.A.",
-   "formulacion": "SL",
-   "principio_activo": "GLIFOSATO SAL POTASICA 66,2% (EA 54%)",
-   "unidad_medida": "L",
-   "familia": "HRAC 9"
-  },
-  {
    "registro_senasa": "41874",
    "nombre_comercial": "GLIFOSATO MACRO PROTEC MAX",
    "categoria": "HERBICIDA",
@@ -31544,16 +32513,6 @@
    "formulacion": "SG",
    "principio_activo": "GLIFOSATO SAL MONOAMONICA 75,7% (EA 68,8%)",
    "unidad_medida": "Kg",
-   "familia": "HRAC 9"
-  },
-  {
-   "registro_senasa": "41418",
-   "nombre_comercial": "GLIFOSATO MACRO PROTECT 66.2%",
-   "categoria": "HERBICIDA",
-   "empresa": "LDC ARGENTINA S.A.",
-   "formulacion": "SL",
-   "principio_activo": "GLIFOSATO SAL POTASICA 66,2% (EA 54%)",
-   "unidad_medida": "L",
    "familia": "HRAC 9"
   },
   {
@@ -31571,16 +32530,6 @@
    "nombre_comercial": "GLIFOSATO MAX INZIRA",
    "categoria": "HERBICIDA",
    "empresa": "RINDES Y CULTIVOS DAS S.A. - FEDEA S.A. - SUMIDAS JV S.A.- DASER AGRO S.A. - AMBITO DAS S.A. - TERRAMAR JV S.A. - DESAB S.A. U. T. E.",
-   "formulacion": "SG",
-   "principio_activo": "GLIFOSATO SAL MONOAMONICA 75,7% (EA 68,8%)",
-   "unidad_medida": "Kg",
-   "familia": "HRAC 9"
-  },
-  {
-   "registro_senasa": "38620",
-   "nombre_comercial": "GLIFOSATO MAX SIGMA",
-   "categoria": "HERBICIDA",
-   "empresa": "SIGMA AGRO S.A",
    "formulacion": "SG",
    "principio_activo": "GLIFOSATO SAL MONOAMONICA 75,7% (EA 68,8%)",
    "unidad_medida": "Kg",
@@ -36777,16 +37726,6 @@
    "familia": "HRAC 4"
   },
   {
-   "registro_senasa": "34791",
-   "nombre_comercial": "KAMBA",
-   "categoria": "HERBICIDA",
-   "empresa": "SUMITOMO CHEMICAL ARGENTINA S.A.",
-   "formulacion": "SL",
-   "principio_activo": "DICAMBA SAL DIMETILAMINA (DMA) 57,71% (EA 48%)",
-   "unidad_medida": "L",
-   "familia": "HRAC 4"
-  },
-  {
    "registro_senasa": "40812",
    "nombre_comercial": "KAMBA DUO",
    "categoria": "HERBICIDA",
@@ -37947,26 +38886,6 @@
    "familia": null
   },
   {
-   "registro_senasa": "38279",
-   "nombre_comercial": "LA TIJERETA BOX L",
-   "categoria": "HERBICIDA",
-   "empresa": "AGRO BAYER S. R. L.",
-   "formulacion": "SG",
-   "principio_activo": "GLIFOSATO SAL MONOAMONICA 79,2% (EA 72%)",
-   "unidad_medida": "Kg",
-   "familia": "HRAC 9"
-  },
-  {
-   "registro_senasa": "41222",
-   "nombre_comercial": "LA TIJERETA BOX W",
-   "categoria": "HERBICIDA",
-   "empresa": "AGRO BAYER S. R. L.",
-   "formulacion": "SG",
-   "principio_activo": "GLIFOSATO SAL MONOAMONICA 79,2% (EA 72%)",
-   "unidad_medida": "Kg",
-   "familia": "HRAC 9"
-  },
-  {
    "registro_senasa": "38409",
    "nombre_comercial": "LA TIJERETA IMAZETAPYR",
    "categoria": "HERBICIDA",
@@ -38667,26 +39586,6 @@
    "familia": "IRAC 3A"
   },
   {
-   "registro_senasa": "39189",
-   "nombre_comercial": "LATIUM SUPER",
-   "categoria": "HERBICIDA",
-   "empresa": "AGRO BAYER S. R. L.",
-   "formulacion": "EC",
-   "principio_activo": "CLETODIM 36%",
-   "unidad_medida": "L",
-   "familia": "HRAC 1"
-  },
-  {
-   "registro_senasa": "39242",
-   "nombre_comercial": "LATIUM SUPER U.",
-   "categoria": "HERBICIDA",
-   "empresa": "UPL ARGENTINA S. A.",
-   "formulacion": "EC",
-   "principio_activo": "CLETODIM 36%",
-   "unidad_medida": "L",
-   "familia": "HRAC 1"
-  },
-  {
    "registro_senasa": "40055",
    "nombre_comercial": "LAUDIS",
    "categoria": "HERBICIDA",
@@ -38957,22 +39856,22 @@
    "familia": "HRAC 15"
   },
   {
-   "registro_senasa": "40459",
-   "nombre_comercial": "LEXION METIL OIL",
-   "categoria": "ADYUVANTE",
-   "empresa": "PRO CROP S.A.",
-   "formulacion": "EC",
-   "principio_activo": "ESTERES METILICOS DE ACIDOS GRASOS DE ACEITE DE SOJA 76,6% (EA 86,1%)",
-   "unidad_medida": "L",
-   "familia": null
-  },
-  {
    "registro_senasa": "42214",
    "nombre_comercial": "LEXION METIL OIL",
    "categoria": "ADYUVANTE",
    "empresa": "PRO CROP S.A.",
    "formulacion": "EC",
    "principio_activo": "ESTERES METILICOS DE ACIDOS GRASOS DE ACEITE VEGETAL 82% + ESTERES METILICOS DE ACIDOS GRASOS DE ACEITE DE SOJA 0%",
+   "unidad_medida": "L",
+   "familia": null
+  },
+  {
+   "registro_senasa": "40459",
+   "nombre_comercial": "LEXION METIL OIL",
+   "categoria": "ADYUVANTE",
+   "empresa": "PRO CROP S.A.",
+   "formulacion": "EC",
+   "principio_activo": "ESTERES METILICOS DE ACIDOS GRASOS DE ACEITE DE SOJA 76,6% (EA 86,1%)",
    "unidad_medida": "L",
    "familia": null
   },
@@ -39125,16 +40024,6 @@
    "principio_activo": "GLUFOSINATO DE AMONIO 12,8% + S-METOLACLORO 30%",
    "unidad_medida": "L",
    "familia": "HRAC 10 + HRAC 15"
-  },
-  {
-   "registro_senasa": "36831",
-   "nombre_comercial": "LIGATE",
-   "categoria": "HERBICIDA",
-   "empresa": "CORTEVA AGRISCIENCE ARGENTINA SRL",
-   "formulacion": "WG",
-   "principio_activo": "CLORIMURON ETIL 20% + SULFOMETURON METIL 15%",
-   "unidad_medida": "Kg",
-   "familia": "HRAC 2"
   },
   {
    "registro_senasa": "36379",
@@ -39417,16 +40306,6 @@
    "familia": "HRAC 14 + HRAC 15"
   },
   {
-   "registro_senasa": "41736",
-   "nombre_comercial": "LOCSUFON XTRA",
-   "categoria": "HERBICIDA",
-   "empresa": "RAINBOW AGROSCIENSES SA",
-   "formulacion": "WG",
-   "principio_activo": "PIROXASULFONE 85%",
-   "unidad_medida": "Kg",
-   "familia": "HRAC 15"
-  },
-  {
    "registro_senasa": "38373",
    "nombre_comercial": "LOFT",
    "categoria": "INSECTICIDA",
@@ -39535,16 +40414,6 @@
    "principio_activo": "ESTERES METILICOS DE ACIDOS GRASOS DE ACEITE VEGETAL 75%",
    "unidad_medida": "L",
    "familia": null
-  },
-  {
-   "registro_senasa": "33572",
-   "nombre_comercial": "LONTREL",
-   "categoria": "HERBICIDA",
-   "empresa": "CORTEVA AGRISCIENCE ARGENTINA SRL",
-   "formulacion": "SL",
-   "principio_activo": "CLOPYRALID 47,5%",
-   "unidad_medida": "L",
-   "familia": "HRAC 4"
   },
   {
    "registro_senasa": "35492",
@@ -39997,16 +40866,6 @@
    "familia": "HRAC 15"
   },
   {
-   "registro_senasa": "42629",
-   "nombre_comercial": "MACROPROTECT CLETODIM 24",
-   "categoria": "HERBICIDA",
-   "empresa": "LDC ARGENTINA S.A.",
-   "formulacion": "EC",
-   "principio_activo": "CLETODIM 24%",
-   "unidad_medida": "L",
-   "familia": "HRAC 1"
-  },
-  {
    "registro_senasa": "42628",
    "nombre_comercial": "MACROPROTECT GLUFO 20",
    "categoria": "HERBICIDA",
@@ -40087,16 +40946,6 @@
    "familia": "HRAC 5"
   },
   {
-   "registro_senasa": "38811",
-   "nombre_comercial": "MAGIC",
-   "categoria": "INSECTICIDA",
-   "empresa": "WECAN AGRO SA",
-   "formulacion": "SC",
-   "principio_activo": "ALFACIPERMETRINA/ALFAMETRINA 20%",
-   "unidad_medida": "L",
-   "familia": "IRAC 3A"
-  },
-  {
    "registro_senasa": "36119",
    "nombre_comercial": "MAGIC",
    "categoria": "INSECTICIDA",
@@ -40105,6 +40954,16 @@
    "principio_activo": "BIFENTRIN 3% + IMIDACLOPRID 10%",
    "unidad_medida": "L",
    "familia": "IRAC 3A + IRAC 4A"
+  },
+  {
+   "registro_senasa": "38811",
+   "nombre_comercial": "MAGIC",
+   "categoria": "INSECTICIDA",
+   "empresa": "WECAN AGRO SA",
+   "formulacion": "SC",
+   "principio_activo": "ALFACIPERMETRINA/ALFAMETRINA 20%",
+   "unidad_medida": "L",
+   "familia": "IRAC 3A"
   },
   {
    "registro_senasa": "34229",
@@ -42837,16 +43696,6 @@
    "familia": "IRAC 4A"
   },
   {
-   "registro_senasa": "33953",
-   "nombre_comercial": "MEXTROL",
-   "categoria": "HERBICIDA",
-   "empresa": "SUMITOMO CHEMICAL ARGENTINA S.A.",
-   "formulacion": "EC",
-   "principio_activo": "BROMOXINIL OCTONOATO 34,2%",
-   "unidad_medida": "L",
-   "familia": "HRAC 6"
-  },
-  {
    "registro_senasa": "40357",
    "nombre_comercial": "MEZCAL",
    "categoria": "FUNGICIDA",
@@ -43079,16 +43928,6 @@
   {
    "registro_senasa": "40004",
    "nombre_comercial": "MILENIAL AR",
-   "categoria": "HERBICIDA",
-   "empresa": "ATANOR SOCIEDAD EN COMANDITA POR ACCIONES",
-   "formulacion": "SC",
-   "principio_activo": "SULFENTRAZONE 50%",
-   "unidad_medida": "L",
-   "familia": "HRAC 14"
-  },
-  {
-   "registro_senasa": "39103",
-   "nombre_comercial": "MILENIAL SC",
    "categoria": "HERBICIDA",
    "empresa": "ATANOR SOCIEDAD EN COMANDITA POR ACCIONES",
    "formulacion": "SC",
@@ -43715,26 +44554,6 @@
    "principio_activo": "CIPERMETRINA 2%",
    "unidad_medida": "L",
    "familia": "IRAC 3A"
-  },
-  {
-   "registro_senasa": "36787",
-   "nombre_comercial": "MULAN",
-   "categoria": "HERBICIDA",
-   "empresa": "AGROFINA S A",
-   "formulacion": "SC",
-   "principio_activo": "FLUMETSULAM 12%",
-   "unidad_medida": "L",
-   "familia": "HRAC 2"
-  },
-  {
-   "registro_senasa": "40426",
-   "nombre_comercial": "MULAN 48",
-   "categoria": "HERBICIDA",
-   "empresa": "AGROFINA S A",
-   "formulacion": "SC",
-   "principio_activo": "FLUMETSULAM 48%",
-   "unidad_medida": "L",
-   "familia": "HRAC 2"
   },
   {
    "registro_senasa": "41126",
@@ -45437,16 +46256,6 @@
    "familia": null
   },
   {
-   "registro_senasa": "39234",
-   "nombre_comercial": "NYAMBI FLO",
-   "categoria": "HERBICIDA",
-   "empresa": "SUMMIT AGRO ARGENTINA S A",
-   "formulacion": "SC",
-   "principio_activo": "FLUMIOXAZIN 48%",
-   "unidad_medida": "L",
-   "familia": "HRAC 14"
-  },
-  {
    "registro_senasa": "39406",
    "nombre_comercial": "OBERON",
    "categoria": "INSECTICIDA",
@@ -45905,16 +46714,6 @@
    "principio_activo": "FLUAZIFOP-P BUTIL 35%",
    "unidad_medida": "L",
    "familia": "HRAC 1"
-  },
-  {
-   "registro_senasa": "38198",
-   "nombre_comercial": "ONEDROP BIO",
-   "categoria": "ADYUVANTE",
-   "empresa": "ARROWWS ARGENTINA S. R. L.",
-   "formulacion": "SL",
-   "principio_activo": "ALCOHOL LAURICO ETOXILADO 32,7%",
-   "unidad_medida": "L",
-   "familia": null
   },
   {
    "registro_senasa": "36055",
@@ -46684,26 +47483,6 @@
    "formulacion": "SG",
    "principio_activo": "GLIFOSATO (SAL/ESTER SIN DETERMINAR) 75,7%",
    "unidad_medida": "Kg",
-   "familia": "HRAC 9"
-  },
-  {
-   "registro_senasa": "34928",
-   "nombre_comercial": "PANZER GOLD",
-   "categoria": "HERBICIDA",
-   "empresa": "CORTEVA AGRISCIENCE ARGENTINA SRL",
-   "formulacion": "SL",
-   "principio_activo": "GLIFOSATO SAL DIMETILAMINA 60,8% (EA 48%)",
-   "unidad_medida": "L",
-   "familia": "HRAC 9"
-  },
-  {
-   "registro_senasa": "37176",
-   "nombre_comercial": "PANZER GOLD EN",
-   "categoria": "HERBICIDA",
-   "empresa": "RINDES Y CULTIVOS DAS S.A. - FEDEA S.A. - SUMIDAS JV S.A.- DASER AGRO S.A. - AMBITO DAS S.A. - TERRAMAR JV S.A. - DESAB S.A. U. T. E.",
-   "formulacion": "SL",
-   "principio_activo": "GLIFOSATO SAL DIMETILAMINA 60,8% (EA 48%)",
-   "unidad_medida": "L",
    "familia": "HRAC 9"
   },
   {
@@ -47637,16 +48416,6 @@
    "familia": "HRAC 2"
   },
   {
-   "registro_senasa": "34250",
-   "nombre_comercial": "PELICAN",
-   "categoria": "HERBICIDA",
-   "empresa": "FMC QUIMICA S. A.",
-   "formulacion": "SC",
-   "principio_activo": "DIFLUFENICAN 50%",
-   "unidad_medida": "L",
-   "familia": "HRAC 12"
-  },
-  {
    "registro_senasa": "41190",
    "nombre_comercial": "PELKE",
    "categoria": "HERBICIDA",
@@ -48247,16 +49016,6 @@
    "familia": "IRAC 4A"
   },
   {
-   "registro_senasa": "38092",
-   "nombre_comercial": "PHILLAMBDA 25 ME",
-   "categoria": "INSECTICIDA",
-   "empresa": "PHILAGRO S.A",
-   "formulacion": "ME",
-   "principio_activo": "LAMBDA-CIALOTRINA 25%",
-   "unidad_medida": "L",
-   "familia": "IRAC 3A"
-  },
-  {
    "registro_senasa": "36618",
    "nombre_comercial": "PHILTRIN 25 EC",
    "categoria": "INSECTICIDA",
@@ -48503,16 +49262,6 @@
    "empresa": "JLB Y ASOCIADOS S.A",
    "formulacion": "SL",
    "principio_activo": "PICLORAM SAL TRIETANOLAMINA (TEA) 38,8% (EA 24%)",
-   "unidad_medida": "L",
-   "familia": "HRAC 4"
-  },
-  {
-   "registro_senasa": "37389",
-   "nombre_comercial": "PICLORAM 24 RAINBOW",
-   "categoria": "HERBICIDA",
-   "empresa": "RAINBOW AGROSCIENSES SA",
-   "formulacion": "SL",
-   "principio_activo": "PICLORAM SAL POTASICA 27,8% (EA 24%)",
    "unidad_medida": "L",
    "familia": "HRAC 4"
   },
@@ -49287,26 +50036,6 @@
    "familia": "HRAC 2"
   },
   {
-   "registro_senasa": "41914",
-   "nombre_comercial": "PIXAR 48% SC",
-   "categoria": "HERBICIDA",
-   "empresa": "LABORATORIOS PEYTE S.A.",
-   "formulacion": "SC",
-   "principio_activo": "PIROXASULFONE 48%",
-   "unidad_medida": "L",
-   "familia": "HRAC 15"
-  },
-  {
-   "registro_senasa": "40386",
-   "nombre_comercial": "PIXXARO",
-   "categoria": "HERBICIDA",
-   "empresa": "CORTEVA AGRISCIENCE ARGENTINA SRL",
-   "formulacion": "EC",
-   "principio_activo": "CLOQUINTOCET MEXIL 1,6% + FLUROXIPIR MEPTIL 36% + HALAUXIFEN METIL 1,7%",
-   "unidad_medida": "L",
-   "familia": "HRAC 4"
-  },
-  {
    "registro_senasa": "30327",
    "nombre_comercial": "PLACAS DEGESCH",
    "categoria": "INSECTICIDA",
@@ -49867,56 +50596,6 @@
    "familia": "HRAC 9"
   },
   {
-   "registro_senasa": "41672",
-   "nombre_comercial": "POWER MAXX 75,7",
-   "categoria": "HERBICIDA",
-   "empresa": "ATANOR SOCIEDAD EN COMANDITA POR ACCIONES",
-   "formulacion": "SG",
-   "principio_activo": "GLIFOSATO SAL MONOAMONICA 75,7% (EA 68,8%)",
-   "unidad_medida": "Kg",
-   "familia": "HRAC 9"
-  },
-  {
-   "registro_senasa": "40052",
-   "nombre_comercial": "POWER MAXX 75,7 SG",
-   "categoria": "HERBICIDA",
-   "empresa": "ATANOR SOCIEDAD EN COMANDITA POR ACCIONES",
-   "formulacion": "SG",
-   "principio_activo": "GLIFOSATO SAL MONOAMONICA 75,7% (EA 68,8%)",
-   "unidad_medida": "Kg",
-   "familia": "HRAC 9"
-  },
-  {
-   "registro_senasa": "38550",
-   "nombre_comercial": "POWER MAXX ALB",
-   "categoria": "HERBICIDA",
-   "empresa": "ATANOR SOCIEDAD EN COMANDITA POR ACCIONES",
-   "formulacion": "SG",
-   "principio_activo": "GLIFOSATO SAL MONOAMONICA 74,7% (EA 67,9%)",
-   "unidad_medida": "Kg",
-   "familia": "HRAC 9"
-  },
-  {
-   "registro_senasa": "40897",
-   "nombre_comercial": "POWER MAXX D",
-   "categoria": "HERBICIDA",
-   "empresa": "ATANOR SOCIEDAD EN COMANDITA POR ACCIONES",
-   "formulacion": "SG",
-   "principio_activo": "GLIFOSATO SAL MONOAMONICA 74,7% (EA 67,9%)",
-   "unidad_medida": "Kg",
-   "familia": "HRAC 9"
-  },
-  {
-   "registro_senasa": "38322",
-   "nombre_comercial": "POWER MAXX SG",
-   "categoria": "HERBICIDA",
-   "empresa": "ATANOR SOCIEDAD EN COMANDITA POR ACCIONES",
-   "formulacion": "SG",
-   "principio_activo": "GLIFOSATO SAL MONOAMONICA 75,7% (EA 68,8%)",
-   "unidad_medida": "Kg",
-   "familia": "HRAC 9"
-  },
-  {
    "registro_senasa": "33605",
    "nombre_comercial": "POWER PLUS ATANOR",
    "categoria": "HERBICIDA",
@@ -49985,16 +50664,6 @@
    "principio_activo": "ESTERES METILICOS DE ACIDOS GRASOS DE ACEITE DE SOJA 76,6% (EA 86,1%)",
    "unidad_medida": "L",
    "familia": null
-  },
-  {
-   "registro_senasa": "39449",
-   "nombre_comercial": "POWERSPRAY LV",
-   "categoria": "HERBICIDA",
-   "empresa": "AGRO BAYER S. R. L.",
-   "formulacion": "EC",
-   "principio_activo": "2,4 D ESTER ETILHEXILICO 102,5% (EA 68%)",
-   "unidad_medida": "L",
-   "familia": "HRAC 4"
   },
   {
    "registro_senasa": "38177",
@@ -52727,16 +53396,6 @@
    "familia": null
   },
   {
-   "registro_senasa": "41589",
-   "nombre_comercial": "RESIDUAL",
-   "categoria": "HERBICIDA",
-   "empresa": "SIPCAM ARGENTINA S.R.L.",
-   "formulacion": "SL",
-   "principio_activo": "IMAZAPIR SAL ISOPROPILAMINA 58,9% (EA 48%)",
-   "unidad_medida": "L",
-   "familia": "HRAC 2"
-  },
-  {
    "registro_senasa": "36764",
    "nombre_comercial": "RESIDUAL",
    "categoria": "HERBICIDA",
@@ -52745,6 +53404,16 @@
    "principio_activo": "FLUROCLORIDONA 25%",
    "unidad_medida": "L",
    "familia": "HRAC 12"
+  },
+  {
+   "registro_senasa": "41589",
+   "nombre_comercial": "RESIDUAL",
+   "categoria": "HERBICIDA",
+   "empresa": "SIPCAM ARGENTINA S.R.L.",
+   "formulacion": "SL",
+   "principio_activo": "IMAZAPIR SAL ISOPROPILAMINA 58,9% (EA 48%)",
+   "unidad_medida": "L",
+   "familia": "HRAC 2"
   },
   {
    "registro_senasa": "42581",
@@ -53817,16 +54486,6 @@
    "familia": "HRAC 9"
   },
   {
-   "registro_senasa": "40678",
-   "nombre_comercial": "ROUNDUP TOP",
-   "categoria": "HERBICIDA",
-   "empresa": "AGRO BAYER S. R. L.",
-   "formulacion": "SL",
-   "principio_activo": "GLIFOSATO (SAL/ESTER SIN DETERMINAR) 70,5%",
-   "unidad_medida": "L",
-   "familia": "HRAC 9"
-  },
-  {
    "registro_senasa": "32465",
    "nombre_comercial": "ROUNDUP ULTRAMAX",
    "categoria": "HERBICIDA",
@@ -54727,36 +55386,6 @@
    "familia": "HRAC 3"
   },
   {
-   "registro_senasa": "39597",
-   "nombre_comercial": "SATIVIS",
-   "categoria": "HERBICIDA",
-   "empresa": "BASF ARGENTINA S. A.",
-   "formulacion": "EC",
-   "principio_activo": "S-METOLACLORO 96%",
-   "unidad_medida": "L",
-   "familia": "HRAC 15"
-  },
-  {
-   "registro_senasa": "39815",
-   "nombre_comercial": "SATIVIS 96 EC",
-   "categoria": "HERBICIDA",
-   "empresa": "BASF ARGENTINA S. A.",
-   "formulacion": "EC",
-   "principio_activo": "S-METOLACLORO 96%",
-   "unidad_medida": "L",
-   "familia": "HRAC 15"
-  },
-  {
-   "registro_senasa": "41301",
-   "nombre_comercial": "SATIVIS EC",
-   "categoria": "HERBICIDA",
-   "empresa": "BASF AGRICULTURAL SOLUTIONS ARGENTINA S.A.",
-   "formulacion": "EC",
-   "principio_activo": "S-METOLACLORO 96%",
-   "unidad_medida": "L",
-   "familia": "HRAC 15"
-  },
-  {
    "registro_senasa": "37351",
    "nombre_comercial": "SAX",
    "categoria": "FUNGICIDA",
@@ -55335,16 +55964,6 @@
    "principio_activo": "FLUROXIPIR MEPTIL 48%",
    "unidad_medida": "L",
    "familia": "HRAC 4"
-  },
-  {
-   "registro_senasa": "33747",
-   "nombre_comercial": "SHARK 40 EC",
-   "categoria": "HERBICIDA",
-   "empresa": "FMC QUIMICA S. A.",
-   "formulacion": "EC",
-   "principio_activo": "CARFENTRAZONE ETIL 40%",
-   "unidad_medida": "L",
-   "familia": "HRAC 14"
   },
   {
    "registro_senasa": "37440",
@@ -56195,26 +56814,6 @@
    "principio_activo": "S-METOLACLORO 96%",
    "unidad_medida": "L",
    "familia": "HRAC 15"
-  },
-  {
-   "registro_senasa": "38677",
-   "nombre_comercial": "SNIPER DRY",
-   "categoria": "HERBICIDA",
-   "empresa": "AGRO BAYER S. R. L.",
-   "formulacion": "SG",
-   "principio_activo": "GLIFOSATO SAL MONOAMONICA 79,2% (EA 72%)",
-   "unidad_medida": "Kg",
-   "familia": "HRAC 9"
-  },
-  {
-   "registro_senasa": "41221",
-   "nombre_comercial": "SNIPER DRY W",
-   "categoria": "HERBICIDA",
-   "empresa": "AGRO BAYER S. R. L.",
-   "formulacion": "SG",
-   "principio_activo": "GLIFOSATO SAL MONOAMONICA 79,2% (EA 72%)",
-   "unidad_medida": "Kg",
-   "familia": "HRAC 9"
   },
   {
    "registro_senasa": "42020",
@@ -57307,16 +57906,6 @@
    "familia": null
   },
   {
-   "registro_senasa": "37913",
-   "nombre_comercial": "STERN",
-   "categoria": "HERBICIDA",
-   "empresa": "FMC QUIMICA S. A.",
-   "formulacion": "WG",
-   "principio_activo": "CLORSULFURON 62,5% + METSULFURON METIL 12,5%",
-   "unidad_medida": "Kg",
-   "familia": "HRAC 2"
-  },
-  {
    "registro_senasa": "42264",
    "nombre_comercial": "STIGMAR XTRA PRO",
    "categoria": "FUNGICIDA",
@@ -57891,16 +58480,6 @@
    "nombre_comercial": "SULFENTRAZONE KEMSURE",
    "categoria": "HERBICIDA",
    "empresa": "AGROEMPRESA COLON S.A.",
-   "formulacion": "SC",
-   "principio_activo": "SULFENTRAZONE 50%",
-   "unidad_medida": "L",
-   "familia": "HRAC 14"
-  },
-  {
-   "registro_senasa": "39754",
-   "nombre_comercial": "SULFENTRAZONE NOVA 50",
-   "categoria": "HERBICIDA",
-   "empresa": "NOVA S. A. U.",
    "formulacion": "SC",
    "principio_activo": "SULFENTRAZONE 50%",
    "unidad_medida": "L",
@@ -58797,56 +59376,6 @@
    "familia": "FRAC 9 + FRAC 12"
   },
   {
-   "registro_senasa": "42349",
-   "nombre_comercial": "SYMPHONY 96",
-   "categoria": "HERBICIDA",
-   "empresa": "ATANOR SOCIEDAD EN COMANDITA POR ACCIONES",
-   "formulacion": "EC",
-   "principio_activo": "S-METOLACLORO 96%",
-   "unidad_medida": "L",
-   "familia": "HRAC 15"
-  },
-  {
-   "registro_senasa": "39713",
-   "nombre_comercial": "SYMPHONY A",
-   "categoria": "HERBICIDA",
-   "empresa": "ATANOR SOCIEDAD EN COMANDITA POR ACCIONES",
-   "formulacion": "EC",
-   "principio_activo": "S-METOLACLORO 96%",
-   "unidad_medida": "L",
-   "familia": "HRAC 15"
-  },
-  {
-   "registro_senasa": "39563",
-   "nombre_comercial": "SYMPHONY AR",
-   "categoria": "HERBICIDA",
-   "empresa": "ATANOR SOCIEDAD EN COMANDITA POR ACCIONES",
-   "formulacion": "EC",
-   "principio_activo": "S-METOLACLORO 96%",
-   "unidad_medida": "L",
-   "familia": "HRAC 15"
-  },
-  {
-   "registro_senasa": "39712",
-   "nombre_comercial": "SYMPHONY B",
-   "categoria": "HERBICIDA",
-   "empresa": "ATANOR SOCIEDAD EN COMANDITA POR ACCIONES",
-   "formulacion": "EC",
-   "principio_activo": "S-METOLACLORO 96%",
-   "unidad_medida": "L",
-   "familia": "HRAC 15"
-  },
-  {
-   "registro_senasa": "39716",
-   "nombre_comercial": "SYMPHONY C",
-   "categoria": "HERBICIDA",
-   "empresa": "ATANOR SOCIEDAD EN COMANDITA POR ACCIONES",
-   "formulacion": "EC",
-   "principio_activo": "S-METOLACLORO 96%",
-   "unidad_medida": "L",
-   "familia": "HRAC 15"
-  },
-  {
    "registro_senasa": "38780",
    "nombre_comercial": "SYNERGI",
    "categoria": "FUNGICIDA",
@@ -58937,16 +59466,6 @@
    "familia": "HRAC 14"
   },
   {
-   "registro_senasa": "35736",
-   "nombre_comercial": "SYSTEMIC",
-   "categoria": "FUNGICIDA",
-   "empresa": "HELM ARGENTINA S. R. L.",
-   "formulacion": "SC",
-   "principio_activo": "TEBUCONAZOLE 43%",
-   "unidad_medida": "L",
-   "familia": "FRAC 3"
-  },
-  {
    "registro_senasa": "38108",
    "nombre_comercial": "SYSTEMIC",
    "categoria": "ADYUVANTE",
@@ -58955,6 +59474,16 @@
    "principio_activo": "ALCOHOL GRASO ETOXILADO 30%",
    "unidad_medida": "L",
    "familia": null
+  },
+  {
+   "registro_senasa": "35736",
+   "nombre_comercial": "SYSTEMIC",
+   "categoria": "FUNGICIDA",
+   "empresa": "HELM ARGENTINA S. R. L.",
+   "formulacion": "SC",
+   "principio_activo": "TEBUCONAZOLE 43%",
+   "unidad_medida": "L",
+   "familia": "FRAC 3"
   },
   {
    "registro_senasa": "30070",
@@ -59105,16 +59634,6 @@
    "principio_activo": "PICLORAM (SAL/ESTER SIN DETERMINAR) 11,4% (EA 6,41%) + 2,4 D SAL TRIISOPROPANOLAMINA (TIPA) 44,7% (EA 24%)",
    "unidad_medida": "L",
    "familia": "HRAC 4"
-  },
-  {
-   "registro_senasa": "34720",
-   "nombre_comercial": "TALIS",
-   "categoria": "HERBICIDA",
-   "empresa": "AGROFINA S A",
-   "formulacion": "EC",
-   "principio_activo": "FLUROCLORIDONA 25%",
-   "unidad_medida": "L",
-   "familia": "HRAC 12"
   },
   {
    "registro_senasa": "41780",
@@ -61077,22 +61596,22 @@
    "familia": "IRAC 4A"
   },
   {
-   "registro_senasa": "42260",
-   "nombre_comercial": "TIAMETRIN",
-   "categoria": "INSECTICIDA",
-   "empresa": "FARMCHEM SA",
-   "formulacion": "ZC",
-   "principio_activo": "LAMBDA-CIALOTRINA 10,6% + TIAMETOXAM 14,1%",
-   "unidad_medida": "L",
-   "familia": "IRAC 3A + IRAC 4A"
-  },
-  {
    "registro_senasa": "41205",
    "nombre_comercial": "TIAMETRIN",
    "categoria": "INSECTICIDA",
    "empresa": "SINER S A",
    "formulacion": "SC",
    "principio_activo": "BIFENTRIN 16,6% + TIAMETOXAM 23,4%",
+   "unidad_medida": "L",
+   "familia": "IRAC 3A + IRAC 4A"
+  },
+  {
+   "registro_senasa": "42260",
+   "nombre_comercial": "TIAMETRIN",
+   "categoria": "INSECTICIDA",
+   "empresa": "FARMCHEM SA",
+   "formulacion": "ZC",
+   "principio_activo": "LAMBDA-CIALOTRINA 10,6% + TIAMETOXAM 14,1%",
    "unidad_medida": "L",
    "familia": "IRAC 3A + IRAC 4A"
   },
@@ -61427,16 +61946,6 @@
    "familia": "HRAC 2"
   },
   {
-   "registro_senasa": "37028",
-   "nombre_comercial": "TITUS",
-   "categoria": "ADYUVANTE",
-   "empresa": "CAMPOCATT SRL",
-   "formulacion": "AL",
-   "principio_activo": "ALCOHOL GRASO ETOXILADO 85,8%",
-   "unidad_medida": "L",
-   "familia": null
-  },
-  {
    "registro_senasa": "38765",
    "nombre_comercial": "TITUS",
    "categoria": "HERBICIDA",
@@ -61445,6 +61954,16 @@
    "principio_activo": "RIMSULFURON 25%",
    "unidad_medida": "Kg",
    "familia": "HRAC 2"
+  },
+  {
+   "registro_senasa": "37028",
+   "nombre_comercial": "TITUS",
+   "categoria": "ADYUVANTE",
+   "empresa": "CAMPOCATT SRL",
+   "formulacion": "AL",
+   "principio_activo": "ALCOHOL GRASO ETOXILADO 85,8%",
+   "unidad_medida": "L",
+   "familia": null
   },
   {
    "registro_senasa": "37696",
@@ -61807,22 +62326,22 @@
    "familia": "HRAC 4"
   },
   {
-   "registro_senasa": "37576",
-   "nombre_comercial": "TORCH PLUS",
-   "categoria": "HERBICIDA",
-   "empresa": "RAINBOW AGROSCIENSES SA",
-   "formulacion": "SL",
-   "principio_activo": "PICLORAM (SAL/ESTER SIN DETERMINAR) 11,4% (EA 6,4%)",
-   "unidad_medida": "L",
-   "familia": "HRAC 4"
-  },
-  {
    "registro_senasa": "37391",
    "nombre_comercial": "TORCH PLUS",
    "categoria": "HERBICIDA",
    "empresa": "RAINBOW AGROSCIENSES SA",
    "formulacion": "SL",
    "principio_activo": "PICLORAM (SAL/ESTER SIN DETERMINAR) 11,4% (EA 6,4%) + 2,4 D SAL TRIISOPROPANOLAMINA (TIPA) 44,7% (EA 24%)",
+   "unidad_medida": "L",
+   "familia": "HRAC 4"
+  },
+  {
+   "registro_senasa": "37576",
+   "nombre_comercial": "TORCH PLUS",
+   "categoria": "HERBICIDA",
+   "empresa": "RAINBOW AGROSCIENSES SA",
+   "formulacion": "SL",
+   "principio_activo": "PICLORAM (SAL/ESTER SIN DETERMINAR) 11,4% (EA 6,4%)",
    "unidad_medida": "L",
    "familia": "HRAC 4"
   },
@@ -62045,16 +62564,6 @@
    "principio_activo": "FLUDIOXONIL 2,5% + METALAXIL -M 3,75%",
    "unidad_medida": "L",
    "familia": "FRAC 12 + FRAC 4"
-  },
-  {
-   "registro_senasa": "39967",
-   "nombre_comercial": "TRASPECT M",
-   "categoria": "HERBICIDA",
-   "empresa": "SYNGENTA AGRO SOCIEDAD ANONIMA",
-   "formulacion": "EC",
-   "principio_activo": "CLETODIM 24%",
-   "unidad_medida": "L",
-   "familia": "HRAC 1"
   },
   {
    "registro_senasa": "42068",
@@ -62907,26 +63416,6 @@
    "familia": "HRAC 12"
   },
   {
-   "registro_senasa": "38505",
-   "nombre_comercial": "TUKEN ALB",
-   "categoria": "HERBICIDA",
-   "empresa": "ATANOR SOCIEDAD EN COMANDITA POR ACCIONES",
-   "formulacion": "WG",
-   "principio_activo": "DIFLUFENICAN 50%",
-   "unidad_medida": "Kg",
-   "familia": "HRAC 12"
-  },
-  {
-   "registro_senasa": "40647",
-   "nombre_comercial": "TUKEN SC",
-   "categoria": "HERBICIDA",
-   "empresa": "ATANOR SOCIEDAD EN COMANDITA POR ACCIONES",
-   "formulacion": "SC",
-   "principio_activo": "DIFLUFENICAN 50%",
-   "unidad_medida": "L",
-   "familia": "HRAC 12"
-  },
-  {
    "registro_senasa": "42451",
    "nombre_comercial": "TUMBLER PRO",
    "categoria": "INSECTICIDA",
@@ -63507,26 +63996,6 @@
    "familia": "HRAC 4"
   },
   {
-   "registro_senasa": "30230",
-   "nombre_comercial": "VENCEWEED EXTRA",
-   "categoria": "HERBICIDA",
-   "empresa": "ATANOR SOCIEDAD EN COMANDITA POR ACCIONES",
-   "formulacion": "EC",
-   "principio_activo": "2,4-DB (SAL/ESTER SIN DETERMINAR) 93,1% (EA 76%)",
-   "unidad_medida": "L",
-   "familia": "HRAC 4"
-  },
-  {
-   "registro_senasa": "37604",
-   "nombre_comercial": "VENCEWEED EXTRA D",
-   "categoria": "HERBICIDA",
-   "empresa": "ATANOR SOCIEDAD EN COMANDITA POR ACCIONES",
-   "formulacion": "EC",
-   "principio_activo": "2,4-DB (SAL/ESTER SIN DETERMINAR) 93,1% (EA 76%)",
-   "unidad_medida": "L",
-   "familia": "HRAC 4"
-  },
-  {
    "registro_senasa": "36188",
    "nombre_comercial": "VENDAVAL DUO",
    "categoria": "INSECTICIDA",
@@ -63927,16 +64396,6 @@
    "familia": "FRAC 7"
   },
   {
-   "registro_senasa": "35554",
-   "nombre_comercial": "VICTORY",
-   "categoria": "HERBICIDA",
-   "empresa": "HELM ARGENTINA S. R. L.",
-   "formulacion": "SC",
-   "principio_activo": "NICOSULFURON 4%",
-   "unidad_medida": "L",
-   "familia": "HRAC 2"
-  },
-  {
    "registro_senasa": "42169",
    "nombre_comercial": "VICTORY",
    "categoria": "INSECTICIDA",
@@ -63945,6 +64404,16 @@
    "principio_activo": "LAMBDA-CIALOTRINA 10,6% + TIAMETOXAM 14,1%",
    "unidad_medida": "L",
    "familia": "IRAC 3A + IRAC 4A"
+  },
+  {
+   "registro_senasa": "35554",
+   "nombre_comercial": "VICTORY",
+   "categoria": "HERBICIDA",
+   "empresa": "HELM ARGENTINA S. R. L.",
+   "formulacion": "SC",
+   "principio_activo": "NICOSULFURON 4%",
+   "unidad_medida": "L",
+   "familia": "HRAC 2"
   },
   {
    "registro_senasa": "40840",
