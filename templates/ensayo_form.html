@@ -164,6 +164,23 @@
       </div>
     </div>
 
+    <!-- FOTOS -->
+    <div class="card-custom mb-4">
+      <div class="card-header-custom"><i class="fa-solid fa-camera me-2"></i>Fotos del ensayo</div>
+      <div class="p-3">
+        <div class="fotos-area">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <span class="small fw-semibold"><i class="fa-solid fa-camera me-1"></i>Fotos</span>
+              <label class="btn btn-sm btn-outline-primary mb-0"><i class="fa-solid fa-image me-1"></i>Agregar fotos
+                <input type="file" accept="image/*" multiple hidden class="fotos-input"></label>
+            </div>
+            <div class="row g-2 fotos-existentes"></div>
+            <div class="row g-2 fotos-nuevas"></div>
+          </div>
+        <div class="small text-muted mt-2">Se suben al guardar el ensayo.</div>
+      </div>
+    </div>
+
   </div>
 
   <!-- Col derecha -->
@@ -415,5 +432,8 @@ window.addEventListener('DOMContentLoaded', () => {
 });
 
 {% include '_productos_autocomplete_js.html' %}
+
+{% include '_fotos_subida_js.html' %}
+mostrarFotosGuardadas(document.querySelector('.fotos-area'), {{ (fotos if fotos is defined else [])|tojson }});
 </script>
 {% endblock %}

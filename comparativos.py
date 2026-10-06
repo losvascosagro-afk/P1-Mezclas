@@ -11,7 +11,7 @@ import io
 import os
 from datetime import datetime
 
-from flask import Blueprint, flash, redirect, render_template, request, url_for
+from flask import Blueprint, flash, jsonify, redirect, render_template, request, url_for
 
 from db import BACKEND, SNAP_COLS, get_db
 
@@ -89,6 +89,7 @@ def _mezclas_para_form(mezclas):
             'productos': [{'id_producto': d['id_producto'], 'nombre': d['nombre_comercial'] or '',
                            'orden': d['orden_carga'], 'dosis': d['dosis'], 'unidad': d['unidad'] or 'L',
                            'obs': d['observacion'] or ''} for d in m['detalles']],
+            'fotos': [{'id': f['id_foto'], 'descripcion': f['descripcion'] or ''} for f in m['fotos']],
         })
     return out
 
@@ -131,6 +132,7 @@ def _guardar_mezclas(db, eid, form):
     existentes = {r['id_mezcla'] for r in db.execute(
         'SELECT id_mezcla FROM mezclas_ensayo WHERE id_ensayo=?', (eid,)).fetchall()}
     vistas = set()
+    por_clave = {}   # clave del formulario → id_mezcla (para subir las fotos a su mezcla)
     for orden, k in enumerate(form.getlist('mezcla_key[]'), start=1):
         vals = [_valor(form, k, c) for c in CAMPOS_MEZCLA]
         if not vals[0]:
@@ -147,6 +149,7 @@ def _guardar_mezclas(db, eid, form):
                 sql += ' RETURNING id_mezcla'
             idm = db.execute(sql, [eid, orden] + vals).lastrowid
         vistas.add(idm)
+        por_clave[k] = idm
         previos = {r['id_producto']: r for r in db.execute(
             'SELECT * FROM detalle_mezcla WHERE id_mezcla=?', (idm,)).fetchall()}
         db.execute('DELETE FROM detalle_mezcla WHERE id_mezcla=?', (idm,))
@@ -156,6 +159,7 @@ def _guardar_mezclas(db, eid, form):
         db.execute('DELETE FROM detalle_mezcla WHERE id_mezcla=?', (idm,))
         db.execute('UPDATE fotos_ensayo SET id_mezcla=NULL WHERE id_mezcla=?', (idm,))
         db.execute('DELETE FROM mezclas_ensayo WHERE id_mezcla=?', (idm,))
+    return por_clave
 
 
 def _form(db, e, mezclas, titulo):
@@ -170,9 +174,11 @@ def nuevo():
     db = get_db()
     if request.method == 'POST':
         eid = _guardar_ensayo(db, request.form)
-        _guardar_mezclas(db, eid, request.form)
+        por_clave = _guardar_mezclas(db, eid, request.form)
         db.commit()
         flash('Ensayo comparativo creado.', 'success')
+        if request.headers.get('X-Fotos') == '1':
+            return jsonify({'id_ensayo': eid, 'mezclas': por_clave})
         return redirect(url_for('ensayo_detalle', id=eid))
     return _form(db, None, [], 'Nuevo Ensayo Comparativo')
 
@@ -181,9 +187,11 @@ def editar(db, eid):
     """Lo llama /ensayos/<id>/editar cuando el ensayo es comparativo."""
     if request.method == 'POST':
         _guardar_ensayo(db, request.form, eid)
-        _guardar_mezclas(db, eid, request.form)
+        por_clave = _guardar_mezclas(db, eid, request.form)
         db.commit()
         flash('Ensayo comparativo actualizado.', 'success')
+        if request.headers.get('X-Fotos') == '1':
+            return jsonify({'id_ensayo': eid, 'mezclas': por_clave})
         return redirect(url_for('ensayo_detalle', id=eid))
     mezclas, _ = cargar_mezclas(db, eid)
     return _form(db, _ensayo(db, eid), mezclas, f'Editar Ensayo Comparativo N° {eid:04d}')

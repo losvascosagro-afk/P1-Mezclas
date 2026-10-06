@@ -1,0 +1,50 @@
+{# Achicado de fotos en el navegador antes de subirlas (límite de ~4,5 MB por envío en Vercel). #}
+const FOTO_MAX_BYTES = 3.5 * 1024 * 1024;   // por foto, con margen bajo el límite de Vercel
+
+// Achica la imagen si supera el límite por envío (las TIFF grandes no se pueden achicar en el navegador).
+async function prepararFoto(file) {
+  if (file.size <= FOTO_MAX_BYTES) return file;
+  let bmp;
+  try { bmp = await createImageBitmap(file); }
+  catch { throw new Error(`${file.name}: pesa ${(file.size / 1048576).toFixed(1)} MB y no se puede achicar en el navegador. Convertila a JPG.`); }
+  let lado = 2560, calidad = 0.88, blob;
+  for (let i = 0; i < 6; i++) {
+    const esc = Math.min(1, lado / Math.max(bmp.width, bmp.height));
+    const cv = document.createElement('canvas');
+    cv.width = Math.round(bmp.width * esc); cv.height = Math.round(bmp.height * esc);
+    cv.getContext('2d').drawImage(bmp, 0, 0, cv.width, cv.height);
+    blob = await new Promise(r => cv.toBlob(r, 'image/jpeg', calidad));
+    if (blob.size <= FOTO_MAX_BYTES) break;
+    lado *= 0.8; calidad -= 0.06;
+  }
+  return new File([blob], file.name.replace(/\.[^.]+$/, '') + '.jpg', {type: 'image/jpeg'});
+}
+
+function tamanio(bytes) { return bytes < 1048576 ? Math.max(1, Math.round(bytes / 1024)) + ' KB' : (bytes / 1048576).toFixed(1) + ' MB'; }
+
+// Formularios "Subir foto" de la ficha (class form-foto): se achica la foto si hace falta y se sube por fetch.
+document.addEventListener('submit', async e => {
+  const form = e.target.closest('.form-foto');
+  if (!form) return;
+  e.preventDefault();
+  const btn = form.querySelector('button');
+  const archivo = form.querySelector('input[type=file]').files[0];
+  if (!archivo) return;
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Subiendo…';
+  try {
+    const fd = new FormData(form);
+    fd.set('foto', await prepararFoto(archivo));
+    const r = await fetch(form.action, {method: 'POST', body: fd, headers: {'X-Fotos': '1'}});
+    if (!r.ok) {
+      let msg = 'HTTP ' + r.status;
+      try { msg = (await r.json()).error || msg; } catch { if (r.status === 413) msg = 'la foto es demasiado grande'; }
+      throw new Error(msg);
+    }
+    location.reload();
+  } catch (err) {
+    alert('No se pudo subir la foto: ' + err.message);
+    btn.disabled = false;
+    btn.innerHTML = '<i class="fa-solid fa-upload me-1"></i>Subir foto';
+  }
+});

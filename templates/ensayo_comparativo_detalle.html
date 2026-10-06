@@ -30,7 +30,7 @@
 
 {% macro galeria(fotos, id_mezcla) %}
   <div class="collapse" id="upload{{ id_mezcla or 'gral' }}">
-    <form method="post" action="{{ url_for('foto_upload', id=e.id_ensayo) }}" enctype="multipart/form-data" class="p-2 mb-2 bg-light rounded">
+    <form method="post" action="{{ url_for('foto_upload', id=e.id_ensayo) }}" enctype="multipart/form-data" class="form-foto p-2 mb-2 bg-light rounded">
       <input type="hidden" name="id_mezcla" value="{{ id_mezcla or '' }}">
       <input type="file" name="foto" class="form-control form-control-sm mb-2" accept="image/*" required>
       <input type="text" name="descripcion" class="form-control form-control-sm mb-2" placeholder="Descripción (opcional)">
@@ -213,4 +213,10 @@
     </div>
   </div>
 </div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+{% include '_foto_preparar_js.html' %}
+</script>
 {% endblock %}

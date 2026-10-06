@@ -65,7 +65,7 @@
       <i class="fa-solid fa-plus me-1"></i>Agregar mezcla
     </button>
   </div>
-  <p class="text-muted small mb-3">Tip: cargá la primera mezcla completa y usá <b>Duplicar</b> para armar las demás cambiando sólo lo que difiere (por ejemplo el adyuvante).</p>
+  <p class="text-muted small mb-3">Tip: cargá la primera mezcla completa y usá <b>Duplicar</b> para armar las demás cambiando sólo lo que difiere (por ejemplo el adyuvante). Las fotos no se duplican: cada mezcla lleva las suyas.</p>
   <div id="mezclas"></div>
 
   <!-- CONCLUSIÓN -->
@@ -136,6 +136,15 @@
           <button type="button" class="btn btn-sm btn-outline-primary" onclick="agregarProducto(this.closest('.mezcla-card'))">
             <i class="fa-solid fa-plus me-1"></i>Agregar producto
           </button>
+          <div class="fotos-area mt-3 pt-3 border-top">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <span class="small fw-semibold"><i class="fa-solid fa-camera me-1"></i>Fotos</span>
+              <label class="btn btn-sm btn-outline-primary mb-0"><i class="fa-solid fa-image me-1"></i>Agregar fotos
+                <input type="file" accept="image/*" multiple hidden class="fotos-input"></label>
+            </div>
+            <div class="row g-2 fotos-existentes"></div>
+            <div class="row g-2 fotos-nuevas"></div>
+          </div>
         </div>
         <div class="col-lg-4">
           <div class="border rounded p-3 mb-3">
@@ -229,6 +238,7 @@ function llenarMezcla(card, d) {
   });
   (d.productos || []).forEach(p => agregarProducto(card, p));
   if (!(d.productos || []).length) agregarProducto(card);
+  mostrarFotosGuardadas(card.querySelector('.fotos-area'), d.fotos);
 }
 
 function agregarMezcla(datos, despuesDe) {
@@ -366,5 +376,7 @@ function addChip(type) {
 })();
 
 {% include '_productos_autocomplete_js.html' %}
+
+{% include '_fotos_subida_js.html' %}
 </script>
 {% endblock %}

@@ -197,7 +197,7 @@
       <!-- Upload form -->
       <div class="collapse" id="uploadForm">
         <div class="p-3 border-bottom bg-light">
-          <form method="post" action="{{ url_for('foto_upload', id=e.id_ensayo) }}" enctype="multipart/form-data">
+          <form method="post" action="{{ url_for('foto_upload', id=e.id_ensayo) }}" enctype="multipart/form-data" class="form-foto">
             <div class="mb-2">
               <label class="form-label small fw-semibold">Imagen (JPG, PNG, TIFF)</label>
               <input type="file" name="foto" class="form-control form-control-sm" accept="image/*" required>
@@ -273,4 +273,10 @@
 
   </div>
 </div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+{% include '_foto_preparar_js.html' %}
+</script>
 {% endblock %}

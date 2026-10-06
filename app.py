@@ -83,6 +83,11 @@ def teardown_db(e=None):
 
 
 
+def _pide_json():
+    """El formulario guarda por fetch y después sube las fotos de a una (X-Fotos: 1)."""
+    return request.headers.get('X-Fotos') == '1'
+
+
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
@@ -516,6 +521,8 @@ def ensayo_nuevo():
         _save_detalles(db, eid, request.form)
         db.commit()
         flash('Ensayo creado exitosamente.', 'success')
+        if _pide_json():
+            return jsonify({'id_ensayo': eid, 'mezclas': {}})
         return redirect(url_for('ensayo_detalle', id=eid))
     clientes_list = db.execute('SELECT id_cliente,razon_social FROM clientes ORDER BY razon_social').fetchall()
     productos_list = []  # el formulario busca productos por /api/productos
@@ -587,6 +594,9 @@ def ensayo_editar(id):
         db.execute('DELETE FROM detalle_mezcla WHERE id_ensayo=?', (id,))
         _save_detalles(db, id, request.form, previos)
         db.commit()
+        if _pide_json():
+            flash('Ensayo actualizado.', 'success')
+            return jsonify({'id_ensayo': id, 'mezclas': {}})
         flash('Ensayo actualizado.', 'success')
         return redirect(url_for('ensayo_detalle', id=id))
     clientes_list = db.execute('SELECT id_cliente,razon_social FROM clientes ORDER BY razon_social').fetchall()
@@ -595,8 +605,10 @@ def ensayo_editar(id):
         'SELECT dm.*,COALESCE(dm.snap_nombre,p.nombre_comercial) AS nombre_comercial FROM detalle_mezcla dm '
         'LEFT JOIN productos p ON dm.id_producto=p.id_producto '
         'WHERE dm.id_ensayo=? ORDER BY dm.orden_carga', (id,)).fetchall()
+    fotos = [{'id': r['id_foto'], 'descripcion': r['descripcion'] or ''} for r in db.execute(
+        'SELECT id_foto, descripcion FROM fotos_ensayo WHERE id_ensayo=? ORDER BY fecha_carga', (id,)).fetchall()]
     return render_template('ensayo_form.html', e=e, clientes=clientes_list,
-                           productos=productos_list, detalles=detalles, titulo='Editar Ensayo')
+                           productos=productos_list, detalles=detalles, fotos=fotos, titulo='Editar Ensayo')
 
 
 @app.route('/ensayos/<int:id>/eliminar', methods=['POST'])
@@ -657,32 +669,36 @@ def _save_detalles(db, eid, form, previos=None, prefijo='', id_mezcla=None):
 @app.route('/ensayos/<int:id>/foto', methods=['POST'])
 def foto_upload(id):
     db = get_db()
-    if 'foto' not in request.files:
+    file = request.files.get('foto')
+    if file is None or file.filename == '':
+        if _pide_json():
+            return jsonify({'error': 'No se seleccionó archivo.'}), 400
         flash('No se seleccionó archivo.', 'danger')
         return redirect(url_for('ensayo_detalle', id=id))
-    file = request.files['foto']
-    if file.filename == '':
-        flash('No se seleccionó archivo.', 'danger')
-        return redirect(url_for('ensayo_detalle', id=id))
-    if file and allowed_file(file.filename):
-        ext = file.filename.rsplit('.', 1)[1].lower()
-        fname = f"ens{id}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.{ext}"
-        img_bytes = file.read()
-        try:
-            with open(os.path.join(UPLOAD_FOLDER, fname), 'wb') as fh:
-                fh.write(img_bytes)
-        except Exception:
-            pass
-        db.execute(
-            'INSERT INTO fotos_ensayo (id_ensayo,id_mezcla,nombre_archivo,descripcion,fecha_carga,imagen_data)'
-            ' VALUES (?,?,?,?,?,?)',
-            (id, request.form.get('id_mezcla') or None, fname, request.form.get('descripcion', ''),
-             datetime.now().strftime('%Y-%m-%d %H:%M'),
-             img_bytes))
-        db.commit()
-        flash('Foto agregada.', 'success')
-    else:
+    if not allowed_file(file.filename):
+        if _pide_json():
+            return jsonify({'error': f'{file.filename}: formato no permitido (JPG, PNG, TIFF o BMP).'}), 400
         flash('Formato no permitido. Use JPG, PNG, TIFF o BMP.', 'danger')
+        return redirect(url_for('ensayo_detalle', id=id))
+    ext = file.filename.rsplit('.', 1)[1].lower()
+    # con microsegundos: varias fotos subidas en el mismo segundo no comparten nombre
+    fname = f"ens{id}_{datetime.now().strftime('%Y%m%d_%H%M%S_%f')}.{ext}"
+    img_bytes = file.read()
+    try:
+        with open(os.path.join(UPLOAD_FOLDER, fname), 'wb') as fh:
+            fh.write(img_bytes)
+    except Exception:
+        pass
+    db.execute(
+        'INSERT INTO fotos_ensayo (id_ensayo,id_mezcla,nombre_archivo,descripcion,fecha_carga,imagen_data)'
+        ' VALUES (?,?,?,?,?,?)',
+        (id, request.form.get('id_mezcla') or None, fname, request.form.get('descripcion', ''),
+         datetime.now().strftime('%Y-%m-%d %H:%M'),
+         img_bytes))
+    db.commit()
+    if _pide_json():
+        return jsonify({'ok': True})
+    flash('Foto agregada.', 'success')
     return redirect(url_for('ensayo_detalle', id=id))
 
 

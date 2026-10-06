@@ -1,0 +1,96 @@
+{# Fotos dentro del formulario de ensayo (simple o comparativo).
+   Cada zona .fotos-area tiene un input .fotos-input; las fotos elegidas quedan
+   pendientes (.foto-pendiente) y se suben DESPUÉS de guardar el ensayo, de a una,
+   para no superar el límite de tamaño por envío de Vercel (~4,5 MB).
+   Debe incluirse después de cualquier otra validación del submit del formulario.
+   Requiere _foto_preparar_js.html. #}
+{% include '_foto_preparar_js.html' %}
+function _escHtml(s) { return String(s ?? '').replace(/[&<>"]/g, c => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;'}[c])); }
+
+function mostrarFotosGuardadas(area, fotos) {
+  const cont = area.querySelector('.fotos-existentes');
+  cont.innerHTML = (fotos || []).map(f => `
+    <div class="col-6 col-md-3">
+      <img src="/fotos/${f.id}" class="img-thumbnail w-100" style="height:90px;object-fit:cover" alt="">
+      <div class="small text-muted text-truncate" title="${_escHtml(f.descripcion)}">${_escHtml(f.descripcion) || '<i>sin descripción</i>'}</div>
+    </div>`).join('');
+}
+
+document.addEventListener('change', e => {
+  if (!e.target.classList.contains('fotos-input')) return;
+  const area = e.target.closest('.fotos-area');
+  const cont = area.querySelector('.fotos-nuevas');
+  [...e.target.files].forEach(file => {
+    const col = document.createElement('div');
+    col.className = 'col-6 col-md-3 foto-pendiente';
+    col._file = file;
+    col.innerHTML = `
+      <div class="position-relative">
+        <img class="img-thumbnail w-100" style="height:90px;object-fit:cover" alt="">
+        <button type="button" class="btn btn-sm btn-danger position-absolute top-0 end-0 m-1 py-0 px-1" title="Quitar"
+                onclick="this.closest('.foto-pendiente').remove()"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <input type="text" class="form-control form-control-sm mt-1 foto-desc" placeholder="Descripción">
+      <div class="small text-muted text-truncate">${_escHtml(file.name)} · ${tamanio(file.size)}</div>`;
+    const img = col.querySelector('img');
+    img.src = URL.createObjectURL(file);
+    img.onerror = () => { img.replaceWith(Object.assign(document.createElement('div'), {className: 'img-thumbnail small text-center pt-4', style: 'height:90px', textContent: 'Sin vista previa'})); };
+    cont.appendChild(col);
+  });
+  e.target.value = '';
+});
+
+function _progreso(texto) {
+  let ov = document.getElementById('fotosProgreso');
+  if (!ov) {
+    ov = document.createElement('div');
+    ov.id = 'fotosProgreso';
+    ov.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:20000;display:flex;align-items:center;justify-content:center';
+    ov.innerHTML = '<div class="bg-white rounded shadow p-4 text-center" style="min-width:300px"><div class="spinner-border text-primary mb-3"></div><div class="fw-semibold" id="fotosProgresoTxt"></div></div>';
+    document.body.appendChild(ov);
+  }
+  document.getElementById('fotosProgresoTxt').textContent = texto;
+}
+
+document.getElementById('ensayoForm').addEventListener('submit', async e => {
+  if (e.defaultPrevented) return;            // otra validación canceló el envío
+  const pendientes = [...document.querySelectorAll('.foto-pendiente')];
+  if (!pendientes.length) return;            // sin fotos nuevas: envío normal
+  e.preventDefault();
+  const form = e.target;
+  _progreso('Guardando el ensayo…');
+  let datos;
+  try {
+    const r = await fetch(form.getAttribute('action') || location.href,
+                          {method: 'POST', body: new FormData(form), headers: {'X-Fotos': '1'}});
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    datos = await r.json();
+  } catch (err) {
+    document.getElementById('fotosProgreso')?.remove();
+    alert('No se pudo guardar el ensayo (' + err.message + '). No se perdió nada de lo cargado: probá de nuevo.');
+    return;
+  }
+  const errores = [];
+  for (const [i, col] of pendientes.entries()) {
+    _progreso(`Subiendo foto ${i + 1} de ${pendientes.length}…`);
+    try {
+      const fd = new FormData();
+      fd.append('foto', await prepararFoto(col._file));
+      fd.append('descripcion', col.querySelector('.foto-desc').value);
+      const card = col.closest('.mezcla-card');
+      fd.append('id_mezcla', card ? (datos.mezclas[card.dataset.k] || '') : '');
+      const r = await fetch(`/ensayos/${datos.id_ensayo}/foto`, {method: 'POST', body: fd, headers: {'X-Fotos': '1'}});
+      if (!r.ok) {
+        let msg = 'HTTP ' + r.status;
+        try { msg = (await r.json()).error || msg; } catch { if (r.status === 413) msg = 'la foto es demasiado grande'; }
+        throw new Error(msg);
+      }
+    } catch (err) {
+      errores.push(`${col._file.name}: ${err.message}`);
+    }
+  }
+  if (errores.length) {
+    alert('El ensayo se guardó, pero estas fotos no se pudieron subir (podés subirlas desde la ficha):\n\n' + errores.join('\n'));
+  }
+  location.href = `/ensayos/${datos.id_ensayo}`;
+});
