@@ -11,8 +11,10 @@ function mostrarFotosGuardadas(area, fotos) {
   const cont = area.querySelector('.fotos-existentes');
   cont.innerHTML = (fotos || []).map(f => `
     <div class="col-6 col-md-3">
-      <img src="/fotos/${f.id}" class="img-thumbnail w-100" style="height:90px;object-fit:cover" alt="">
-      <div class="small text-muted text-truncate" title="${_escHtml(f.descripcion)}">${_escHtml(f.descripcion) || '<i>sin descripción</i>'}</div>
+      <a href="/fotos/${f.id}" target="_blank" title="Ver en tamaño completo">
+        <img src="/fotos/${f.id}" class="img-thumbnail w-100" style="height:90px;object-fit:cover" alt=""></a>
+      <input type="text" name="foto_desc_${f.id}" class="form-control form-control-sm mt-1"
+             placeholder="Descripción" value="${_escHtml(f.descripcion)}">
     </div>`).join('');
 }
 

@@ -6,7 +6,7 @@ Datos viejos: los ensayos cargados antes de la escala tienen "Si"/"No"; se
 muestran tal cual ("Sí" en rojo, "No" como bueno), sin inventarles un grado.
 """
 
-VERDE, AMARILLO, NARANJA, ROJO, GRIS = '#2E7D32', '#F9A825', '#EF6C00', '#C62828', '#9E9E9E'
+VERDE, AMARILLO, NARANJA, ROJO, GRIS = '#2E7D32', '#FDD835', '#EF6C00', '#C62828', '#9E9E9E'
 TEAL_PDF = '#1A7A7A'   # en los PDF lo "bueno" va en el verde DMA, como siempre
 
 _GRADO = [('No', VERDE), ('Leve', AMARILLO), ('Medio', NARANJA), ('Grave', ROJO)]

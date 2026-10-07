@@ -188,6 +188,7 @@ def editar(db, eid):
     if request.method == 'POST':
         _guardar_ensayo(db, request.form, eid)
         por_clave = _guardar_mezclas(db, eid, request.form)
+        _app().guardar_desc_fotos(db, eid, request.form)
         db.commit()
         flash('Ensayo comparativo actualizado.', 'success')
         if request.headers.get('X-Fotos') == '1':

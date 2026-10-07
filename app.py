@@ -601,6 +601,7 @@ def ensayo_editar(id):
             'SELECT * FROM detalle_mezcla WHERE id_ensayo=?', (id,)).fetchall()}
         db.execute('DELETE FROM detalle_mezcla WHERE id_ensayo=?', (id,))
         _save_detalles(db, id, request.form, previos)
+        guardar_desc_fotos(db, id, request.form)
         db.commit()
         if _pide_json():
             flash('Ensayo actualizado.', 'success')
@@ -708,6 +709,14 @@ def foto_upload(id):
         return jsonify({'ok': True})
     flash('Foto agregada.', 'success')
     return redirect(url_for('ensayo_detalle', id=id))
+
+
+def guardar_desc_fotos(db, id_ensayo, form):
+    """Descripciones de las fotos ya cargadas, editadas en el formulario (foto_desc_<id>)."""
+    for clave, valor in form.items():
+        if clave.startswith('foto_desc_') and clave[10:].isdigit():
+            db.execute('UPDATE fotos_ensayo SET descripcion=? WHERE id_foto=? AND id_ensayo=?',
+                       (valor.strip(), int(clave[10:]), id_ensayo))
 
 
 @app.route('/fotos/<int:fid>')
@@ -1090,6 +1099,8 @@ def _build_pdf(e, detalles, fotos):
 
     # ── FOTOS ──
     if fotos:
+        from informe_comparativo import caja_fotos
+        caja = caja_fotos(fotos)
         foto_pairs = [fotos[i:i+2] for i in range(0, len(fotos), 2)]
         for n_pair, pair in enumerate(foto_pairs):
             cells = []
@@ -1099,7 +1110,7 @@ def _build_pdf(e, detalles, fotos):
                 if img_data:
                     try:
                         raw = bytes(img_data) if not isinstance(img_data, bytes) else img_data
-                        img = _fit_image(io.BytesIO(raw))
+                        img = _fit_image(io.BytesIO(raw), *caja)
                         cell.append(img)
                     except Exception:
                         cell.append(Paragraph('[Imagen no disponible]', sty()))
@@ -1107,7 +1118,7 @@ def _build_pdf(e, detalles, fotos):
                     fp = os.path.join(UPLOAD_FOLDER, foto['nombre_archivo'])
                     if os.path.exists(fp):
                         try:
-                            img = _fit_image(fp)
+                            img = _fit_image(fp, *caja)
                             cell.append(img)
                         except Exception:
                             cell.append(Paragraph('[Imagen no disponible]', sty()))

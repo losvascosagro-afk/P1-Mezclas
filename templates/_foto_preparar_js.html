@@ -1,18 +1,28 @@
-{# Achicado de fotos en el navegador antes de subirlas (límite de ~4,5 MB por envío en Vercel). #}
+{# Achicado de fotos en el navegador antes de subirlas: lado mayor de 1600 px en JPG
+   (en el PDF van a 8×8 cm, ~950 px a 300 dpi) y siempre bajo el límite de ~4,5 MB por envío en Vercel. #}
 const FOTO_MAX_BYTES = 3.5 * 1024 * 1024;   // por foto, con margen bajo el límite de Vercel
+const FOTO_LADO_MAX = 1600;
 
-// Achica la imagen si supera el límite por envío (las TIFF grandes no se pueden achicar en el navegador).
+// Deja la foto en JPG de hasta 1600 px de lado (las que ya son JPG chicas se suben tal cual).
+// Las TIFF no se pueden leer en el navegador: se suben como vienen si no pesan demasiado.
 async function prepararFoto(file) {
-  if (file.size <= FOTO_MAX_BYTES) return file;
   let bmp;
   try { bmp = await createImageBitmap(file); }
-  catch { throw new Error(`${file.name}: pesa ${(file.size / 1048576).toFixed(1)} MB y no se puede achicar en el navegador. Convertila a JPG.`); }
-  let lado = 2560, calidad = 0.88, blob;
+  catch {
+    if (file.size <= FOTO_MAX_BYTES) return file;
+    throw new Error(`${file.name}: pesa ${(file.size / 1048576).toFixed(1)} MB y no se puede achicar en el navegador. Convertila a JPG.`);
+  }
+  const esJpg = /^image\/jpe?g$/.test(file.type);
+  if (esJpg && Math.max(bmp.width, bmp.height) <= FOTO_LADO_MAX && file.size <= FOTO_MAX_BYTES) return file;
+  let lado = FOTO_LADO_MAX, calidad = 0.9, blob;
   for (let i = 0; i < 6; i++) {
     const esc = Math.min(1, lado / Math.max(bmp.width, bmp.height));
     const cv = document.createElement('canvas');
     cv.width = Math.round(bmp.width * esc); cv.height = Math.round(bmp.height * esc);
-    cv.getContext('2d').drawImage(bmp, 0, 0, cv.width, cv.height);
+    const ctx = cv.getContext('2d');
+    ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, cv.width, cv.height);   // PNG con transparencia: fondo blanco
+    ctx.imageSmoothingQuality = 'high';
+    ctx.drawImage(bmp, 0, 0, cv.width, cv.height);
     blob = await new Promise(r => cv.toBlob(r, 'image/jpeg', calidad));
     if (blob.size <= FOTO_MAX_BYTES) break;
     lado *= 0.8; calidad -= 0.06;

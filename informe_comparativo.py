@@ -166,6 +166,19 @@ def _composicion(detalles):
     return t
 
 
+# Fotos cargadas desde esta fecha van en un recuadro de 8×8 cm. Los ensayos con
+# alguna foto anterior conservan el tamaño viejo (7,5×5,5 cm) para que sus PDF
+# ya entregados salgan idénticos.
+FOTOS_8X8_DESDE = '2026-10-07 10:45'
+
+
+def caja_fotos(fotos):
+    """(ancho, alto) máximos de las fotos en el PDF de este ensayo."""
+    if all((f['fecha_carga'] or '') >= FOTOS_8X8_DESDE for f in fotos):
+        return 8 * cm, 8 * cm
+    return 7.5 * cm, 5.5 * cm
+
+
 def _fit_image(src, max_w=7.5 * cm, max_h=5.5 * cm):
     ir = ImageReader(src)
     iw, ih = ir.getSize()
@@ -175,7 +188,7 @@ def _fit_image(src, max_w=7.5 * cm, max_h=5.5 * cm):
     return img
 
 
-def _fotos(fotos, upload_folder, titulo):
+def _fotos(fotos, upload_folder, titulo, caja):
     out = []
     pares = [fotos[i:i + 2] for i in range(0, len(fotos), 2)]
     for n, par in enumerate(pares):
@@ -185,9 +198,9 @@ def _fotos(fotos, upload_folder, titulo):
             try:
                 datos = f['imagen_data']
                 if datos:
-                    celda.append(_fit_image(io.BytesIO(bytes(datos))))
+                    celda.append(_fit_image(io.BytesIO(bytes(datos)), *caja))
                 else:
-                    celda.append(_fit_image(os.path.join(upload_folder, f['nombre_archivo'])))
+                    celda.append(_fit_image(os.path.join(upload_folder, f['nombre_archivo']), *caja))
             except Exception:
                 celda.append(Paragraph('[Imagen no disponible]', sty()))
             if f['descripcion']:
@@ -209,6 +222,7 @@ def construir(e, mezclas, fotos_generales, upload_folder):
     doc = SimpleDocTemplate(buf, pagesize=A4, rightMargin=1.8 * cm, leftMargin=1.8 * cm,
                             topMargin=1.8 * cm, bottomMargin=1.8 * cm)
     story = []
+    caja = caja_fotos([f for m in mezclas for f in m['fotos']] + list(fotos_generales))
 
     # ── Encabezado ──
     titulo = [Paragraph(LAB_NAME.upper(), sty('title')), Spacer(1, 4),
@@ -311,11 +325,11 @@ def construir(e, mezclas, fotos_generales, upload_folder):
             story += [KeepTogether([sec('Observaciones al microscopio'), _caja(_esc(m['obs_microscopio']))]),
                       Spacer(1, 4)]
         if m['fotos']:
-            story += _fotos(m['fotos'], upload_folder, f'Imágenes — {_esc(m["nombre"])}')
+            story += _fotos(m['fotos'], upload_folder, f'Imágenes — {_esc(m["nombre"])}', caja)
         story.append(Spacer(1, 10))
 
     if fotos_generales:
-        story += _fotos(fotos_generales, upload_folder, 'IMÁGENES GENERALES DEL ENSAYO')
+        story += _fotos(fotos_generales, upload_folder, 'IMÁGENES GENERALES DEL ENSAYO', caja)
         story.append(Spacer(1, 8))
 
     # ── Firmas y pie ──
