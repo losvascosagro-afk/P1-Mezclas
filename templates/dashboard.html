@@ -7,6 +7,16 @@
 {% macro desglose(r) -%}
   {{ miles(r.mezclas_simples) }} en ensayos simples + {{ miles(r.mezclas_comparativos) }} en comparativos
 {%- endmacro %}
+<!-- ¿Tenemos…? (muestras del laboratorio) -->
+<div class="card-custom p-3 mb-3">
+  <form method="get" action="{{ url_for('muestras.index') }}" class="d-flex flex-wrap gap-2 align-items-center">
+    <label for="tenemosQ" class="fw-semibold me-1"><i class="fa-solid fa-flask-vial me-1"></i>¿Tenemos…?</label>
+    <input type="text" name="q" id="tenemosQ" class="form-control form-control-sm" style="max-width:360px"
+           placeholder="Producto, principio activo o empresa">
+    <button class="btn btn-sm btn-primary"><i class="fa-solid fa-magnifying-glass me-1"></i>Buscar muestra</button>
+  </form>
+</div>
+
 <div class="row g-4 mb-3">
   <!-- Campaña elegida -->
   <div class="col-lg-7">

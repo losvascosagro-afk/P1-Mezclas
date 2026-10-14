@@ -1,0 +1,120 @@
+{% extends "base.html" %}
+{% block title %}Muestras — Lab. Mezclas{% endblock %}
+{% block page_title %}Muestras del laboratorio{% endblock %}
+
+{% macro fila(p, tenemos) %}
+  <tr>
+    <td>
+      <strong>{{ p.nombre_comercial }}</strong>
+      {% if p.formulacion %}<span class="badge bg-light text-dark border ms-1">{{ p.formulacion }}</span>{% endif %}
+      <div class="small text-muted">{{ p.principio_activo or '' }}</div>
+    </td>
+    <td class="d-none d-md-table-cell">
+      {% if p.categoria %}<span class="badge cat-badge cat-{{ p.categoria|lower|replace(' ','_') }}">{{ p.categoria }}</span>{% endif %}
+    </td>
+    <td class="d-none d-md-table-cell"><small>{{ p.empresa or '—' }}</small></td>
+    <td class="text-end text-nowrap">
+      {% if tenemos %}
+        <span class="badge me-2" style="background:#2E7D32"><i class="fa-solid fa-check me-1"></i>Tenemos</span>
+        <form method="post" action="{{ url_for('muestras.quitar', id_producto=p.id_producto) }}" style="display:inline"
+              onsubmit="return confirm('¿Quitar {{ p.nombre_comercial|e }} de las muestras? (ya no lo tenemos)')">
+          <input type="hidden" name="q" value="{{ q }}">
+          <button class="btn btn-sm btn-outline-secondary" title="Ya no lo tenemos"><i class="fa-solid fa-xmark"></i></button>
+        </form>
+      {% else %}
+        <form method="post" action="{{ url_for('muestras.agregar', id_producto=p.id_producto) }}" style="display:inline">
+          <input type="hidden" name="q" value="{{ q }}">
+          <button class="btn btn-sm btn-outline-success"><i class="fa-solid fa-plus me-1"></i>Lo tenemos</button>
+        </form>
+      {% endif %}
+    </td>
+  </tr>
+{% endmacro %}
+
+{% block content %}
+<div class="card-custom mb-4">
+  <div class="p-4">
+    <form method="get" class="d-flex flex-wrap gap-2 align-items-center">
+      <label for="q" class="fw-semibold me-1" style="font-size:1.1rem"><i class="fa-solid fa-magnifying-glass me-1"></i>¿Tenemos…?</label>
+      <input type="text" name="q" id="q" value="{{ q }}" class="form-control" style="max-width:420px" autofocus
+             placeholder="Nombre, principio activo o empresa (ej: cletodim, Harrier)">
+      <button class="btn btn-primary">Buscar</button>
+      {% if q %}<a href="{{ url_for('muestras.index') }}" class="btn btn-outline-secondary">Ver todas</a>{% endif %}
+    </form>
+    <div id="respuesta">
+    {% if q %}
+      <div class="mt-3 fs-5">
+        {% if tenemos %}
+          <span class="text-success fw-semibold"><i class="fa-solid fa-circle-check me-1"></i>Sí: {{ tenemos|length }} producto{{ 's' if tenemos|length != 1 }} con "{{ q }}" en el laboratorio.</span>
+        {% else %}
+          <span class="text-danger fw-semibold"><i class="fa-solid fa-circle-xmark me-1"></i>No tenemos nada con "{{ q }}".</span>
+        {% endif %}
+      </div>
+    {% endif %}
+    </div>
+  </div>
+</div>
+
+<div id="resultados">
+<div class="card-custom mb-4">
+  <div class="card-header-custom">
+    <i class="fa-solid fa-flask-vial me-2"></i>{% if q %}En el laboratorio ({{ tenemos|length }}){% else %}Productos que tenemos en el laboratorio ({{ total }}){% endif %}
+  </div>
+  <div class="table-responsive">
+    <table class="table table-hover mb-0 align-middle">
+      <tbody>
+      {% for p in tenemos %}{{ fila(p, True) }}{% else %}
+        <tr><td class="text-center text-muted py-4">
+          {% if q %}Ninguno.{% else %}Todavía no hay muestras cargadas. Buscá un producto arriba y tocá <b>Lo tenemos</b>.{% endif %}
+        </td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+{% if q %}
+<div class="card-custom mb-4">
+  <div class="card-header-custom" style="background:#6c757d">
+    <i class="fa-solid fa-boxes-stacked me-2"></i>Del catálogo, que no tenemos ({{ catalogo|length }}{% if catalogo|length == 50 %}+, afiná la búsqueda{% endif %})
+  </div>
+  <div class="table-responsive">
+    <table class="table table-hover mb-0 align-middle">
+      <tbody>
+      {% for p in catalogo %}{{ fila(p, False) }}{% else %}
+        <tr><td class="text-center text-muted py-4">
+          No hay más productos con "{{ q }}" en el catálogo.
+          <a href="{{ url_for('producto_nuevo') }}">Cargar un producto nuevo</a>
+        </td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endif %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Busca mientras se escribe: trae la misma página y reemplaza la respuesta y los resultados.
+(function () {
+  const inp = document.getElementById('q');
+  let timer, pedido = 0;
+  inp.addEventListener('input', () => {
+    clearTimeout(timer);
+    timer = setTimeout(async () => {
+      const n = ++pedido;
+      const url = '{{ url_for('muestras.index') }}' + (inp.value.trim() ? '?q=' + encodeURIComponent(inp.value.trim()) : '');
+      const html = await (await fetch(url)).text();
+      if (n !== pedido) return;   // llegó tarde: ya hay una búsqueda más nueva
+      const doc = new DOMParser().parseFromString(html, 'text/html');
+      ['respuesta', 'resultados'].forEach(id => document.getElementById(id).replaceWith(doc.getElementById(id)));
+      history.replaceState(null, '', url);
+    }, 250);
+  });
+  // el cursor al final del texto al volver de marcar un producto
+  inp.setSelectionRange(inp.value.length, inp.value.length);
+})();
+</script>
+{% endblock %}

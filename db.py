@@ -315,6 +315,18 @@ _SCHEMA_MEZCLAS = {
     'sqlite': f'CREATE TABLE IF NOT EXISTS mezclas_ensayo (id_mezcla INTEGER PRIMARY KEY AUTOINCREMENT,{_MEZCLAS_COLS})',
     'postgres': f'CREATE TABLE IF NOT EXISTS mezclas_ensayo (id_mezcla SERIAL PRIMARY KEY,{_MEZCLAS_COLS})',
 }
+# Muestras de productos que hay en el laboratorio. Por ahora sólo "tenemos":
+# una fila por producto. Más adelante se le pueden sumar ubicación, nivel, lote, etc.
+_MUESTRAS_COLS = '''
+        id_producto INTEGER NOT NULL,
+        fecha_alta  TEXT,
+        nota        TEXT,
+        FOREIGN KEY (id_producto) REFERENCES productos(id_producto)
+'''
+_SCHEMA_MUESTRAS = {
+    'sqlite': f'CREATE TABLE IF NOT EXISTS muestras_lab (id_muestra INTEGER PRIMARY KEY AUTOINCREMENT,{_MUESTRAS_COLS})',
+    'postgres': f'CREATE TABLE IF NOT EXISTS muestras_lab (id_muestra SERIAL PRIMARY KEY,{_MUESTRAS_COLS})',
+}
 _COLS_COMPARATIVO = [
     ('ensayos', 'tipo', 'TEXT'),
     ('detalle_mezcla', 'id_mezcla', 'INTEGER'),
@@ -383,6 +395,7 @@ def _init_sqlite():
         except Exception:
             pass
     conn.execute(_SCHEMA_MEZCLAS['sqlite'])
+    conn.execute(_SCHEMA_MUESTRAS['sqlite'])
     for tabla, col, tipo in _COLS_COMPARATIVO:
         try:
             conn.execute(f'ALTER TABLE {tabla} ADD COLUMN {col} {tipo}')
@@ -484,6 +497,7 @@ def _init_postgres():
     for col, tipo in _PRODUCTOS_COLS_NUEVAS:
         cur.execute(f'ALTER TABLE productos ADD COLUMN IF NOT EXISTS {col} {tipo}')
     cur.execute(_SCHEMA_MEZCLAS['postgres'])
+    cur.execute(_SCHEMA_MUESTRAS['postgres'])
     for tabla, col, tipo in _COLS_COMPARATIVO:
         cur.execute(f'ALTER TABLE {tabla} ADD COLUMN IF NOT EXISTS {col} {tipo}')
     conn.commit()

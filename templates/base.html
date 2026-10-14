@@ -40,6 +40,11 @@
         <i class="fa-solid fa-boxes-stacked"></i> Productos
       </a>
     </li>
+    <li class="nav-item">
+      <a class="nav-link {% if 'muestras' in (request.endpoint or '') %}active{% endif %}" href="{{ url_for('muestras.index') }}">
+        <i class="fa-solid fa-flask-vial"></i> Muestras
+      </a>
+    </li>
   </ul>
   <div class="sidebar-logo-wrap">
     <img src="{{ url_for('static', filename='logo_dma.png') }}" alt="DMA Agro" class="sidebar-logo-img">

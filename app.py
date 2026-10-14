@@ -496,7 +496,8 @@ def api_productos():
             f'FROM productos WHERE COALESCE(oculto,0)=0 AND {conditions} ORDER BY nombre_comercial LIMIT 30',
             params
         ).fetchall()
-    return jsonify([dict(r) for r in rows])
+    en_lab = muestras.ids_en_lab(db)
+    return jsonify([dict(r, en_lab=r['id_producto'] in en_lab) for r in rows])
 
 
 @app.route('/api/productos/nuevo', methods=['POST'])
@@ -1281,6 +1282,10 @@ def _build_pdf(e, detalles, fotos):
 # Ensayos comparativos (varias mezclas por ensayo)
 import comparativos  # noqa: E402
 app.register_blueprint(comparativos.bp)
+
+# Muestras de productos que hay en el laboratorio
+import muestras  # noqa: E402
+app.register_blueprint(muestras.bp)
 
 
 if __name__ == '__main__':
