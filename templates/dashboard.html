@@ -4,26 +4,50 @@
 
 {% block content %}
 {% macro miles(n) %}{{ '{:,}'.format(n).replace(',', '.') }}{% endmacro %}
-<div class="row g-4 mb-4">
-  <!-- Stats cards -->
-  <div class="col-12">
-    <div class="stat-card border-blue">
+{% macro desglose(r) -%}
+  {{ miles(r.mezclas_simples) }} en ensayos simples + {{ miles(r.mezclas_comparativos) }} en comparativos
+{%- endmacro %}
+<div class="row g-4 mb-3">
+  <!-- Campaña elegida -->
+  <div class="col-lg-7">
+    <div class="stat-card border-blue h-100">
       <div class="stat-icon bg-blue"><i class="fa-solid fa-flask"></i></div>
-      <div class="stat-info">
+      <div class="stat-info flex-grow-1">
+        <form method="get" class="d-flex align-items-center gap-2 mb-1">
+          <span class="stat-label" style="font-size:.95rem">Campaña</span>
+          <select name="campana" class="form-select form-select-sm" style="width:auto" onchange="this.form.submit()">
+            {% for c, txt in campanas %}<option value="{{ c }}" {% if c == campana %}selected{% endif %}>{{ txt }}</option>{% endfor %}
+          </select>
+          <small class="text-muted">1/4/{{ campana }} al 31/3/{{ campana + 1 }}</small>
+        </form>
         <div class="stat-num" style="font-size:2.4rem;line-height:1.1">{{ miles(stats.mezclas) }}</div>
-        <div class="stat-label" style="font-size:.95rem">Mezclas evaluadas en total</div>
-        <div class="small text-muted mt-1">
-          {{ miles(stats.mezclas_simples) }} en ensayos simples
-          + {{ miles(stats.mezclas_comparativos) }} en ensayos comparativos
-        </div>
+        <div class="stat-label" style="font-size:.95rem">Mezclas evaluadas en la campaña {{ campana_txt }}</div>
+        <div class="small text-muted mt-1">{{ desglose(stats) }}</div>
       </div>
     </div>
   </div>
+  <!-- Total general -->
+  <div class="col-lg-5">
+    <div class="stat-card border-purple h-100">
+      <div class="stat-icon bg-purple"><i class="fa-solid fa-trophy"></i></div>
+      <div class="stat-info">
+        <div class="stat-label" style="font-size:.95rem">Total general</div>
+        <div class="stat-num" style="font-size:2.4rem;line-height:1.1">{{ miles(total.mezclas) }}</div>
+        <div class="stat-label" style="font-size:.95rem">Mezclas evaluadas desde el inicio</div>
+        <div class="small text-muted mt-1">{{ desglose(total) }}</div>
+        <div class="small text-muted">{{ miles(total.ensayos) }} ensayos · {{ miles(total.clientes_registrados) }} clientes registrados</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="small text-muted fw-semibold mb-2">Campaña {{ campana_txt }}</div>
+<div class="row g-4 mb-4">
   <div class="col-6 col-md-3">
     <div class="stat-card border-blue">
       <div class="stat-icon bg-blue"><i class="fa-solid fa-vials"></i></div>
       <div class="stat-info">
-        <div class="stat-num">{{ stats.ensayos }}</div>
+        <div class="stat-num">{{ miles(stats.ensayos) }}</div>
         <div class="stat-label">Ensayos</div>
       </div>
     </div>
@@ -32,8 +56,8 @@
     <div class="stat-card border-green">
       <div class="stat-icon bg-green"><i class="fa-solid fa-circle-check"></i></div>
       <div class="stat-info">
-        <div class="stat-num text-green">{{ stats.estables }}</div>
-        <div class="stat-label">Estables</div>
+        <div class="stat-num text-green">{{ miles(stats.estables) }}</div>
+        <div class="stat-label">Mezclas estables</div>
       </div>
     </div>
   </div>
@@ -41,8 +65,8 @@
     <div class="stat-card border-red">
       <div class="stat-icon bg-red"><i class="fa-solid fa-circle-xmark"></i></div>
       <div class="stat-info">
-        <div class="stat-num text-red">{{ stats.inestables }}</div>
-        <div class="stat-label">Inestables</div>
+        <div class="stat-num text-red">{{ miles(stats.inestables) }}</div>
+        <div class="stat-label">Mezclas inestables</div>
       </div>
     </div>
   </div>
@@ -50,8 +74,8 @@
     <div class="stat-card border-purple">
       <div class="stat-icon bg-purple"><i class="fa-solid fa-building-user"></i></div>
       <div class="stat-info">
-        <div class="stat-num">{{ stats.clientes }}</div>
-        <div class="stat-label">Clientes</div>
+        <div class="stat-num">{{ miles(stats.clientes) }}</div>
+        <div class="stat-label">Clientes atendidos</div>
       </div>
     </div>
   </div>

@@ -24,8 +24,12 @@
         <option value="estable"   {% if res_sel=='estable'   %}selected{% endif %}>✅ Estable</option>
         <option value="inestable" {% if res_sel=='inestable' %}selected{% endif %}>❌ Inestable</option>
       </select>
+      <select name="campana" class="form-select form-select-sm" style="max-width:170px">
+        <option value="">Todas las campañas</option>
+        {% for c, txt in campanas %}<option value="{{ c }}" {% if c == campana_sel %}selected{% endif %}>Campaña {{ txt }}</option>{% endfor %}
+      </select>
       <button class="btn btn-sm btn-outline-primary"><i class="fa-solid fa-search me-1"></i>Buscar</button>
-      {% if q or res_sel %}<a href="{{ url_for('ensayos') }}" class="btn btn-sm btn-outline-secondary">Limpiar</a>{% endif %}
+      {% if q or res_sel or campana_sel is not none %}<a href="{{ url_for('ensayos') }}" class="btn btn-sm btn-outline-secondary">Limpiar</a>{% endif %}
     </form>
   </div>
   <div class="table-responsive">

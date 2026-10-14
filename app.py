@@ -195,31 +195,73 @@ def admin_catalogo_senasa():
 # ──────────────────────────────────────────────────────────
 # DASHBOARD
 # ──────────────────────────────────────────────────────────
-def _mezclas_por_tipo(db, cond='1=1'):
-    """(en ensayos simples, en comparativos) que cumplen cond. Cada ensayo simple
-    es una mezcla; cada comparativo aporta todas las suyas."""
-    simples = db.execute(f"SELECT COUNT(*) FROM ensayos WHERE COALESCE(tipo, '') <> 'comparativo' AND {cond}").fetchone()[0]
-    comparadas = db.execute(f"""SELECT COUNT(*) FROM mezclas_ensayo
-        WHERE id_ensayo IN (SELECT id_ensayo FROM ensayos WHERE tipo = 'comparativo') AND {cond}""").fetchone()[0]
+# Campañas: del 1/4 de un año al 31/3 del siguiente. Se nombran por el año en
+# que empiezan: campaña 2026 = "2026/27" = 2026-04-01 … 2027-03-31.
+def campana_de(fecha):
+    """Año de inicio de la campaña de una fecha (date o 'YYYY-MM-DD'). None si no se puede leer."""
+    try:
+        anio, mes = int(str(fecha)[:4]), int(str(fecha)[5:7])
+    except (TypeError, ValueError):
+        return None
+    return anio if mes >= 4 else anio - 1
+
+
+def campana_etiqueta(anio):
+    return f'{anio}/{(anio + 1) % 100:02d}'
+
+
+def campana_rango(anio):
+    """(desde, hasta) para filtrar fecha >= desde AND fecha < hasta."""
+    return f'{anio}-04-01', f'{anio + 1}-04-01'
+
+
+def campanas_disponibles(db):
+    """Campañas desde el primer ensayo hasta la actual, la más nueva primero."""
+    actual = campana_de(datetime.now().strftime('%Y-%m-%d'))
+    primera = campana_de(db.execute("SELECT MIN(fecha) FROM ensayos WHERE fecha IS NOT NULL AND fecha <> ''").fetchone()[0])
+    primera = min(primera or actual, actual)
+    return list(range(actual, primera - 1, -1))
+
+
+def _mezclas_por_tipo(db, campana=None, resultado=None):
+    """(en ensayos simples, en comparativos). Cada ensayo simple es una mezcla;
+    cada comparativo aporta todas las suyas. Opcional: sólo una campaña y/o un resultado."""
+    cond, params = '', []
+    if campana is not None:
+        cond, params = ' AND e.fecha >= ? AND e.fecha < ?', list(campana_rango(campana))
+    res = (lambda t: f" AND LOWER({t}.resultado_final) = '{resultado}'") if resultado else (lambda t: '')
+    simples = db.execute(f"""SELECT COUNT(*) FROM ensayos e
+        WHERE COALESCE(e.tipo, '') <> 'comparativo'{cond}{res('e')}""", params).fetchone()[0]
+    comparadas = db.execute(f"""SELECT COUNT(*) FROM mezclas_ensayo m JOIN ensayos e ON e.id_ensayo = m.id_ensayo
+        WHERE e.tipo = 'comparativo'{cond}{res('m')}""", params).fetchone()[0]
     return simples, comparadas
 
 
-def _contar_mezclas(db, cond='1=1'):
-    return sum(_mezclas_por_tipo(db, cond))
+def _resumen(db, campana=None):
+    """Números del dashboard para una campaña (o para todo si campana es None)."""
+    cond, params = '', []
+    if campana is not None:
+        cond, params = ' AND fecha >= ? AND fecha < ?', list(campana_rango(campana))
+    simples, comparadas = _mezclas_por_tipo(db, campana)
+    return {
+        'mezclas': simples + comparadas, 'mezclas_simples': simples, 'mezclas_comparativos': comparadas,
+        'ensayos': db.execute(f'SELECT COUNT(*) FROM ensayos WHERE 1=1{cond}', params).fetchone()[0],
+        'estables': sum(_mezclas_por_tipo(db, campana, 'estable')),
+        'inestables': sum(_mezclas_por_tipo(db, campana, 'inestable')),
+        'clientes': db.execute(f'SELECT COUNT(DISTINCT id_cliente) FROM ensayos WHERE id_cliente IS NOT NULL{cond}',
+                               params).fetchone()[0],
+    }
 
 
 @app.route('/')
 def dashboard():
     db = get_db()
-    stats = {
-        'clientes': db.execute('SELECT COUNT(*) FROM clientes').fetchone()[0],
-        'productos': db.execute('SELECT COUNT(*) FROM productos').fetchone()[0],
-        'ensayos':   db.execute('SELECT COUNT(*) FROM ensayos').fetchone()[0],
-        'estables':  _contar_mezclas(db, "LOWER(resultado_final) = 'estable'"),
-        'inestables': _contar_mezclas(db, "LOWER(resultado_final) = 'inestable'"),
-    }
-    stats['mezclas_simples'], stats['mezclas_comparativos'] = _mezclas_por_tipo(db)
-    stats['mezclas'] = stats['mezclas_simples'] + stats['mezclas_comparativos']
+    campanas = campanas_disponibles(db)
+    sel = request.args.get('campana', '')
+    campana = int(sel) if sel.isdigit() and int(sel) in campanas else campanas[0]
+    stats = _resumen(db, campana)
+    total = _resumen(db)
+    total['clientes_registrados'] = db.execute('SELECT COUNT(*) FROM clientes').fetchone()[0]
     recientes = db.execute('''
         SELECT e.id_ensayo, e.fecha, e.resultado_final, e.objetivo,
                c.razon_social,
@@ -228,7 +270,9 @@ def dashboard():
         LEFT JOIN clientes c ON e.id_cliente = c.id_cliente
         ORDER BY e.fecha DESC, e.id_ensayo DESC LIMIT 10
     ''').fetchall()
-    return render_template('dashboard.html', stats=stats, recientes=recientes)
+    return render_template('dashboard.html', stats=stats, total=total, recientes=recientes,
+                           campanas=[(c, campana_etiqueta(c)) for c in campanas], campana=campana,
+                           campana_txt=campana_etiqueta(campana))
 
 
 # ──────────────────────────────────────────────────────────
@@ -502,9 +546,16 @@ def ensayos():
     if res:
         sql += ' AND LOWER(e.resultado_final) LIKE ?'
         params.append(f'%{res.lower()}%')
+    campanas = campanas_disponibles(db)
+    camp = request.args.get('campana', '')
+    camp = int(camp) if camp.isdigit() and int(camp) in campanas else None
+    if camp is not None:
+        sql += ' AND e.fecha >= ? AND e.fecha < ?'
+        params.extend(campana_rango(camp))
     sql += ' ORDER BY e.fecha DESC, e.id_ensayo DESC'
     rows = db.execute(sql, params).fetchall()
-    return render_template('ensayos.html', ensayos=rows, q=q, res_sel=res)
+    return render_template('ensayos.html', ensayos=rows, q=q, res_sel=res, campana_sel=camp,
+                           campanas=[(c, campana_etiqueta(c)) for c in campanas])
 
 
 @app.route('/ensayos/nuevo', methods=['GET', 'POST'])
