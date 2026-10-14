@@ -60,6 +60,7 @@
 
 {% block content %}
 {% import '_obs_campos.html' as obs with context %}
+{% set con_vol = mezclas|selectattr('volumenes')|list|length > 0 %}
 <div class="row g-4">
   <div class="col-lg-9">
 
@@ -80,7 +81,7 @@
         {% if e.objetivo %}<div class="mt-3 p-2 bg-light rounded"><small class="text-muted">Objetivo:</small><br><strong>{{ e.objetivo }}</strong></div>{% endif %}
         {% if e.obs_mezcla %}<div class="mt-2 p-2 rounded" style="background:#fffbe6;border-left:3px solid #f0a500"><small class="text-muted">Descripción:</small><br><span style="white-space:pre-line">{{ e.obs_mezcla }}</span></div>{% endif %}
         <div class="mt-2 small text-muted">
-          Volúmenes: {{ (e.volumenes or '—').replace(',', ' / ') }} L &nbsp;·&nbsp; Tiempos de observación: {{ (e.tiempos_obs or '—').replace(',', ' / ') }} min
+          Volúmenes: {% if e.volumenes %}{{ e.volumenes|vols }}{% elif con_vol %}según cada mezcla{% else %}— L{% endif %} &nbsp;·&nbsp; Tiempos de observación: {{ (e.tiempos_obs or '—').replace(',', ' / ') }} min
         </div>
       </div>
     </div>
@@ -91,7 +92,7 @@
       <div class="table-responsive">
         <table class="table table-sm mb-0 align-middle">
           <thead><tr>
-            <th>Mezcla</th><th>Agua</th>
+            <th>Mezcla</th>{% if con_vol %}<th>Volumen</th>{% endif %}<th>Agua</th>
             {% for c, label in obs_visuales %}<th class="text-center">{{ label }}</th>{% endfor %}
             <th>Resultado</th>
           </tr></thead>
@@ -99,6 +100,7 @@
           {% for m in mezclas %}
             <tr>
               <td><a href="#mezcla{{ m.id_mezcla }}" class="fw-semibold text-decoration-none">{{ m.nombre }}</a></td>
+              {% if con_vol %}<td class="text-nowrap">{{ m.volumenes|vols or '—' }}</td>{% endif %}
               <td><small class="text-muted">{{ agua(m) }}</small></td>
               {% for c, label in obs_visuales %}
                 <td class="text-center">{{ obs.pill(c, m[c]) }}</td>
@@ -106,7 +108,7 @@
               <td>{{ badge_resultado(m.resultado_final) }}</td>
             </tr>
           {% else %}
-            <tr><td colspan="7" class="text-muted text-center py-3">Sin mezclas.</td></tr>
+            <tr><td colspan="{{ 8 if con_vol else 7 }}" class="text-muted text-center py-3">Sin mezclas.</td></tr>
           {% endfor %}
           </tbody>
         </table>
@@ -128,6 +130,7 @@
         {{ badge_resultado(m.resultado_final) }}
       </div>
       <div class="p-3">
+        {% if m.volumenes %}<div class="small mb-1"><i class="fa-solid fa-flask-vial me-1 text-primary"></i><b>Volúmenes de caldo:</b> {{ m.volumenes|vols }}</div>{% endif %}
         <div class="small mb-2"><i class="fa-solid fa-droplet me-1 text-primary"></i><b>Agua:</b> {{ agua(m) }}</div>
         {% if m.descripcion %}<div class="p-2 mb-3 rounded" style="background:#fffbe6;border-left:3px solid #f0a500;white-space:pre-line">{{ m.descripcion }}</div>{% endif %}
 

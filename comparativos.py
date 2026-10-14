@@ -9,6 +9,7 @@ fotos en `fotos_ensayo`, ambos con id_mezcla.
 """
 import io
 import os
+import re
 from datetime import datetime
 
 from flask import Blueprint, flash, jsonify, redirect, render_template, request, url_for
@@ -20,7 +21,7 @@ bp = Blueprint('comparativos', __name__)
 
 CAMPOS_MEZCLA = ['nombre', 'descripcion', 'tipo_agua', 'ph', 'dureza', 'temperatura', 'conductividad',
                  'espuma', 'precipitado', 'separacion_fases', 'redispersion', 'obs_microscopio',
-                 'resultado_final']
+                 'resultado_final', 'volumenes']
 _NUMERICOS = {'ph', 'dureza', 'temperatura', 'conductividad'}
 OBS_VISUALES = observaciones.ETIQUETAS
 RESULTADOS = ['Estable', 'Inestable', 'Estable con observaciones', 'Requiere más ensayos']
@@ -37,6 +38,19 @@ def num(v):
         return f'{float(v):g}'
     except (TypeError, ValueError):
         return v
+
+
+def volumenes_limpios(texto):
+    """'50, 12 y 20 L' → '50,12,20' (mismo formato que ensayos.volumenes). La coma
+    separa valores; los decimales van con punto (12.5). Vacío → None."""
+    return ','.join(re.findall(r'\d+(?:\.\d+)?', texto or '')) or None
+
+
+@bp.app_template_filter('vols')
+def vols(texto, unidad='L'):
+    """'50,12,20' → '50 / 12 / 20 L'. Vacío → ''."""
+    vals = [v.strip() for v in (texto or '').split(',') if v.strip()]
+    return f'{" / ".join(vals)} {unidad}' if vals else ''
 
 
 def _app():
@@ -86,6 +100,7 @@ def _mezclas_para_form(mezclas):
         out.append({
             'id_mezcla': m['id_mezcla'],
             **{c: m[c] for c in CAMPOS_MEZCLA},
+            'volumenes': (m['volumenes'] or '').replace(',', ', '),
             'productos': [{'id_producto': d['id_producto'], 'nombre': d['nombre_comercial'] or '',
                            'orden': d['orden_carga'], 'dosis': d['dosis'], 'unidad': d['unidad'] or 'L',
                            'obs': d['observacion'] or ''} for d in m['detalles']],
@@ -104,6 +119,8 @@ def _valor(form, k, campo):
         return _app()._float_or_none(v)
     if campo in observaciones.ESCALAS:
         return v or observaciones.POR_DEFECTO[campo]
+    if campo == 'volumenes':
+        return volumenes_limpios(v)
     return (v or '').strip() or None
 
 

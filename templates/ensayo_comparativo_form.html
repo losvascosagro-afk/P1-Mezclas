@@ -38,7 +38,7 @@
                     placeholder="Qué se compara, en qué condiciones, para qué...">{{ e.obs_mezcla if e and e.obs_mezcla else '' }}</textarea>
         </div>
         <div class="col-md-6">
-          <label class="form-label fw-semibold">Volúmenes de caldo (L)</label>
+          <label class="form-label fw-semibold">Volúmenes de caldo (L) <small class="text-muted fw-normal">comunes a todas las mezclas</small></label>
           <input type="hidden" name="volumenes" id="volumenesHidden" value="{{ e.volumenes if e and e.volumenes else '' }}">
           <div class="d-flex gap-2 align-items-center flex-wrap" id="volChips"></div>
           <div class="d-flex gap-2 mt-2">
@@ -122,6 +122,11 @@
             <div class="col-md-2"><label class="form-label small fw-semibold">Cond. µS/cm</label>
               <input type="number" name="m__K___conductividad" class="form-control form-control-sm" step="1"></div>
           </div>
+          <div class="row g-2 mb-3">
+            <div class="col-md-5"><label class="form-label small fw-semibold">Volúmenes de caldo (L)</label>
+              <input type="text" name="m__K___volumenes" class="form-control form-control-sm" inputmode="decimal"
+                     placeholder="Ej: 50, 12, 20"></div>
+          </div>
           <label class="form-label small fw-semibold">Descripción de la mezcla</label>
           <textarea name="m__K___descripcion" class="form-control form-control-sm mb-3" rows="2"
                     placeholder="Qué tiene de particular esta mezcla, cómo se preparó..."></textarea>
@@ -190,7 +195,7 @@
 {% block scripts %}
 <script>
 const MEZCLAS_INICIALES = {{ mezclas_json|tojson }};
-const CAMPOS = ['nombre','descripcion','tipo_agua','ph','dureza','temperatura','conductividad','obs_microscopio','resultado_final'];
+const CAMPOS = ['nombre','descripcion','tipo_agua','ph','dureza','temperatura','conductividad','volumenes','obs_microscopio','resultado_final'];
 const OBS = {{ obs_visuales|map('first')|list|tojson }};
 let _k = 0;
 

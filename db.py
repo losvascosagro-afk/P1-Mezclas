@@ -319,6 +319,7 @@ _COLS_COMPARATIVO = [
     ('ensayos', 'tipo', 'TEXT'),
     ('detalle_mezcla', 'id_mezcla', 'INTEGER'),
     ('fotos_ensayo', 'id_mezcla', 'INTEGER'),
+    ('mezclas_ensayo', 'volumenes', 'TEXT'),   # volúmenes de caldo propios de la mezcla: "50,12,20"
 ]
 
 _SQL_SNAPSHOT_BACKFILL = (

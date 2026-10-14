@@ -217,6 +217,11 @@ def _fotos(fotos, upload_folder, titulo, caja):
     return out
 
 
+def _vols_txt(texto):
+    """'50,12,20' → '50 L / 12 L / 20 L'. Vacío → '—'."""
+    return ' / '.join(f'{v.strip()} L' for v in (texto or '').split(',') if v.strip()) or '—'
+
+
 def construir(e, mezclas, fotos_generales, upload_folder):
     buf = io.BytesIO()
     doc = SimpleDocTemplate(buf, pagesize=A4, rightMargin=1.8 * cm, leftMargin=1.8 * cm,
@@ -260,7 +265,9 @@ def construir(e, mezclas, fotos_generales, upload_folder):
                   [3 * cm, 5.7 * cm, 2.7 * cm, 6 * cm])
     story += [KeepTogether([sec('DATOS DEL CLIENTE'), cli]), Spacer(1, 7)]
 
-    vols = ' / '.join(f'{v.strip()} L' for v in (e['volumenes'] or '').split(',') if v.strip()) or '—'
+    vols = _vols_txt(e['volumenes'])
+    if vols == '—' and any(m.get('volumenes') for m in mezclas):
+        vols = 'Según cada mezcla'
     tobs = ' / '.join(f'{t.strip()} min' for t in (e['tiempos_obs'] or '').split(',') if t.strip()) or '—'
     cond = _grilla([[Paragraph('Volúmenes de caldo', sty('label')), Paragraph(vols, sty()),
                      Paragraph('Tiempos de observación', sty('label')), Paragraph(tobs, sty())]],
@@ -273,7 +280,10 @@ def construir(e, mezclas, fotos_generales, upload_folder):
               ['Mezcla', 'Agua', 'Espuma', 'Precip.', 'Separ. fases', 'Redisp.', 'Resultado']]]
     estilos = []
     for i, m in enumerate(mezclas, start=1):
-        fila = [Paragraph(f'<b>{_esc(m["nombre"])}</b>', sty('body', fontSize=8.5, leading=10.5)),
+        nombre = f'<b>{_esc(m["nombre"])}</b>'
+        if m.get('volumenes'):
+            nombre += f'<br/><font size="7.5" color="#555555">{_vols_txt(m["volumenes"])}</font>'
+        fila = [Paragraph(nombre, sty('body', fontSize=8.5, leading=10.5)),
                 Paragraph(_agua_txt(m), sty('body', fontSize=7.5, leading=9.5))]
         for j, campo in enumerate(['espuma', 'precipitado', 'separacion_fases', 'redispersion'], start=2):
             texto, bg, fg = observaciones.estilo(campo, m[campo], pdf=True)
@@ -300,7 +310,12 @@ def construir(e, mezclas, fotos_generales, upload_folder):
         bloque = [sec(f'MEZCLA {i}  —  {_esc(m["nombre"]).upper()}', bg=C_TEAL)]
         info = [[Paragraph('Agua', sty('label')), Paragraph(_agua_txt(m), sty()),
                  Paragraph('Resultado', sty('label')), _badge_res(m['resultado_final'], 4.2 * cm)]]
-        bloque.append(_grilla(info, [2.2 * cm, 8.4 * cm, 2.4 * cm, 4.4 * cm]))
+        if m.get('volumenes'):
+            info.append([Paragraph('Volúmenes', sty('label')), Paragraph(_vols_txt(m['volumenes']), sty()), '', ''])
+        grilla = _grilla(info, [2.2 * cm, 8.4 * cm, 2.4 * cm, 4.4 * cm])
+        if len(info) > 1:
+            grilla.setStyle(TableStyle([('SPAN', (1, 1), (3, 1))]))
+        bloque.append(grilla)
         if m['descripcion']:
             bloque += [Spacer(1, 3), _caja(f'<b><font color="#1A7A7A">DESCRIPCIÓN</font></b><br/>{_esc(m["descripcion"])}')]
         # el encabezado de la mezcla viaja junto con su composición
