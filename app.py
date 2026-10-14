@@ -195,6 +195,14 @@ def admin_catalogo_senasa():
 # ──────────────────────────────────────────────────────────
 # DASHBOARD
 # ──────────────────────────────────────────────────────────
+def _contar_mezclas(db, cond='1=1'):
+    """Mezclas evaluadas que cumplen cond: ensayos simples + mezclas de los comparativos."""
+    simples = db.execute(f"SELECT COUNT(*) FROM ensayos WHERE COALESCE(tipo, '') <> 'comparativo' AND {cond}").fetchone()[0]
+    comparadas = db.execute(f"""SELECT COUNT(*) FROM mezclas_ensayo
+        WHERE id_ensayo IN (SELECT id_ensayo FROM ensayos WHERE tipo = 'comparativo') AND {cond}""").fetchone()[0]
+    return simples + comparadas
+
+
 @app.route('/')
 def dashboard():
     db = get_db()
@@ -202,10 +210,10 @@ def dashboard():
         'clientes': db.execute('SELECT COUNT(*) FROM clientes').fetchone()[0],
         'productos': db.execute('SELECT COUNT(*) FROM productos').fetchone()[0],
         'ensayos':   db.execute('SELECT COUNT(*) FROM ensayos').fetchone()[0],
-        'estables':  db.execute(
-            "SELECT COUNT(*) FROM ensayos WHERE LOWER(resultado_final) = 'estable'").fetchone()[0],
-        'inestables': db.execute(
-            "SELECT COUNT(*) FROM ensayos WHERE LOWER(resultado_final) = 'inestable'").fetchone()[0],
+        'estables':  _contar_mezclas(db, "LOWER(resultado_final) = 'estable'"),
+        'inestables': _contar_mezclas(db, "LOWER(resultado_final) = 'inestable'"),
+        # cada ensayo simple es una mezcla; un comparativo suma cada una de las suyas
+        'mezclas':   _contar_mezclas(db),
     }
     recientes = db.execute('''
         SELECT e.id_ensayo, e.fecha, e.resultado_final, e.objetivo,

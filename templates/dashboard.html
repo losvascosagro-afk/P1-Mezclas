@@ -5,7 +5,16 @@
 {% block content %}
 <div class="row g-4 mb-4">
   <!-- Stats cards -->
-  <div class="col-6 col-lg-3">
+  <div class="col-12 col-xl">
+    <div class="stat-card border-blue">
+      <div class="stat-icon bg-blue"><i class="fa-solid fa-flask"></i></div>
+      <div class="stat-info">
+        <div class="stat-num">{{ '{:,}'.format(stats.mezclas).replace(',', '.') }}</div>
+        <div class="stat-label">Mezclas evaluadas</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-6 col-md-3 col-xl">
     <div class="stat-card border-blue">
       <div class="stat-icon bg-blue"><i class="fa-solid fa-vials"></i></div>
       <div class="stat-info">
@@ -14,7 +23,7 @@
       </div>
     </div>
   </div>
-  <div class="col-6 col-lg-3">
+  <div class="col-6 col-md-3 col-xl">
     <div class="stat-card border-green">
       <div class="stat-icon bg-green"><i class="fa-solid fa-circle-check"></i></div>
       <div class="stat-info">
@@ -23,7 +32,7 @@
       </div>
     </div>
   </div>
-  <div class="col-6 col-lg-3">
+  <div class="col-6 col-md-3 col-xl">
     <div class="stat-card border-red">
       <div class="stat-icon bg-red"><i class="fa-solid fa-circle-xmark"></i></div>
       <div class="stat-info">
@@ -32,7 +41,7 @@
       </div>
     </div>
   </div>
-  <div class="col-6 col-lg-3">
+  <div class="col-6 col-md-3 col-xl">
     <div class="stat-card border-purple">
       <div class="stat-icon bg-purple"><i class="fa-solid fa-building-user"></i></div>
       <div class="stat-info">
