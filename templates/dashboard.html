@@ -3,18 +3,23 @@
 {% block page_title %}Dashboard{% endblock %}
 
 {% block content %}
+{% macro miles(n) %}{{ '{:,}'.format(n).replace(',', '.') }}{% endmacro %}
 <div class="row g-4 mb-4">
   <!-- Stats cards -->
-  <div class="col-12 col-xl">
+  <div class="col-12">
     <div class="stat-card border-blue">
       <div class="stat-icon bg-blue"><i class="fa-solid fa-flask"></i></div>
       <div class="stat-info">
-        <div class="stat-num">{{ '{:,}'.format(stats.mezclas).replace(',', '.') }}</div>
-        <div class="stat-label">Mezclas evaluadas</div>
+        <div class="stat-num" style="font-size:2.4rem;line-height:1.1">{{ miles(stats.mezclas) }}</div>
+        <div class="stat-label" style="font-size:.95rem">Mezclas evaluadas en total</div>
+        <div class="small text-muted mt-1">
+          {{ miles(stats.mezclas_simples) }} en ensayos simples
+          + {{ miles(stats.mezclas_comparativos) }} en ensayos comparativos
+        </div>
       </div>
     </div>
   </div>
-  <div class="col-6 col-md-3 col-xl">
+  <div class="col-6 col-md-3">
     <div class="stat-card border-blue">
       <div class="stat-icon bg-blue"><i class="fa-solid fa-vials"></i></div>
       <div class="stat-info">
@@ -23,7 +28,7 @@
       </div>
     </div>
   </div>
-  <div class="col-6 col-md-3 col-xl">
+  <div class="col-6 col-md-3">
     <div class="stat-card border-green">
       <div class="stat-icon bg-green"><i class="fa-solid fa-circle-check"></i></div>
       <div class="stat-info">
@@ -32,7 +37,7 @@
       </div>
     </div>
   </div>
-  <div class="col-6 col-md-3 col-xl">
+  <div class="col-6 col-md-3">
     <div class="stat-card border-red">
       <div class="stat-icon bg-red"><i class="fa-solid fa-circle-xmark"></i></div>
       <div class="stat-info">
@@ -41,7 +46,7 @@
       </div>
     </div>
   </div>
-  <div class="col-6 col-md-3 col-xl">
+  <div class="col-6 col-md-3">
     <div class="stat-card border-purple">
       <div class="stat-icon bg-purple"><i class="fa-solid fa-building-user"></i></div>
       <div class="stat-info">

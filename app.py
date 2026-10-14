@@ -195,12 +195,17 @@ def admin_catalogo_senasa():
 # ──────────────────────────────────────────────────────────
 # DASHBOARD
 # ──────────────────────────────────────────────────────────
-def _contar_mezclas(db, cond='1=1'):
-    """Mezclas evaluadas que cumplen cond: ensayos simples + mezclas de los comparativos."""
+def _mezclas_por_tipo(db, cond='1=1'):
+    """(en ensayos simples, en comparativos) que cumplen cond. Cada ensayo simple
+    es una mezcla; cada comparativo aporta todas las suyas."""
     simples = db.execute(f"SELECT COUNT(*) FROM ensayos WHERE COALESCE(tipo, '') <> 'comparativo' AND {cond}").fetchone()[0]
     comparadas = db.execute(f"""SELECT COUNT(*) FROM mezclas_ensayo
         WHERE id_ensayo IN (SELECT id_ensayo FROM ensayos WHERE tipo = 'comparativo') AND {cond}""").fetchone()[0]
-    return simples + comparadas
+    return simples, comparadas
+
+
+def _contar_mezclas(db, cond='1=1'):
+    return sum(_mezclas_por_tipo(db, cond))
 
 
 @app.route('/')
@@ -212,9 +217,9 @@ def dashboard():
         'ensayos':   db.execute('SELECT COUNT(*) FROM ensayos').fetchone()[0],
         'estables':  _contar_mezclas(db, "LOWER(resultado_final) = 'estable'"),
         'inestables': _contar_mezclas(db, "LOWER(resultado_final) = 'inestable'"),
-        # cada ensayo simple es una mezcla; un comparativo suma cada una de las suyas
-        'mezclas':   _contar_mezclas(db),
     }
+    stats['mezclas_simples'], stats['mezclas_comparativos'] = _mezclas_por_tipo(db)
+    stats['mezclas'] = stats['mezclas_simples'] + stats['mezclas_comparativos']
     recientes = db.execute('''
         SELECT e.id_ensayo, e.fecha, e.resultado_final, e.objetivo,
                c.razon_social,
