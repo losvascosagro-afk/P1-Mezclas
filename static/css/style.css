@@ -19,6 +19,12 @@ body {
   font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
   font-size: 14px;
   margin: 0;
+  text-transform: uppercase;   /* todo en MAYÚSCULA, también lo que se escribe */
+}
+
+input, textarea, select, button, .form-control, .form-select,
+input::placeholder, textarea::placeholder {
+  text-transform: uppercase;
 }
 
 /* ── SIDEBAR ── */

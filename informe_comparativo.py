@@ -11,13 +11,14 @@ import os
 from datetime import datetime
 
 import observaciones
+from mayus import Paragraph
 from reportlab.lib import colors
 from reportlab.lib.enums import TA_CENTER, TA_LEFT
 from reportlab.lib.pagesizes import A4
 from reportlab.lib.styles import ParagraphStyle
 from reportlab.lib.units import cm
 from reportlab.lib.utils import ImageReader
-from reportlab.platypus import (HRFlowable, Image, KeepTogether, Paragraph,
+from reportlab.platypus import (HRFlowable, Image, KeepTogether,
                                 SimpleDocTemplate, Spacer, Table, TableStyle)
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))

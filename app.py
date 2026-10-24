@@ -9,10 +9,11 @@ from reportlab.lib.pagesizes import A4
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.units import cm
 from reportlab.platypus import (SimpleDocTemplate, Table, TableStyle,
-                                Paragraph, Spacer, Image, HRFlowable, KeepTogether)
+                                Spacer, Image, HRFlowable, KeepTogether)
 from reportlab.lib.enums import TA_CENTER, TA_LEFT, TA_RIGHT
 from reportlab.lib.utils import ImageReader
 
+from mayus import Paragraph
 from db import get_db, close_db, init_db, BACKEND, BASE_DIR, SNAP_COLS
 import observaciones
 
