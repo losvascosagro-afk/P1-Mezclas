@@ -7,7 +7,7 @@ muestran tal cual ("Sí" en rojo, "No" como bueno), sin inventarles un grado.
 """
 
 VERDE, AMARILLO, NARANJA, ROJO, GRIS = '#2E7D32', '#FDD835', '#EF6C00', '#C62828', '#9E9E9E'
-TEAL_PDF = '#1A7A7A'   # en los PDF lo "bueno" va en el verde DMA, como siempre
+TEAL_PDF = '#1D7A6E'   # en los PDF lo "bueno" va en el verde DMA, como siempre
 
 _GRADO = [('No', VERDE), ('Leve', AMARILLO), ('Medio', NARANJA), ('Grave', ROJO)]
 
@@ -40,6 +40,12 @@ def estilo(campo, valor, pdf=False):
                 color = TEAL_PDF
             return texto, color, '#212121' if color == AMARILLO else '#FFFFFF'
     return (v or '—'), GRIS, '#FFFFFF'
+
+
+def color_pdf(color):
+    """En los PDF la observación va como texto de color sobre blanco (sin
+    cuadro relleno): el amarillo y el gris se oscurecen para que se lean."""
+    return {AMARILLO: '#B7950B', GRIS: '#757575'}.get(color, color)
 
 
 def opciones(campo, valor_actual=None):

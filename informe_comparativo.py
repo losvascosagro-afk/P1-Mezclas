@@ -25,10 +25,9 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 LAB_NAME = 'Laboratorio de Análisis de Compatibilidad de Agroquímicos y Calidad de Agua'
 LOGO_PATH = os.path.join(BASE_DIR, 'LOGO ORIGINAL.png')
 
-C_TEAL = colors.HexColor('#1A7A7A')
+C_TEAL = colors.HexColor('#1D7A6E')  # verde del logo DMA Agro
 C_DARK = colors.HexColor('#2D2D2D')
-C_LGRAY = colors.HexColor('#F2F2F2')
-C_BORDER = colors.HexColor('#CCCCCC')
+C_BORDER = colors.HexColor('#DCDCDC')
 C_WHITE = colors.white
 C_RED = colors.HexColor('#C62828')
 C_ORANGE = colors.HexColor('#E67E00')
@@ -39,8 +38,8 @@ ANCHO = 17.4 * cm
 _BASE_STY = {
     'body': dict(fontName='Barlow', fontSize=9, textColor=C_BLACK, spaceAfter=2),
     'label': dict(fontName='Barlow-Bold', fontSize=9, textColor=C_DARK),
-    'th': dict(fontName='Barlow-Bold', fontSize=8, textColor=C_WHITE),
-    'thc': dict(fontName='Barlow-Bold', fontSize=8, textColor=C_WHITE, alignment=TA_CENTER),
+    'th': dict(fontName='Barlow-Bold', fontSize=8, textColor=C_TEAL),
+    'thc': dict(fontName='Barlow-Bold', fontSize=8, textColor=C_TEAL, alignment=TA_CENTER),
     'center': dict(fontName='Barlow', fontSize=9, alignment=TA_CENTER),
     'title': dict(fontName='Barlow-Bold', fontSize=13, textColor=C_WHITE, alignment=TA_LEFT),
     'sub': dict(fontName='Barlow', fontSize=10, textColor=C_WHITE, alignment=TA_LEFT),
@@ -86,8 +85,16 @@ def color_resultado(res):
 
 def sec(text, bg=None):
     t = Table([[Paragraph(text, sty('label', textColor=C_WHITE, leftIndent=6))]], colWidths=[ANCHO])
-    t.setStyle(TableStyle([('BACKGROUND', (0, 0), (-1, -1), bg or C_DARK),
+    t.setStyle(TableStyle([('BACKGROUND', (0, 0), (-1, -1), bg or C_TEAL),
                            ('TOPPADDING', (0, 0), (-1, -1), 5), ('BOTTOMPADDING', (0, 0), (-1, -1), 5)]))
+    return t
+
+
+def subsec(text):
+    """Título dentro de una mezcla: más liviano que sec (blanco, texto y línea verde)."""
+    t = Table([[Paragraph(text.upper(), sty('label', textColor=C_TEAL, fontSize=8.5))]], colWidths=[ANCHO])
+    t.setStyle(TableStyle([('LINEBELOW', (0, 0), (-1, -1), 0.8, C_TEAL), ('LEFTPADDING', (0, 0), (-1, -1), 2),
+                           ('TOPPADDING', (0, 0), (-1, -1), 4), ('BOTTOMPADDING', (0, 0), (-1, -1), 3)]))
     return t
 
 
@@ -104,10 +111,9 @@ def _caja(texto, borde=C_TEAL):
 def _grilla(filas, anchos):
     t = Table(filas, colWidths=anchos)
     t.setStyle(TableStyle([
-        ('ROWBACKGROUNDS', (0, 0), (-1, -1), [C_WHITE, C_LGRAY]),
         ('TOPPADDING', (0, 0), (-1, -1), 5), ('BOTTOMPADDING', (0, 0), (-1, -1), 5),
         ('LEFTPADDING', (0, 0), (-1, -1), 6), ('RIGHTPADDING', (0, 0), (-1, -1), 6),
-        ('BOX', (0, 0), (-1, -1), 0.5, C_BORDER), ('INNERGRID', (0, 0), (-1, -1), 0.3, C_BORDER),
+        ('BOX', (0, 0), (-1, -1), 0.5, C_BORDER), ('LINEBELOW', (0,0),(-1,-2), 0.4, C_BORDER),
         ('VALIGN', (0, 0), (-1, -1), 'MIDDLE')]))
     return t
 
@@ -150,16 +156,16 @@ def _composicion(detalles):
                       Paragraph(_num(d['dosis']), sc),
                       Paragraph(_esc(d['unidad'] or 'L').upper(), sc)])
         if d['observacion'] and str(d['observacion']).strip():
-            filas.append(['', Paragraph(f'<i><font color="#1A7A7A">Obs:</font> {_esc(d["observacion"]).strip()}</i>',
+            filas.append(['', Paragraph(f'<i><font color="#1D7A6E">Obs:</font> {_esc(d["observacion"]).strip()}</i>',
                                         sty('body', fontSize=7, leading=9, textColor=colors.HexColor('#555555'))),
                           '', '', '', '', '', ''])
             obs_rows.append(len(filas) - 1)
     t = Table(filas, colWidths=[0.8 * cm, 3.4 * cm, 2.3 * cm, 2.6 * cm, 1.3 * cm, 4.4 * cm, 1.4 * cm, 1.2 * cm],
               repeatRows=1)
-    st = [('BACKGROUND', (0, 0), (-1, 0), C_DARK),
+    st = [('LINEBELOW', (0,0),(-1,0), 1, C_TEAL),
           ('TOPPADDING', (0, 0), (-1, -1), 4), ('BOTTOMPADDING', (0, 0), (-1, -1), 4),
           ('LEFTPADDING', (0, 0), (-1, -1), 5), ('RIGHTPADDING', (0, 0), (-1, -1), 5),
-          ('BOX', (0, 0), (-1, -1), 0.5, C_BORDER), ('INNERGRID', (0, 0), (-1, -1), 0.3, C_BORDER),
+          ('BOX', (0, 0), (-1, -1), 0.5, C_BORDER), ('LINEBELOW', (0,0),(-1,-2), 0.4, C_BORDER),
           ('VALIGN', (0, 0), (-1, -1), 'MIDDLE')]
     for r in obs_rows:
         st += [('SPAN', (1, r), (7, r)), ('LINEBEFORE', (1, r), (1, r), 2, C_TEAL)]
@@ -253,7 +259,7 @@ def construir(e, mezclas, fotos_generales, upload_folder):
                   [4 * cm, 9.4 * cm, 4 * cm])
     story += [bar, Spacer(1, 4)]
     if e['obs_mezcla']:
-        story += [_caja(f'<b><font color="#1A7A7A">DESCRIPCIÓN DEL ENSAYO</font></b><br/>{_esc(e["obs_mezcla"])}'),
+        story += [_caja(f'<b><font color="#1D7A6E">DESCRIPCIÓN DEL ENSAYO</font></b><br/>{_esc(e["obs_mezcla"])}'),
                   Spacer(1, 6)]
 
     def _v(v):
@@ -279,7 +285,6 @@ def construir(e, mezclas, fotos_generales, upload_folder):
     sc = sty('center', fontSize=8, leading=10)
     filas = [[Paragraph(t, sty('thc')) for t in
               ['Mezcla', 'Agua', 'Espuma', 'Precip.', 'Separ. fases', 'Redisp.', 'Resultado']]]
-    estilos = []
     for i, m in enumerate(mezclas, start=1):
         nombre = f'<b>{_esc(m["nombre"])}</b>'
         if m.get('volumenes'):
@@ -287,19 +292,17 @@ def construir(e, mezclas, fotos_generales, upload_folder):
         fila = [Paragraph(nombre, sty('body', fontSize=8.5, leading=10.5)),
                 Paragraph(_agua_txt(m), sty('body', fontSize=7.5, leading=9.5))]
         for j, campo in enumerate(['espuma', 'precipitado', 'separacion_fases', 'redispersion'], start=2):
-            texto, bg, fg = observaciones.estilo(campo, m[campo], pdf=True)
-            fila.append(Paragraph(f'<font color="{fg}"><b>{_esc(texto).upper()}</b></font>',
+            texto, color, _ = observaciones.estilo(campo, m[campo], pdf=True)
+            fila.append(Paragraph(f'<font color="{observaciones.color_pdf(color)}"><b>{_esc(texto).upper()}</b></font>',
                                   sty('center', fontSize=7.5, leading=9)))
-            estilos.append(('BACKGROUND', (j, i), (j, i), colors.HexColor(bg)))
         fila.append(_badge_res(m['resultado_final'], 3.2 * cm))
         filas.append(fila)
     res = Table(filas, colWidths=[3.2 * cm, 3.7 * cm, 1.6 * cm, 1.6 * cm, 1.8 * cm, 2.1 * cm, 3.4 * cm], repeatRows=1)
-    res.setStyle(TableStyle([('BACKGROUND', (0, 0), (-1, 0), C_DARK),
-                             ('ROWBACKGROUNDS', (0, 1), (1, -1), [C_WHITE, C_LGRAY]),
+    res.setStyle(TableStyle([('LINEBELOW', (0,0),(-1,0), 1, C_TEAL),
                              ('TOPPADDING', (0, 0), (-1, -1), 5), ('BOTTOMPADDING', (0, 0), (-1, -1), 5),
                              ('LEFTPADDING', (0, 0), (-1, -1), 5), ('RIGHTPADDING', (0, 0), (-1, -1), 5),
-                             ('BOX', (0, 0), (-1, -1), 0.5, C_BORDER), ('INNERGRID', (0, 0), (-1, -1), 0.3, C_BORDER),
-                             ('VALIGN', (0, 0), (-1, -1), 'MIDDLE')] + estilos))
+                             ('BOX', (0, 0), (-1, -1), 0.5, C_BORDER), ('LINEBELOW', (0,0),(-1,-2), 0.4, C_BORDER),
+                             ('VALIGN', (0, 0), (-1, -1), 'MIDDLE')]))
     story += [KeepTogether([sec('RESUMEN COMPARATIVO'), res]), Spacer(1, 7)]
 
     if e['recomendacion']:
@@ -318,27 +321,24 @@ def construir(e, mezclas, fotos_generales, upload_folder):
             grilla.setStyle(TableStyle([('SPAN', (1, 1), (3, 1))]))
         bloque.append(grilla)
         if m['descripcion']:
-            bloque += [Spacer(1, 3), _caja(f'<b><font color="#1A7A7A">DESCRIPCIÓN</font></b><br/>{_esc(m["descripcion"])}')]
+            bloque += [Spacer(1, 3), _caja(f'<b><font color="#1D7A6E">DESCRIPCIÓN</font></b><br/>{_esc(m["descripcion"])}')]
         # el encabezado de la mezcla viaja junto con su composición
         if m['detalles']:
-            bloque += [Spacer(1, 4), sec('Composición'), _composicion(m['detalles'])]
+            bloque += [Spacer(1, 4), subsec('Composición'), _composicion(m['detalles'])]
         story += [KeepTogether(bloque), Spacer(1, 4)]
-        obs, fondos = [], []
+        obs = []
         for c, lbl in observaciones.ETIQUETAS:
-            texto, bg, fg = observaciones.estilo(c, m[c], pdf=True)
+            texto, color, _ = observaciones.estilo(c, m[c], pdf=True)
             obs.append([Paragraph(lbl, sty('label')),
-                        Paragraph(f'<font color="{fg}"><b>{_esc(texto).upper()}</b></font>', sc)])
-            fondos.append(colors.HexColor(bg))
+                        Paragraph(f'<font color="{observaciones.color_pdf(color)}"><b>{_esc(texto).upper()}</b></font>', sc)])
         ov = Table([obs[0] + obs[1], obs[2] + obs[3]], colWidths=[5 * cm, 3.7 * cm, 5 * cm, 3.7 * cm])
         ov_st = [('TOPPADDING', (0, 0), (-1, -1), 5), ('BOTTOMPADDING', (0, 0), (-1, -1), 5),
                  ('LEFTPADDING', (0, 0), (-1, -1), 8), ('BOX', (0, 0), (-1, -1), 0.5, C_BORDER),
-                 ('INNERGRID', (0, 0), (-1, -1), 0.3, C_BORDER), ('VALIGN', (0, 0), (-1, -1), 'MIDDLE')]
-        for (r, c), fondo in zip([(0, 1), (0, 3), (1, 1), (1, 3)], fondos):
-            ov_st.append(('BACKGROUND', (c, r), (c, r), fondo))
+                 ('LINEBELOW', (0,0),(-1,-2), 0.4, C_BORDER), ('VALIGN', (0, 0), (-1, -1), 'MIDDLE')]
         ov.setStyle(TableStyle(ov_st))
-        story += [KeepTogether([sec('Observaciones visuales'), ov]), Spacer(1, 4)]
+        story += [KeepTogether([subsec('Observaciones visuales'), ov]), Spacer(1, 4)]
         if m['obs_microscopio']:
-            story += [KeepTogether([sec('Observaciones al microscopio'), _caja(_esc(m['obs_microscopio']))]),
+            story += [KeepTogether([subsec('Observaciones al microscopio'), _caja(_esc(m['obs_microscopio']))]),
                       Spacer(1, 4)]
         if m['fotos']:
             story += _fotos(m['fotos'], upload_folder, f'Imágenes — {_esc(m["nombre"])}', caja)

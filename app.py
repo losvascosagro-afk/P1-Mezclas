@@ -853,10 +853,9 @@ def _build_pdf(e, detalles, fotos):
                             rightMargin=1.8*cm, leftMargin=1.8*cm,
                             topMargin=1.8*cm, bottomMargin=1.8*cm)
 
-    C_TEAL    = colors.HexColor('#1A7A7A')   # verde DMA Agro (solo header y footer)
-    C_DARK    = colors.HexColor('#2D2D2D')   # encabezados de sección y tabla
-    C_LGRAY   = colors.HexColor('#F2F2F2')   # filas alternas neutras
-    C_BORDER  = colors.HexColor('#CCCCCC')   # bordes de tabla
+    C_TEAL    = colors.HexColor('#1D7A6E')   # verde del logo DMA Agro
+    C_DARK    = colors.HexColor('#2D2D2D')   # texto de las etiquetas
+    C_BORDER  = colors.HexColor('#DCDCDC')   # líneas finas de tabla
     C_WHITE   = colors.white
     C_RED     = colors.HexColor('#C62828')
     C_BLACK   = colors.black
@@ -872,8 +871,8 @@ def _build_pdf(e, detalles, fotos):
         base = {
             'body':    dict(fontName='Barlow', fontSize=9, textColor=C_BLACK, spaceAfter=2),
             'label':   dict(fontName='Barlow-Bold', fontSize=9, textColor=C_DARK),
-            'th':      dict(fontName='Barlow-Bold', fontSize=9, textColor=C_WHITE),
-            'thc':     dict(fontName='Barlow-Bold', fontSize=9, textColor=C_WHITE, alignment=TA_CENTER),
+            'th':      dict(fontName='Barlow-Bold', fontSize=9, textColor=C_TEAL),
+            'thc':     dict(fontName='Barlow-Bold', fontSize=9, textColor=C_TEAL, alignment=TA_CENTER),
             'center':  dict(fontName='Barlow', fontSize=9, alignment=TA_CENTER),
             'title':   dict(fontName='Barlow-Bold', fontSize=13, textColor=C_WHITE, alignment=TA_LEFT),
             'sub':     dict(fontName='Barlow', fontSize=10, textColor=C_WHITE, alignment=TA_LEFT),
@@ -893,7 +892,7 @@ def _build_pdf(e, detalles, fotos):
         return img
 
     def sec(text, bg=None):
-        bg = bg or C_DARK
+        bg = bg or C_TEAL
         t = Table([[Paragraph(text, sty('label', textColor=C_WHITE, fontSize=9, leftIndent=6))]], colWidths=[17.4*cm])
         t.setStyle(TableStyle([
             ('BACKGROUND', (0,0),(-1,-1), bg),
@@ -950,13 +949,13 @@ def _build_pdf(e, detalles, fotos):
         ('TOPPADDING', (0,0),(-1,-1), 7), ('BOTTOMPADDING', (0,0),(-1,-1), 7),
         ('LEFTPADDING', (0,0),(-1,-1), 8), ('RIGHTPADDING', (0,0),(-1,-1), 8),
         ('BOX', (0,0),(-1,-1), 0.5, C_BORDER),
-        ('INNERGRID', (0,0),(-1,-1), 0.5, C_BORDER),
+        ('LINEBELOW', (0,0),(-1,-2), 0.4, C_BORDER),
     ]))
     story += [bar, Spacer(1, 4)]
 
     if e['obs_mezcla']:
         obs_bar = Table([[
-            TextoLibre(f'<b><font color="#1A7A7A">OBSERVACIONES DE LA MEZCLA</font></b><br/>{e["obs_mezcla"]}',
+            TextoLibre(f'<b><font color="#1D7A6E">OBSERVACIONES DE LA MEZCLA</font></b><br/>{e["obs_mezcla"]}',
                       sty('obs')),
         ]], colWidths=[17.4*cm])
         obs_bar.setStyle(TableStyle([
@@ -988,11 +987,10 @@ def _build_pdf(e, detalles, fotos):
          Paragraph(_loc(e['localidad'], e['provincia']), sty())],
     ], colWidths=[3*cm, 5.7*cm, 2.7*cm, 6*cm])
     cli.setStyle(TableStyle([
-        ('ROWBACKGROUNDS', (0,0),(-1,-1), [C_WHITE, C_LGRAY]),
         ('TOPPADDING', (0,0),(-1,-1), 5), ('BOTTOMPADDING', (0,0),(-1,-1), 5),
         ('LEFTPADDING', (0,0),(-1,-1), 6), ('RIGHTPADDING', (0,0),(-1,-1), 6),
         ('BOX', (0,0),(-1,-1), 0.5, C_BORDER),
-        ('INNERGRID', (0,0),(-1,-1), 0.3, C_BORDER),
+        ('LINEBELOW', (0,0),(-1,-2), 0.4, C_BORDER),
     ]))
     story += [KeepTogether([sec('DATOS DEL CLIENTE'), cli]), Spacer(1, 7)]
 
@@ -1008,11 +1006,10 @@ def _build_pdf(e, detalles, fotos):
          Paragraph('Tiempos obs. (min)', sty('label')), Paragraph(_tobs, sty())],
     ], colWidths=[3.8*cm, 2.4*cm, 1.8*cm, 3.4*cm, 3*cm, 3*cm])
     cond.setStyle(TableStyle([
-        ('ROWBACKGROUNDS', (0,0),(-1,-1), [C_WHITE, C_LGRAY]),
         ('TOPPADDING', (0,0),(-1,-1), 5), ('BOTTOMPADDING', (0,0),(-1,-1), 5),
         ('LEFTPADDING', (0,0),(-1,-1), 6), ('RIGHTPADDING', (0,0),(-1,-1), 6),
         ('BOX', (0,0),(-1,-1), 0.5, C_BORDER),
-        ('INNERGRID', (0,0),(-1,-1), 0.3, C_BORDER),
+        ('LINEBELOW', (0,0),(-1,-2), 0.4, C_BORDER),
     ]))
     story += [KeepTogether([sec('CONDICIONES DEL ENSAYO'), cond]), Spacer(1, 7)]
 
@@ -1058,7 +1055,7 @@ def _build_pdf(e, detalles, fotos):
             if d['observacion'] and str(d['observacion']).strip():
                 mrows.append([
                     Paragraph('', sc),
-                    Paragraph(f'<i><font color="#1A7A7A">Obs:</font> {d["observacion"].strip()}</i>',
+                    Paragraph(f'<i><font color="#1D7A6E">Obs:</font> {d["observacion"].strip()}</i>',
                               sty('body', fontSize=7, leading=9, textColor=colors.HexColor('#555555'))),
                     '', '', '', '', '', '',
                 ])
@@ -1067,11 +1064,11 @@ def _build_pdf(e, detalles, fotos):
         mt = Table(mrows, colWidths=[0.8*cm, 3.4*cm, 2.3*cm, 2.6*cm, 1.3*cm, 4.4*cm, 1.4*cm, 1.2*cm],
                    repeatRows=1)
         ms = [
-            ('BACKGROUND', (0,0),(-1,0), C_DARK),
+            ('LINEBELOW', (0,0),(-1,0), 1, C_TEAL),
             ('TOPPADDING', (0,0),(-1,-1), 4), ('BOTTOMPADDING', (0,0),(-1,-1), 4),
             ('LEFTPADDING', (0,0),(-1,-1), 5), ('RIGHTPADDING', (0,0),(-1,-1), 5),
             ('BOX', (0,0),(-1,-1), 0.5, C_BORDER),
-            ('INNERGRID', (0,0),(-1,-1), 0.3, C_BORDER),
+            ('LINEBELOW', (0,0),(-1,-2), 0.4, C_BORDER),
             ('VALIGN', (0,0),(-1,-1), 'MIDDLE'),
         ]
         for r in obs_row_indices:
@@ -1082,9 +1079,6 @@ def _build_pdf(e, detalles, fotos):
                 ('BACKGROUND', (0, r), (-1, r), C_WHITE),
                 ('LINEBEFORE', (1, r), (1, r), 2, C_TEAL),
             ]
-        for i, r in enumerate(prod_row_indices):
-            if i % 2 == 0:
-                ms.append(('BACKGROUND', (0, r), (-1, r), C_LGRAY))
         mt.setStyle(TableStyle(ms))
         story.append(KeepTogether([comp_sec, mt]))
     else:
@@ -1096,11 +1090,11 @@ def _build_pdf(e, detalles, fotos):
     def ind(val, campo):
         # escala No/Leve/Medio/Grave (o Total/Parcial… en redispersión); datos viejos Si/No tal cual
         v = str(val or '').strip()
-        texto, _, fg = observaciones.estilo(campo, v, pdf=True)
+        texto, color, _ = observaciones.estilo(campo, v, pdf=True)
         if observaciones.es_viejo_si(v) or not v:
             texto = (v or 'No')
-        return Paragraph(f'<font color="{fg}"><b> {texto.upper()} </b></font>',
-                         sty('center', textColor=C_WHITE, fontName='Barlow-Bold', fontSize=9))
+        return Paragraph(f'<font color="{observaciones.color_pdf(color)}"><b> {texto.upper()} </b></font>',
+                         sty('center', fontName='Barlow-Bold', fontSize=9))
 
     ov = Table([
         [Paragraph('Parámetro', sty('th')), Paragraph('Resultado', sty('thc')),
@@ -1111,21 +1105,12 @@ def _build_pdf(e, detalles, fotos):
          Paragraph('Redispersión', sty('label')), ind(e['redispersion'], 'redispersion')],
     ], colWidths=[5*cm, 3.7*cm, 5*cm, 3.7*cm])
 
-    def _obs_bg(val, campo):
-        v = str(val or '').strip() or 'No'
-        return colors.HexColor(observaciones.estilo(campo, v, pdf=True)[1])
-
     ov.setStyle(TableStyle([
-        ('BACKGROUND', (0,0),(-1,0), C_DARK),
-        ('ROWBACKGROUNDS', (0,1),(-1,-1), [C_WHITE, C_LGRAY]),
-        ('BACKGROUND', (1,1),(1,1), _obs_bg(e['espuma'], 'espuma')),
-        ('BACKGROUND', (3,1),(3,1), _obs_bg(e['precipitado'], 'precipitado')),
-        ('BACKGROUND', (1,2),(1,2), _obs_bg(e['separacion_fases'], 'separacion_fases')),
-        ('BACKGROUND', (3,2),(3,2), _obs_bg(e['redispersion'], 'redispersion')),
+        ('LINEBELOW', (0,0),(-1,0), 1, C_TEAL),
         ('TOPPADDING', (0,0),(-1,-1), 6), ('BOTTOMPADDING', (0,0),(-1,-1), 6),
         ('LEFTPADDING', (0,0),(-1,-1), 8), ('RIGHTPADDING', (0,0),(-1,-1), 8),
         ('BOX', (0,0),(-1,-1), 0.5, C_BORDER),
-        ('INNERGRID', (0,0),(-1,-1), 0.3, C_BORDER),
+        ('LINEBELOW', (0,0),(-1,-2), 0.4, C_BORDER),
         ('VALIGN', (0,0),(-1,-1), 'MIDDLE'),
     ]))
     story += [KeepTogether([sec('OBSERVACIONES VISUALES'), ov]), Spacer(1, 7)]
@@ -1139,14 +1124,11 @@ def _build_pdf(e, detalles, fotos):
          TextoLibre(e['recomendacion'] or '—', sty('obs'))],
     ], colWidths=[3.5*cm, 13.9*cm])
     conc.setStyle(TableStyle([
-        # ROWBACKGROUNDS primero: ReportLab pinta en orden y, si va después,
-        # tapa con blanco la celda del resultado (texto blanco invisible).
-        ('ROWBACKGROUNDS', (0,0),(-1,-1), [C_WHITE, C_LGRAY]),
         ('BACKGROUND', (1,0),(1,0), C_RESULT),
         ('TOPPADDING', (0,0),(-1,-1), 7), ('BOTTOMPADDING', (0,0),(-1,-1), 7),
         ('LEFTPADDING', (0,0),(-1,-1), 8), ('RIGHTPADDING', (0,0),(-1,-1), 8),
         ('BOX', (0,0),(-1,-1), 0.5, C_BORDER),
-        ('INNERGRID', (0,0),(-1,-1), 0.3, C_BORDER),
+        ('LINEBELOW', (0,0),(-1,-2), 0.4, C_BORDER),
         ('VALIGN', (0,0),(-1,-1), 'TOP'),
     ]))
     story += [KeepTogether([sec('CONCLUSIÓN Y RECOMENDACIÓN', bg=C_RESULT), conc]), Spacer(1, 7)]
