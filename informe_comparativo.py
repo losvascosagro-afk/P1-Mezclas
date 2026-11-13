@@ -11,7 +11,7 @@ import os
 from datetime import datetime
 
 import observaciones
-from mayus import Paragraph
+from mayus import Paragraph, TextoLibre
 from reportlab.lib import colors
 from reportlab.lib.enums import TA_CENTER, TA_LEFT
 from reportlab.lib.pagesizes import A4
@@ -92,7 +92,7 @@ def sec(text, bg=None):
 
 
 def _caja(texto, borde=C_TEAL):
-    t = Table([[Paragraph(texto, sty('obs'))]], colWidths=[ANCHO])
+    t = Table([[TextoLibre(texto, sty('obs'))]], colWidths=[ANCHO])
     t.setStyle(TableStyle([
         ('BACKGROUND', (0, 0), (-1, -1), C_WHITE), ('LINEBEFORE', (0, 0), (0, -1), 2.5, borde),
         ('LEFTPADDING', (0, 0), (-1, -1), 10), ('RIGHTPADDING', (0, 0), (-1, -1), 8),

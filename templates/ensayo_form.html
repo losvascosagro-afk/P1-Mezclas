@@ -42,8 +42,8 @@
           </div>
           <div class="col-12">
             <label class="form-label fw-semibold">Observaciones de la mezcla</label>
-            <input type="text" name="obs_mezcla" class="form-control"
-                   value="{{ e.obs_mezcla if e else '' }}"
+            <input type="text" name="obs_mezcla" class="form-control texto-libre"
+                   value="{{ (e.obs_mezcla or '') if e else '' }}"
                    placeholder="Ej: Chalares, Aplicación tardía, Mezcla en campo">
           </div>
         </div>

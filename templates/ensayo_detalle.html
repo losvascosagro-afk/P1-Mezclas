@@ -66,7 +66,7 @@
         {% if e.obs_mezcla %}
           <div class="mt-2 p-2 rounded" style="background:#fffbe6;border-left:3px solid #f0a500">
             <small class="text-muted">Observaciones de la mezcla:</small><br>
-            <span>{{ e.obs_mezcla }}</span>
+            <span class="texto-libre">{{ e.obs_mezcla }}</span>
           </div>
         {% endif %}
       </div>
@@ -158,7 +158,7 @@
     <div class="card-custom mb-4">
       <div class="card-header-custom"><i class="fa-solid fa-lightbulb me-2"></i>Recomendación</div>
       <div class="p-4">
-        <p class="mb-0">{{ e.recomendacion }}</p>
+        <p class="mb-0 texto-libre">{{ e.recomendacion }}</p>
       </div>
     </div>
     {% endif %}
@@ -173,7 +173,7 @@
       <div class="card-header-custom"><i class="fa-solid fa-microscope me-2"></i>Observaciones al Microscopio</div>
       <div class="p-4">
         {% if e.obs_microscopio %}
-          <p class="mb-0" style="white-space:pre-line">{{ e.obs_microscopio }}</p>
+          <p class="mb-0 texto-libre" style="white-space:pre-line">{{ e.obs_microscopio }}</p>
         {% else %}
           <p class="text-muted mb-0">Sin observaciones registradas.</p>
         {% endif %}

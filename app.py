@@ -13,7 +13,7 @@ from reportlab.platypus import (SimpleDocTemplate, Table, TableStyle,
 from reportlab.lib.enums import TA_CENTER, TA_LEFT, TA_RIGHT
 from reportlab.lib.utils import ImageReader
 
-from mayus import Paragraph
+from mayus import Paragraph, TextoLibre
 from db import get_db, close_db, init_db, BACKEND, BASE_DIR, SNAP_COLS
 import observaciones
 
@@ -956,7 +956,7 @@ def _build_pdf(e, detalles, fotos):
 
     if e['obs_mezcla']:
         obs_bar = Table([[
-            Paragraph(f'<b><font color="#1A7A7A">OBSERVACIONES DE LA MEZCLA</font></b><br/>{e["obs_mezcla"]}',
+            TextoLibre(f'<b><font color="#1A7A7A">OBSERVACIONES DE LA MEZCLA</font></b><br/>{e["obs_mezcla"]}',
                       sty('obs')),
         ]], colWidths=[17.4*cm])
         obs_bar.setStyle(TableStyle([
@@ -1136,7 +1136,7 @@ def _build_pdf(e, detalles, fotos):
          Paragraph(f'<font color="white"><b>  {resultado.upper() or "—"}  </b></font>',
                    sty('center', textColor=C_WHITE, fontName='Helvetica-Bold', fontSize=10))],
         [Paragraph('Recomendación:', sty('label')),
-         Paragraph(e['recomendacion'] or '—', sty())],
+         TextoLibre(e['recomendacion'] or '—', sty('obs'))],
     ], colWidths=[3.5*cm, 13.9*cm])
     conc.setStyle(TableStyle([
         # ROWBACKGROUNDS primero: ReportLab pinta en orden y, si va después,
@@ -1153,7 +1153,7 @@ def _build_pdf(e, detalles, fotos):
 
     # ── MICROSCOPÍA ──
     if e['obs_microscopio']:
-        mic = Table([[Paragraph(e['obs_microscopio'], sty('obs'))]], colWidths=[17.4*cm])
+        mic = Table([[TextoLibre(e['obs_microscopio'], sty('obs'))]], colWidths=[17.4*cm])
         mic.setStyle(TableStyle([
             ('BACKGROUND', (0,0),(-1,-1), C_WHITE),
             ('LINEBEFORE', (0,0),(0,-1), 2.5, C_TEAL),

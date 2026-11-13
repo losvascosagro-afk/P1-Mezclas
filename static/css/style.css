@@ -27,6 +27,15 @@ input::placeholder, textarea::placeholder {
   text-transform: uppercase;
 }
 
+/* Textos largos que escribe el laboratorio (recomendación, observaciones,
+   microscopía, descripciones): como se escribieron, en mayúscula y
+   minúscula, porque un párrafo entero en MAYÚSCULA se lee mal. */
+textarea, textarea.form-control, textarea::placeholder,
+.form-control.texto-libre, .texto-libre, .texto-libre::placeholder {
+  text-transform: none;
+}
+.texto-libre { line-height: 1.6; }
+
 /* ── SIDEBAR ── */
 #sidebar {
   position: fixed;

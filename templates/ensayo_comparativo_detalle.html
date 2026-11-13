@@ -79,7 +79,7 @@
           </div>
         </div>
         {% if e.objetivo %}<div class="mt-3 p-2 bg-light rounded"><small class="text-muted">Objetivo:</small><br><strong>{{ e.objetivo }}</strong></div>{% endif %}
-        {% if e.obs_mezcla %}<div class="mt-2 p-2 rounded" style="background:#fffbe6;border-left:3px solid #f0a500"><small class="text-muted">Descripción:</small><br><span style="white-space:pre-line">{{ e.obs_mezcla }}</span></div>{% endif %}
+        {% if e.obs_mezcla %}<div class="mt-2 p-2 rounded" style="background:#fffbe6;border-left:3px solid #f0a500"><small class="text-muted">Descripción:</small><br><span class="texto-libre" style="white-space:pre-line">{{ e.obs_mezcla }}</span></div>{% endif %}
         <div class="mt-2 small text-muted">
           Volúmenes: {% if e.volumenes %}{{ e.volumenes|vols }}{% elif con_vol %}según cada mezcla{% else %}— L{% endif %} &nbsp;·&nbsp; Tiempos de observación: {{ (e.tiempos_obs or '—').replace(',', ' / ') }} min
         </div>
@@ -118,7 +118,7 @@
     {% if e.recomendacion %}
     <div class="card-custom mb-4">
       <div class="card-header-custom"><i class="fa-solid fa-lightbulb me-2"></i>Conclusión general</div>
-      <div class="p-4"><p class="mb-0" style="white-space:pre-line">{{ e.recomendacion }}</p></div>
+      <div class="p-4"><p class="mb-0 texto-libre" style="white-space:pre-line">{{ e.recomendacion }}</p></div>
     </div>
     {% endif %}
 
@@ -132,7 +132,7 @@
       <div class="p-3">
         {% if m.volumenes %}<div class="small mb-1"><i class="fa-solid fa-flask-vial me-1 text-primary"></i><b>Volúmenes de caldo:</b> {{ m.volumenes|vols }}</div>{% endif %}
         <div class="small mb-2"><i class="fa-solid fa-droplet me-1 text-primary"></i><b>Agua:</b> {{ agua(m) }}</div>
-        {% if m.descripcion %}<div class="p-2 mb-3 rounded" style="background:#fffbe6;border-left:3px solid #f0a500;white-space:pre-line">{{ m.descripcion }}</div>{% endif %}
+        {% if m.descripcion %}<div class="p-2 mb-3 rounded texto-libre" style="background:#fffbe6;border-left:3px solid #f0a500;white-space:pre-line">{{ m.descripcion }}</div>{% endif %}
 
         {% if m.detalles %}
         <div class="table-responsive mb-3">
@@ -169,7 +169,7 @@
 
         {% if m.obs_microscopio %}
         <div class="mb-3"><div class="small fw-semibold"><i class="fa-solid fa-microscope me-1"></i>Microscopio</div>
-          <p class="mb-0 small" style="white-space:pre-line">{{ m.obs_microscopio }}</p></div>
+          <p class="mb-0 small texto-libre" style="white-space:pre-line">{{ m.obs_microscopio }}</p></div>
         {% endif %}
 
         <div class="d-flex justify-content-between align-items-center mb-2">

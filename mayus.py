@@ -45,3 +45,29 @@ class Paragraph(_Paragraph):
             texto, args, kwargs = self._args
             super().__init__(texto, estilo, *args, **kwargs)
         return super().wrap(availWidth, availHeight)
+
+
+def _primera_mayus(texto):
+    """Pone en mayúscula solo la primera letra del texto (fuera de etiquetas)."""
+    if not isinstance(texto, str):
+        return texto
+    partes = _MARCAS.split(texto)
+    for i in range(0, len(partes), 2):
+        p = partes[i]
+        for j, ch in enumerate(p):
+            if ch.isalpha():
+                partes[i] = p[:j] + ch.upper() + p[j + 1:]
+                return ''.join(partes)
+            if not ch.isspace():
+                return ''.join(partes)
+    return ''.join(partes)
+
+
+class TextoLibre(_Paragraph):
+    """Para los textos largos que escribe el laboratorio (recomendación,
+    observaciones, descripciones): se muestran como fueron escritos, en
+    mayúscula y minúscula, porque un párrafo entero en MAYÚSCULA se lee mal.
+    Los títulos que van dentro (<b>...</b>) ya vienen escritos en mayúscula."""
+
+    def __init__(self, text, style=None, *args, **kwargs):
+        super().__init__(_primera_mayus(text), style, *args, **kwargs)
