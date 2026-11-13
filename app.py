@@ -869,16 +869,16 @@ def _build_pdf(e, detalles, fotos):
 
     def sty(name='body', **kw):
         base = {
-            'body':    dict(fontName='Barlow', fontSize=9, textColor=C_BLACK, spaceAfter=2),
-            'label':   dict(fontName='Barlow-Bold', fontSize=9, textColor=C_DARK),
-            'th':      dict(fontName='Barlow-Bold', fontSize=9, textColor=C_TEAL),
-            'thc':     dict(fontName='Barlow-Bold', fontSize=9, textColor=C_TEAL, alignment=TA_CENTER),
-            'center':  dict(fontName='Barlow', fontSize=9, alignment=TA_CENTER),
-            'title':   dict(fontName='Barlow-Bold', fontSize=13, textColor=C_WHITE, alignment=TA_LEFT),
-            'sub':     dict(fontName='Barlow', fontSize=10, textColor=C_WHITE, alignment=TA_LEFT),
-            'footer':  dict(fontName='Barlow', fontSize=7, textColor=colors.gray, alignment=TA_CENTER),
-            'caption': dict(fontName='Barlow', fontSize=8, textColor=colors.gray, alignment=TA_CENTER),
-            'obs':     dict(fontName='Barlow', fontSize=9, textColor=C_BLACK, leading=14),
+            'body':    dict(fontName='Outfit', fontSize=9, textColor=C_BLACK, spaceAfter=2),
+            'label':   dict(fontName='Outfit-Bold', fontSize=9, textColor=C_DARK),
+            'th':      dict(fontName='Outfit-Bold', fontSize=9, textColor=C_TEAL),
+            'thc':     dict(fontName='Outfit-Bold', fontSize=9, textColor=C_TEAL, alignment=TA_CENTER),
+            'center':  dict(fontName='Outfit', fontSize=9, alignment=TA_CENTER),
+            'title':   dict(fontName='Outfit-Bold', fontSize=13, textColor=C_WHITE, alignment=TA_LEFT),
+            'sub':     dict(fontName='Outfit', fontSize=10, textColor=C_WHITE, alignment=TA_LEFT),
+            'footer':  dict(fontName='Outfit', fontSize=7, textColor=colors.gray, alignment=TA_CENTER),
+            'caption': dict(fontName='Outfit', fontSize=8, textColor=colors.gray, alignment=TA_CENTER),
+            'obs':     dict(fontName='Outfit', fontSize=9, textColor=C_BLACK, leading=14),
         }
         d = {**base.get(name, base['body']), **kw}
         return ParagraphStyle(f'S_{name}_{id(kw)}', **d)
@@ -1094,7 +1094,7 @@ def _build_pdf(e, detalles, fotos):
         if observaciones.es_viejo_si(v) or not v:
             texto = (v or 'No')
         return Paragraph(f'<font color="{observaciones.color_pdf(color)}"><b> {texto.upper()} </b></font>',
-                         sty('center', fontName='Barlow-Bold', fontSize=9))
+                         sty('center', fontName='Outfit-Bold', fontSize=9))
 
     ov = Table([
         [Paragraph('Parámetro', sty('th')), Paragraph('Resultado', sty('thc')),
@@ -1119,7 +1119,7 @@ def _build_pdf(e, detalles, fotos):
     conc = Table([
         [Paragraph('Resultado Final:', sty('label')),
          Paragraph(f'<font color="white"><b>  {resultado.upper() or "—"}  </b></font>',
-                   sty('center', textColor=C_WHITE, fontName='Barlow-Bold', fontSize=10))],
+                   sty('center', textColor=C_WHITE, fontName='Outfit-Bold', fontSize=10))],
         [Paragraph('Recomendación:', sty('label')),
          TextoLibre(e['recomendacion'] or '—', sty('obs'))],
     ], colWidths=[3.5*cm, 13.9*cm])

@@ -36,16 +36,16 @@ C_BLACK = colors.black
 ANCHO = 17.4 * cm
 
 _BASE_STY = {
-    'body': dict(fontName='Barlow', fontSize=9, textColor=C_BLACK, spaceAfter=2),
-    'label': dict(fontName='Barlow-Bold', fontSize=9, textColor=C_DARK),
-    'th': dict(fontName='Barlow-Bold', fontSize=8, textColor=C_TEAL),
-    'thc': dict(fontName='Barlow-Bold', fontSize=8, textColor=C_TEAL, alignment=TA_CENTER),
-    'center': dict(fontName='Barlow', fontSize=9, alignment=TA_CENTER),
-    'title': dict(fontName='Barlow-Bold', fontSize=13, textColor=C_WHITE, alignment=TA_LEFT),
-    'sub': dict(fontName='Barlow', fontSize=10, textColor=C_WHITE, alignment=TA_LEFT),
-    'footer': dict(fontName='Barlow', fontSize=7, textColor=colors.gray, alignment=TA_CENTER),
-    'caption': dict(fontName='Barlow', fontSize=8, textColor=colors.gray, alignment=TA_CENTER),
-    'obs': dict(fontName='Barlow', fontSize=9, textColor=C_BLACK, leading=14),
+    'body': dict(fontName='Outfit', fontSize=9, textColor=C_BLACK, spaceAfter=2),
+    'label': dict(fontName='Outfit-Bold', fontSize=9, textColor=C_DARK),
+    'th': dict(fontName='Outfit-Bold', fontSize=8, textColor=C_TEAL),
+    'thc': dict(fontName='Outfit-Bold', fontSize=8, textColor=C_TEAL, alignment=TA_CENTER),
+    'center': dict(fontName='Outfit', fontSize=9, alignment=TA_CENTER),
+    'title': dict(fontName='Outfit-Bold', fontSize=13, textColor=C_WHITE, alignment=TA_LEFT),
+    'sub': dict(fontName='Outfit', fontSize=10, textColor=C_WHITE, alignment=TA_LEFT),
+    'footer': dict(fontName='Outfit', fontSize=7, textColor=colors.gray, alignment=TA_CENTER),
+    'caption': dict(fontName='Outfit', fontSize=8, textColor=colors.gray, alignment=TA_CENTER),
+    'obs': dict(fontName='Outfit', fontSize=9, textColor=C_BLACK, leading=14),
 }
 _n_sty = [0]
 
