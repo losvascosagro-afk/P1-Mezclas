@@ -870,16 +870,16 @@ def _build_pdf(e, detalles, fotos):
 
     def sty(name='body', **kw):
         base = {
-            'body':    dict(fontName='Helvetica', fontSize=9, textColor=C_BLACK, spaceAfter=2),
-            'label':   dict(fontName='Helvetica-Bold', fontSize=9, textColor=C_DARK),
-            'th':      dict(fontName='Helvetica-Bold', fontSize=9, textColor=C_WHITE),
-            'thc':     dict(fontName='Helvetica-Bold', fontSize=9, textColor=C_WHITE, alignment=TA_CENTER),
-            'center':  dict(fontName='Helvetica', fontSize=9, alignment=TA_CENTER),
-            'title':   dict(fontName='Helvetica-Bold', fontSize=13, textColor=C_WHITE, alignment=TA_LEFT),
-            'sub':     dict(fontName='Helvetica', fontSize=10, textColor=C_WHITE, alignment=TA_LEFT),
-            'footer':  dict(fontName='Helvetica', fontSize=7, textColor=colors.gray, alignment=TA_CENTER),
-            'caption': dict(fontName='Helvetica', fontSize=8, textColor=colors.gray, alignment=TA_CENTER),
-            'obs':     dict(fontName='Helvetica', fontSize=9, textColor=C_BLACK, leading=14),
+            'body':    dict(fontName='Barlow', fontSize=9, textColor=C_BLACK, spaceAfter=2),
+            'label':   dict(fontName='Barlow-Bold', fontSize=9, textColor=C_DARK),
+            'th':      dict(fontName='Barlow-Bold', fontSize=9, textColor=C_WHITE),
+            'thc':     dict(fontName='Barlow-Bold', fontSize=9, textColor=C_WHITE, alignment=TA_CENTER),
+            'center':  dict(fontName='Barlow', fontSize=9, alignment=TA_CENTER),
+            'title':   dict(fontName='Barlow-Bold', fontSize=13, textColor=C_WHITE, alignment=TA_LEFT),
+            'sub':     dict(fontName='Barlow', fontSize=10, textColor=C_WHITE, alignment=TA_LEFT),
+            'footer':  dict(fontName='Barlow', fontSize=7, textColor=colors.gray, alignment=TA_CENTER),
+            'caption': dict(fontName='Barlow', fontSize=8, textColor=colors.gray, alignment=TA_CENTER),
+            'obs':     dict(fontName='Barlow', fontSize=9, textColor=C_BLACK, leading=14),
         }
         d = {**base.get(name, base['body']), **kw}
         return ParagraphStyle(f'S_{name}_{id(kw)}', **d)
@@ -1003,7 +1003,7 @@ def _build_pdf(e, detalles, fotos):
         [Paragraph('Tipo de Agua', sty('label')), Paragraph(e['tipo_agua'] or '—', sty()),
          Paragraph('pH', sty('label')), Paragraph(str(e['ph'] or '—'), sty()),
          Paragraph('Temperatura (°C)', sty('label')), Paragraph(str(e['temperatura'] or '—'), sty())],
-        [Paragraph('Dureza (mg/L CaCO₃)', sty('label')), Paragraph(str(e['dureza'] or '—'), sty()),
+        [Paragraph('Dureza (mg/L CaCO<sub>3</sub>)', sty('label')), Paragraph(str(e['dureza'] or '—'), sty()),
          Paragraph('Volúmenes (L)', sty('label')), Paragraph(_vols, sty()),
          Paragraph('Tiempos obs. (min)', sty('label')), Paragraph(_tobs, sty())],
     ], colWidths=[3.8*cm, 2.4*cm, 1.8*cm, 3.4*cm, 3*cm, 3*cm])
@@ -1100,7 +1100,7 @@ def _build_pdf(e, detalles, fotos):
         if observaciones.es_viejo_si(v) or not v:
             texto = (v or 'No')
         return Paragraph(f'<font color="{fg}"><b> {texto.upper()} </b></font>',
-                         sty('center', textColor=C_WHITE, fontName='Helvetica-Bold', fontSize=9))
+                         sty('center', textColor=C_WHITE, fontName='Barlow-Bold', fontSize=9))
 
     ov = Table([
         [Paragraph('Parámetro', sty('th')), Paragraph('Resultado', sty('thc')),
@@ -1134,7 +1134,7 @@ def _build_pdf(e, detalles, fotos):
     conc = Table([
         [Paragraph('Resultado Final:', sty('label')),
          Paragraph(f'<font color="white"><b>  {resultado.upper() or "—"}  </b></font>',
-                   sty('center', textColor=C_WHITE, fontName='Helvetica-Bold', fontSize=10))],
+                   sty('center', textColor=C_WHITE, fontName='Barlow-Bold', fontSize=10))],
         [Paragraph('Recomendación:', sty('label')),
          TextoLibre(e['recomendacion'] or '—', sty('obs'))],
     ], colWidths=[3.5*cm, 13.9*cm])

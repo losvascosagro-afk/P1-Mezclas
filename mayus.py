@@ -7,7 +7,24 @@ En pantalla lo mismo se hace con CSS (text-transform en style.css).
 import copy
 import re
 
+import os
+
+from reportlab.lib.fonts import addMapping
+from reportlab.pdfbase import pdfmetrics
+from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.platypus import Paragraph as _Paragraph
+
+# Letra de los informes: Barlow (la misma que en pantalla), en static/fonts.
+# Nombres: 'Barlow' y 'Barlow-Bold' (más 'Barlow-Italic' y
+# 'Barlow-BoldItalic' para <i> y <b><i> dentro de los Paragraph).
+_FUENTES = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'static', 'fonts')
+for _nombre, _archivo, _b, _i in [('Barlow', 'Barlow-Regular.ttf', 0, 0),
+                                  ('Barlow-Bold', 'Barlow-Bold.ttf', 1, 0),
+                                  ('Barlow-Italic', 'Barlow-Italic.ttf', 0, 1),
+                                  ('Barlow-BoldItalic', 'Barlow-BoldItalic.ttf', 1, 1)]:
+    pdfmetrics.registerFont(TTFont(_nombre, os.path.join(_FUENTES, _archivo)))
+    addMapping('Barlow', _b, _i, _nombre)
+    addMapping('Barlow-Bold', _b, _i, 'Barlow-BoldItalic' if _i else 'Barlow-Bold')
 
 _MARCAS = re.compile(r'(<[^>]*>|&[#\w]+;)')
 
@@ -17,7 +34,7 @@ def mayus(texto):
         return texto
     partes = _MARCAS.split(texto)
     # Las partes impares son etiquetas/entidades; µ queda igual (su
-    # mayúscula es la letra griega, que Helvetica no tiene).
+    # mayúscula es la letra griega, que Barlow no tiene).
     return ''.join(p if i % 2 else p.replace('µ', '\0').upper().replace('\0', 'µ')
                    for i, p in enumerate(partes))
 

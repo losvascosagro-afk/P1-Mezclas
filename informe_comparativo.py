@@ -37,16 +37,16 @@ C_BLACK = colors.black
 ANCHO = 17.4 * cm
 
 _BASE_STY = {
-    'body': dict(fontName='Helvetica', fontSize=9, textColor=C_BLACK, spaceAfter=2),
-    'label': dict(fontName='Helvetica-Bold', fontSize=9, textColor=C_DARK),
-    'th': dict(fontName='Helvetica-Bold', fontSize=8, textColor=C_WHITE),
-    'thc': dict(fontName='Helvetica-Bold', fontSize=8, textColor=C_WHITE, alignment=TA_CENTER),
-    'center': dict(fontName='Helvetica', fontSize=9, alignment=TA_CENTER),
-    'title': dict(fontName='Helvetica-Bold', fontSize=13, textColor=C_WHITE, alignment=TA_LEFT),
-    'sub': dict(fontName='Helvetica', fontSize=10, textColor=C_WHITE, alignment=TA_LEFT),
-    'footer': dict(fontName='Helvetica', fontSize=7, textColor=colors.gray, alignment=TA_CENTER),
-    'caption': dict(fontName='Helvetica', fontSize=8, textColor=colors.gray, alignment=TA_CENTER),
-    'obs': dict(fontName='Helvetica', fontSize=9, textColor=C_BLACK, leading=14),
+    'body': dict(fontName='Barlow', fontSize=9, textColor=C_BLACK, spaceAfter=2),
+    'label': dict(fontName='Barlow-Bold', fontSize=9, textColor=C_DARK),
+    'th': dict(fontName='Barlow-Bold', fontSize=8, textColor=C_WHITE),
+    'thc': dict(fontName='Barlow-Bold', fontSize=8, textColor=C_WHITE, alignment=TA_CENTER),
+    'center': dict(fontName='Barlow', fontSize=9, alignment=TA_CENTER),
+    'title': dict(fontName='Barlow-Bold', fontSize=13, textColor=C_WHITE, alignment=TA_LEFT),
+    'sub': dict(fontName='Barlow', fontSize=10, textColor=C_WHITE, alignment=TA_LEFT),
+    'footer': dict(fontName='Barlow', fontSize=7, textColor=colors.gray, alignment=TA_CENTER),
+    'caption': dict(fontName='Barlow', fontSize=8, textColor=colors.gray, alignment=TA_CENTER),
+    'obs': dict(fontName='Barlow', fontSize=9, textColor=C_BLACK, leading=14),
 }
 _n_sty = [0]
 

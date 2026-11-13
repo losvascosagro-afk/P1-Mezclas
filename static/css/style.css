@@ -16,8 +16,10 @@
 
 body {
   background: var(--gray-bg);
-  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  /* Barlow: angosta, se lee bien en MAYÚSCULA. Si no carga, Segoe UI. */
+  font-family: 'Barlow', 'Segoe UI', system-ui, -apple-system, sans-serif;
   font-size: 14px;
+  letter-spacing: .02em;
   margin: 0;
   text-transform: uppercase;   /* todo en MAYÚSCULA, también lo que se escribe */
 }
