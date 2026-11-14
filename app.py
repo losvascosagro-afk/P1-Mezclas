@@ -1270,6 +1270,9 @@ app.register_blueprint(comparativos.bp)
 import muestras  # noqa: E402
 app.register_blueprint(muestras.bp)
 
+import metricas  # noqa: E402
+app.register_blueprint(metricas.bp)
+
 
 if __name__ == '__main__':
     init_db()

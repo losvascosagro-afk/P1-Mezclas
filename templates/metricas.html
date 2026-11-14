@@ -1,0 +1,300 @@
+{% extends "base.html" %}
+{% block title %}Métricas — Lab. Mezclas{% endblock %}
+{% block page_title %}Métricas{% endblock %}
+
+{% block content %}
+{% set COLOR = {'Estable': '#2E7D32', 'Estable con observaciones': '#F9A825', 'Inestable': '#C62828',
+                'Requiere más ensayos': '#1565C0', 'Sin resultado': '#9E9E9E'} %}
+{% set ORDEN = resultados + ['Sin resultado'] %}
+{% macro barra_resultados(res, total) -%}
+  <div class="met-stack" title="{% for r in ORDEN if res.get(r) %}{{ r }}: {{ res[r] }}{% if not loop.last %} · {% endif %}{% endfor %}">
+    {% for r in ORDEN if res.get(r) %}<span style="width:{{ 100 * res[r] / total }}%;background:{{ COLOR[r] }}"></span>{% endfor %}
+  </div>
+{%- endmacro %}
+{% macro pct_badge(p, ref) -%}
+  <span class="met-pct {% if p > ref %}alto{% endif %}">{{ p }}%</span>
+{%- endmacro %}
+
+<div class="card-custom p-3 mb-3">
+  <form method="get" class="d-flex flex-wrap align-items-center gap-2">
+    <span class="fw-semibold"><i class="fa-solid fa-chart-column me-1"></i>Período</span>
+    <select name="campana" class="form-select form-select-sm" style="width:auto" onchange="this.form.submit()">
+      <option value="todas" {% if campana is none %}selected{% endif %}>Desde el inicio</option>
+      {% for c, txt in campanas %}<option value="{{ c }}" {% if c == campana %}selected{% endif %}>Campaña {{ txt }}</option>{% endfor %}
+    </select>
+    <small class="text-muted ms-auto">Cada ensayo simple cuenta como una mezcla; cada comparativo aporta todas sus mezclas. Datos al {{ hoy }}.</small>
+  </form>
+</div>
+
+{% if not m.total %}
+  <div class="card-custom p-4 text-center text-muted">No hay mezclas evaluadas en este período.</div>
+{% else %}
+
+<!-- Números principales -->
+<div class="row g-3 mb-3">
+  <div class="col-6 col-lg-3"><div class="stat-card border-blue h-100"><div class="stat-icon bg-blue"><i class="fa-solid fa-flask"></i></div>
+    <div class="stat-info"><div class="stat-num">{{ m.total }}</div><div class="stat-label">Mezclas evaluadas</div>
+    <div class="small text-muted">{{ m.ensayos }} ensayos · {{ m.clientes_n }} clientes</div></div></div></div>
+  <div class="col-6 col-lg-3"><div class="stat-card border-green h-100"><div class="stat-icon bg-green"><i class="fa-solid fa-circle-check"></i></div>
+    <div class="stat-info"><div class="stat-num text-green">{{ m.pct['Estable'] }}%</div><div class="stat-label">Estables</div>
+    <div class="small text-muted">{{ m.res['Estable'] }} mezclas{% if m.res['Estable con observaciones'] %} · +{{ m.pct['Estable con observaciones'] }}% con observaciones{% endif %}</div></div></div></div>
+  <div class="col-6 col-lg-3"><div class="stat-card border-red h-100"><div class="stat-icon bg-red"><i class="fa-solid fa-circle-xmark"></i></div>
+    <div class="stat-info"><div class="stat-num text-red">{{ m.pct['Inestable'] }}%</div><div class="stat-label">Inestables</div>
+    <div class="small text-muted">{{ m.res['Inestable'] }} mezclas</div></div></div></div>
+  <div class="col-6 col-lg-3"><div class="stat-card border-purple h-100"><div class="stat-icon bg-purple"><i class="fa-solid fa-layer-group"></i></div>
+    <div class="stat-info"><div class="stat-num">{{ m.prom_productos|string|replace('.', ',') }}</div><div class="stat-label">Productos por mezcla (promedio)</div>
+    <div class="small text-muted">{{ m.pct_con_ady }}% de las mezclas lleva adyuvante</div></div></div></div>
+</div>
+
+<div class="met-leyenda mb-3">
+  {% for r in ORDEN if m.res.get(r) %}<span><i style="background:{{ COLOR[r] }}"></i>{{ r }}</span>{% endfor %}
+</div>
+
+<div class="row g-3 mb-3">
+  <!-- Por mes -->
+  <div class="col-lg-7">
+    <div class="card-custom h-100">
+      <div class="card-header-custom"><i class="fa-solid fa-calendar-days me-2"></i>Mezclas por mes</div>
+      <div class="p-3">
+        <div class="met-cols">
+          {% for x in m.meses %}
+          <div class="met-col">
+            <div class="met-col-n">{{ x.total }}</div>
+            <div class="met-col-bar" style="height:{{ (160 * x.total / m.max_mes)|round|int }}px"
+                 title="{{ x.etiqueta }}: {% for r in ORDEN if x.res.get(r) %}{{ r }} {{ x.res[r] }}{% if not loop.last %} · {% endif %}{% endfor %}">
+              {% for r in ORDEN|reverse if x.res.get(r) %}<span style="flex:{{ x.res[r] }};background:{{ COLOR[r] }}"></span>{% endfor %}
+            </div>
+            <div class="met-col-lbl">{{ x.etiqueta }}</div>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- Según cantidad de productos -->
+  <div class="col-lg-5">
+    <div class="card-custom h-100">
+      <div class="card-header-custom"><i class="fa-solid fa-layer-group me-2"></i>Resultado según cantidad de productos</div>
+      <div class="p-3">
+        {% for x in m.por_cant %}
+        <div class="met-fila">
+          <div class="met-fila-lbl">{{ x.etiqueta }} prod.</div>
+          <div class="flex-grow-1">{{ barra_resultados(x.res, x.total) }}</div>
+          <div class="met-fila-num">{{ x.total }} <small class="text-muted">· {{ x.pct_problemas }}% no est.</small></div>
+        </div>
+        {% endfor %}
+        <div class="small text-muted mt-2">"No est." = no estables (con observaciones, inestables u otros).</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row g-3 mb-3">
+  <!-- Observaciones visuales -->
+  <div class="col-lg-5">
+    <div class="card-custom h-100">
+      <div class="card-header-custom"><i class="fa-solid fa-eye me-2"></i>Observaciones visuales</div>
+      <div class="p-3">
+        {% for o in m.obs %}
+        <div class="met-fila">
+          <div class="met-fila-lbl">{{ o.etiqueta }}</div>
+          <div class="flex-grow-1"><div class="met-bar"><span style="width:{{ o.pct }}%;background:#EF6C00"></span></div></div>
+          <div class="met-fila-num">{{ o.veces }} <small class="text-muted">· {{ o.pct }}%</small></div>
+        </div>
+        {% if o.grados %}<div class="small text-muted mb-2 met-sub">{% for g, n in o.grados %}{{ g }}: {{ n }}{% if not loop.last %} · {% endif %}{% endfor %}</div>{% endif %}
+        {% endfor %}
+        <div class="small text-muted mt-2">En cuántas mezclas apareció cada problema. "Sí (sin grado)" son ensayos cargados antes de la escala Leve/Medio/Grave.</div>
+      </div>
+    </div>
+  </div>
+  <!-- Formulaciones -->
+  <div class="col-lg-7">
+    <div class="card-custom h-100">
+      <div class="card-header-custom"><i class="fa-solid fa-vial me-2"></i>Formulaciones</div>
+      <div class="table-responsive">
+        <table class="table table-sm mb-0 met-tabla">
+          <thead><tr><th>Formulación</th><th class="text-end">Mezclas</th><th style="width:40%">Presente en</th><th class="text-end">No estables</th><th class="text-end">Inestables</th></tr></thead>
+          <tbody>
+          {% for f in m.formulaciones %}
+            <tr><td class="fw-semibold">{{ f.nombre }}</td><td class="text-end">{{ f.veces }}</td>
+              <td><div class="met-bar"><span style="width:{{ f.pct_mezclas }}%"></span></div></td>
+              <td class="text-end">{{ pct_badge(f.pct_problemas, m.pct_general) }}</td><td class="text-end">{{ f.inestables }}</td></tr>
+          {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      <div class="small text-muted p-2 px-3">Promedio general: {{ m.pct_general }}% de mezclas no estables (en rojo, las que están por encima).
+        {% if m.formulaciones_pocas %}Con menos de {{ min_apariciones }} mezclas (no se muestran): {{ m.formulaciones_pocas|join(', ') }}.{% endif %}</div>
+    </div>
+  </div>
+</div>
+
+<div class="row g-3 mb-3">
+  <!-- Productos más ensayados -->
+  <div class="col-lg-7">
+    <div class="card-custom h-100">
+      <div class="card-header-custom"><i class="fa-solid fa-ranking-star me-2"></i>Productos más ensayados</div>
+      <div class="table-responsive">
+        <table class="table table-sm mb-0 met-tabla">
+          <thead><tr><th>#</th><th>Producto</th><th class="text-end">Mezclas</th><th style="width:30%">Presente en</th><th class="text-end">No estables</th></tr></thead>
+          <tbody>
+          {% for p in m.productos %}
+            <tr><td class="text-muted">{{ loop.index }}</td><td class="fw-semibold">{{ p.nombre }}</td><td class="text-end">{{ p.veces }}</td>
+              <td><div class="met-bar"><span style="width:{{ p.pct_mezclas }}%"></span></div></td>
+              <td class="text-end">{{ pct_badge(p.pct_problemas, m.pct_general) }}</td></tr>
+          {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  <!-- Adyuvantes + Harrier Bio -->
+  <div class="col-lg-5">
+    {% set h = m.harrier %}
+    {% if h.con.n %}
+    <div class="card-custom mb-3">
+      <div class="card-header-custom"><i class="fa-solid fa-droplet me-2"></i>Harrier Bio</div>
+      <div class="p-3">
+        <div class="mb-2">Presente en <b>{{ h.con.n }}</b> mezclas ({{ h.pct_mezclas }}% del total).</div>
+        <div class="met-fila"><div class="met-fila-lbl">Con Harrier Bio</div>
+          <div class="flex-grow-1"><div class="met-bar"><span style="width:{{ h.con.pct_estable }}%;background:#2E7D32"></span></div></div>
+          <div class="met-fila-num">{{ h.con.pct_estable }}% estables</div></div>
+        {% if h.sin.n %}
+        <div class="met-fila"><div class="met-fila-lbl">Sin Harrier Bio</div>
+          <div class="flex-grow-1"><div class="met-bar"><span style="width:{{ h.sin.pct_estable }}%;background:#2E7D32"></span></div></div>
+          <div class="met-fila-num">{{ h.sin.pct_estable }}% estables <small class="text-muted">({{ h.sin.n }})</small></div></div>
+        {% endif %}
+        <div class="small text-muted mt-1">Compara mezclas distintas (otros productos, otras aguas): es una referencia, no una prueba de efecto.</div>
+      </div>
+    </div>
+    {% endif %}
+    <div class="card-custom">
+      <div class="card-header-custom"><i class="fa-solid fa-bottle-droplet me-2"></i>Adyuvantes más usados</div>
+      <div class="p-3">
+        {% for a in m.adyuvantes %}
+        <div class="met-fila">
+          <div class="met-fila-lbl text-truncate" title="{{ a.nombre }}">{{ a.nombre }}</div>
+          <div class="flex-grow-1"><div class="met-bar"><span style="width:{{ 100 * a.veces / m.adyuvantes[0].veces }}%"></span></div></div>
+          <div class="met-fila-num">{{ a.veces }}</div>
+        </div>
+        {% else %}<div class="text-muted small">Sin adyuvantes en este período.</div>{% endfor %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row g-3 mb-3">
+  <!-- Para mirar -->
+  <div class="col-lg-7">
+    <div class="card-custom h-100">
+      <div class="card-header-custom" style="background:linear-gradient(90deg,#8e1b1b,#C62828)"><i class="fa-solid fa-triangle-exclamation me-2"></i>Productos para mirar</div>
+      {% if m.alertas %}
+      <div class="table-responsive">
+        <table class="table table-sm mb-0 met-tabla">
+          <thead><tr><th>Producto</th><th class="text-end">Mezclas</th><th class="text-end">No estables</th><th class="text-end">Inestables</th></tr></thead>
+          <tbody>
+          {% for p in m.alertas %}
+            <tr><td class="fw-semibold">{{ p.nombre }}</td><td class="text-end">{{ p.veces }}</td>
+              <td class="text-end">{{ p.problemas }} {{ pct_badge(p.pct_problemas, m.pct_general) }}</td>
+              <td class="text-end">{{ p.inestables }}</td></tr>
+          {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}<div class="p-3 text-muted small">Ningún producto con {{ min_apariciones }} o más mezclas supera el promedio de no estables.</div>{% endif %}
+      <div class="small text-muted p-2 px-3">Productos con {{ min_apariciones }} o más mezclas cuyas mezclas salieron no estables más seguido que el promedio ({{ m.pct_general }}%). Que un producto esté acá no quiere decir que sea el culpable: puede ser otro de la misma mezcla.</div>
+    </div>
+  </div>
+  <!-- Fabricantes de los productos -->
+  <div class="col-lg-5">
+    <div class="card-custom h-100">
+      <div class="card-header-custom"><i class="fa-solid fa-industry me-2"></i>Empresas de los productos ensayados</div>
+      <div class="table-responsive">
+        <table class="table table-sm mb-0 met-tabla">
+          <thead><tr><th>Empresa</th><th class="text-end">Mezclas</th><th style="width:35%">Presente en</th><th class="text-end">No est.</th></tr></thead>
+          <tbody>
+          {% for f in m.fabricantes %}
+            <tr><td class="fw-semibold">{{ f.nombre }}</td><td class="text-end">{{ f.veces }}</td>
+              <td><div class="met-bar"><span style="width:{{ f.pct_mezclas }}%;background:#00838F"></span></div></td>
+              <td class="text-end">{{ pct_badge(f.pct_problemas, m.pct_general) }}</td></tr>
+          {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      <div class="small text-muted p-2 px-3">Fabricante o marca de cada producto, según la ficha guardada en el ensayo.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ EMPRESAS CLIENTES ═══ -->
+<h6 class="met-titulo"><i class="fa-solid fa-building-user me-2"></i>Empresas clientes · {{ periodo }}</h6>
+<div class="row g-3 mb-3">
+  <div class="col-6 col-lg-3"><div class="stat-card border-purple h-100"><div class="stat-icon bg-purple"><i class="fa-solid fa-building-user"></i></div>
+    <div class="stat-info"><div class="stat-num">{{ m.clientes|length }}</div><div class="stat-label">Empresas que consultaron</div></div></div></div>
+  <div class="col-6 col-lg-3"><div class="stat-card border-green h-100"><div class="stat-icon bg-green"><i class="fa-solid fa-user-plus"></i></div>
+    <div class="stat-info"><div class="stat-num">{% if campana is none %}—{% else %}{{ m.nuevos }}{% endif %}</div><div class="stat-label">Nuevas en el período</div>
+    <div class="small text-muted">{% if campana is none %}Elegí una campaña para ver las nuevas{% else %}Primera consulta en esta campaña{% endif %}</div></div></div></div>
+  <div class="col-6 col-lg-3"><div class="stat-card border-blue h-100"><div class="stat-icon bg-blue"><i class="fa-solid fa-rotate"></i></div>
+    <div class="stat-info"><div class="stat-num">{{ m.volvieron }}</div><div class="stat-label">Consultaron más de un día</div>
+    <div class="small text-muted">{{ m.pct_volvieron }}% de las empresas</div></div></div></div>
+  <div class="col-6 col-lg-3"><div class="stat-card border-red h-100"><div class="stat-icon bg-red"><i class="fa-solid fa-flask"></i></div>
+    <div class="stat-info"><div class="stat-num">{{ m.prom_mezclas_cliente|string|replace('.', ',') }}</div><div class="stat-label">Mezclas por empresa (promedio)</div></div></div></div>
+</div>
+
+<div class="row g-3 mb-3">
+  <div class="col-lg-8">
+    <div class="card-custom h-100">
+      <div class="card-header-custom"><i class="fa-solid fa-ranking-star me-2"></i>Ranking de empresas que más consultan</div>
+      <div class="table-responsive met-scroll">
+        <table class="table table-sm table-hover mb-0 met-tabla">
+          <thead><tr><th>#</th><th>Empresa</th><th class="text-end">Consultas</th><th style="width:18%"></th><th class="text-end">Mezclas</th>
+            <th class="text-end">Estables</th><th>Última</th><th>Cliente desde</th></tr></thead>
+          <tbody>
+          {% for c in m.clientes %}
+            <tr>
+              <td class="text-muted">{{ loop.index }}</td>
+              <td><a href="{{ url_for('cliente_detalle', id=c.id) }}" class="fw-semibold text-decoration-none">{{ c.nombre }}</a>
+                {% if c.zona %}<div class="text-muted" style="font-size:10px">{{ c.zona }}</div>{% endif %}</td>
+              <td class="text-end fw-semibold">{{ c.consultas }}</td>
+              <td><div class="met-bar"><span style="width:{{ 100 * c.consultas / m.max_consultas }}%;background:#6a1b9a"></span></div></td>
+              <td class="text-end">{{ c.mezclas }}</td>
+              <td class="text-end"><span class="met-pct {% if c.pct_estable < 100 - m.pct_general %}alto{% endif %}">{{ c.pct_estable }}%</span></td>
+              <td class="text-nowrap">{{ c.ultima|fecha_ar }}</td>
+              <td class="text-nowrap text-muted">{{ c.cliente_desde|fecha_ar }}</td>
+            </tr>
+          {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      <div class="small text-muted p-2 px-3">Consulta = un ensayo (un comparativo cuenta como una consulta aunque tenga varias mezclas). Ordenado por consultas y después por mezclas.</div>
+    </div>
+  </div>
+  <div class="col-lg-4">
+    <div class="card-custom mb-3">
+      <div class="card-header-custom"><i class="fa-solid fa-map-location-dot me-2"></i>Mezclas por localidad</div>
+      <div class="p-3">
+        {% for nombre, n in m.localidades %}
+        <div class="met-fila">
+          <div class="met-fila-lbl text-truncate" title="{{ nombre }}">{{ nombre }}</div>
+          <div class="flex-grow-1"><div class="met-bar"><span style="width:{{ 100 * n / m.max_loc }}%;background:#6a1b9a"></span></div></div>
+          <div class="met-fila-num">{{ n }}</div>
+        </div>
+        {% else %}<div class="text-muted small">Sin localidades cargadas.</div>{% endfor %}
+      </div>
+    </div>
+    <div class="card-custom">
+      <div class="card-header-custom"><i class="fa-solid fa-map me-2"></i>Mezclas por provincia</div>
+      <div class="p-3">
+        {% for nombre, n in m.provincias %}
+        <div class="met-fila">
+          <div class="met-fila-lbl text-truncate" title="{{ nombre }}">{{ nombre }}</div>
+          <div class="flex-grow-1"><div class="met-bar"><span style="width:{{ 100 * n / m.total }}%;background:#6a1b9a"></span></div></div>
+          <div class="met-fila-num">{{ n }} <small class="text-muted">· {{ (100 * n / m.total)|round|int }}%</small></div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endif %}
+{% endblock %}

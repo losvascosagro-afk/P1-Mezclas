@@ -29,6 +29,11 @@
       </a>
     </li>
     <li class="nav-item">
+      <a class="nav-link {% if 'metricas' in (request.endpoint or '') %}active{% endif %}" href="{{ url_for('metricas.index') }}">
+        <i class="fa-solid fa-chart-column"></i> Métricas
+      </a>
+    </li>
+    <li class="nav-item">
       <a class="nav-link {% if 'ensayo' in (request.endpoint or '') %}active{% endif %}" href="{{ url_for('ensayos') }}">
         <i class="fa-solid fa-vials"></i> Ensayos
       </a>
