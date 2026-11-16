@@ -10,6 +10,7 @@ import io
 import os
 from datetime import datetime
 
+import colores_pdf
 import observaciones
 from mayus import Paragraph, TextoLibre
 from reportlab.lib import colors
@@ -84,8 +85,17 @@ def color_resultado(res):
 
 
 def sec(text, bg=None):
-    t = Table([[Paragraph(text, sty('label', textColor=C_WHITE, leftIndent=6))]], colWidths=[ANCHO])
-    t.setStyle(TableStyle([('BACKGROUND', (0, 0), (-1, -1), bg or C_TEAL),
+    acento = None if bg else colores_pdf.ACENTO
+    bg = bg or colors.HexColor(colores_pdf.SECCION)
+    txt = Paragraph(text, sty('label', textColor=C_WHITE, leftIndent=6))
+    if acento:   # franja de color a la izquierda del título
+        t = Table([['', txt]], colWidths=[0.25 * cm, ANCHO - 0.25 * cm])
+        t.setStyle(TableStyle([('BACKGROUND', (0, 0), (0, -1), colors.HexColor(acento)),
+                               ('BACKGROUND', (1, 0), (1, -1), bg),
+                               ('TOPPADDING', (0, 0), (-1, -1), 5), ('BOTTOMPADDING', (0, 0), (-1, -1), 5)]))
+        return t
+    t = Table([[txt]], colWidths=[ANCHO])
+    t.setStyle(TableStyle([('BACKGROUND', (0, 0), (-1, -1), bg),
                            ('TOPPADDING', (0, 0), (-1, -1), 5), ('BOTTOMPADDING', (0, 0), (-1, -1), 5)]))
     return t
 
@@ -229,6 +239,48 @@ def _vols_txt(texto):
     return ' / '.join(f'{v.strip()} L' for v in (texto or '').split(',') if v.strip()) or '—'
 
 
+_PAPEL_PDF = {'testigo': ('TESTIGO', '#546E7A'), 'sugerida': ('OPCIÓN SUGERIDA', '#1D7A6E')}
+
+
+def _papel_txt(m):
+    """Etiqueta chica de testigo / sugerida para poner junto al nombre ('' si no tiene)."""
+    if m.get('papel') not in _PAPEL_PDF:
+        return ''
+    txt, col = _PAPEL_PDF[m['papel']]
+    return f'<br/><font size="6.5" color="{col}"><b>{txt}</b></font>'
+
+
+def _testigo_vs_sugerida(mezclas):
+    """Bloque 'cómo llegó vs. opción sugerida', o [] si no hay testigo marcado."""
+    from comparativos import testigo_y_sugerida
+    t, s, agregados, quitados = testigo_y_sugerida(mezclas)
+    if not (t and s):
+        return []
+    def col(m, titulo):
+        return [Paragraph(titulo, sty('label', fontSize=8, textColor=colors.HexColor('#555555'))), Spacer(1, 2),
+                Paragraph(f'<b>{_esc(m["nombre"]).upper()}</b>', sty('body', fontSize=9.5, leading=12)), Spacer(1, 3),
+                _badge_res(m['resultado_final'], 5.5 * cm)]
+    flecha = Paragraph('<font size="16" color="#1D7A6E"><b>→</b></font>', sty('center', leading=18))
+    t_tit = 'TESTIGO · COMO LA MANDA EL CLIENTE'
+    s_tit = 'OPCIÓN SUGERIDA' if s.get('papel') == 'sugerida' else 'OPCIÓN SUGERIDA (MEJOR RESULTADO)'
+    filas = [[col(t, t_tit), flecha, col(s, s_tit)]]
+    cambios = []
+    if agregados:
+        cambios.append(f'<b>Agrega:</b> {_esc(", ".join(agregados))}')
+    if quitados:
+        cambios.append(f'<b>Quita:</b> {_esc(", ".join(quitados))}')
+    if cambios:
+        filas.append([Paragraph('<br/>'.join(cambios), sty('body', fontSize=8.5, leading=11)), '', ''])
+    tb = Table(filas, colWidths=[7.9 * cm, 1.6 * cm, 7.9 * cm])
+    st = [('VALIGN', (0, 0), (-1, 0), 'MIDDLE'), ('BOX', (0, 0), (-1, -1), 0.5, C_BORDER),
+          ('TOPPADDING', (0, 0), (-1, -1), 7), ('BOTTOMPADDING', (0, 0), (-1, -1), 7),
+          ('LEFTPADDING', (0, 0), (-1, -1), 10), ('RIGHTPADDING', (0, 0), (-1, -1), 10)]
+    if cambios:
+        st += [('SPAN', (0, 1), (2, 1)), ('LINEABOVE', (0, 1), (-1, 1), 0.4, C_BORDER)]
+    tb.setStyle(TableStyle(st))
+    return [KeepTogether([sec('CÓMO LLEGÓ VS. OPCIÓN SUGERIDA'), tb]), Spacer(1, 7)]
+
+
 def construir(e, mezclas, fotos_generales, upload_folder):
     buf = io.BytesIO()
     doc = SimpleDocTemplate(buf, pagesize=A4, rightMargin=1.8 * cm, leftMargin=1.8 * cm,
@@ -286,7 +338,7 @@ def construir(e, mezclas, fotos_generales, upload_folder):
     filas = [[Paragraph(t, sty('thc')) for t in
               ['Mezcla', 'Agua', 'Espuma', 'Precip.', 'Separ. fases', 'Redisp.', 'Resultado']]]
     for i, m in enumerate(mezclas, start=1):
-        nombre = f'<b>{_esc(m["nombre"])}</b>'
+        nombre = f'<b>{_esc(m["nombre"])}</b>' + _papel_txt(m)
         if m.get('volumenes'):
             nombre += f'<br/><font size="7.5" color="#555555">{_vols_txt(m["volumenes"])}</font>'
         fila = [Paragraph(nombre, sty('body', fontSize=8.5, leading=10.5)),
@@ -304,14 +356,16 @@ def construir(e, mezclas, fotos_generales, upload_folder):
                              ('BOX', (0, 0), (-1, -1), 0.5, C_BORDER), ('LINEBELOW', (0,0),(-1,-2), 0.4, C_BORDER),
                              ('VALIGN', (0, 0), (-1, -1), 'MIDDLE')]))
     story += [KeepTogether([sec('RESUMEN COMPARATIVO'), res]), Spacer(1, 7)]
+    story += _testigo_vs_sugerida(mezclas)
 
     if e['recomendacion']:
-        story += [KeepTogether([sec('CONCLUSIÓN GENERAL', bg=C_TEAL), _caja(_esc(e['recomendacion']))]),
+        story += [KeepTogether([sec('CONCLUSIÓN GENERAL'), _caja(_esc(e['recomendacion']))]),
                   Spacer(1, 7)]
 
     # ── Una sección por mezcla ──
     for i, m in enumerate(mezclas, start=1):
-        bloque = [sec(f'MEZCLA {i}  —  {_esc(m["nombre"]).upper()}', bg=C_TEAL)]
+        papel = f'  ·  {_PAPEL_PDF[m["papel"]][0]}' if m.get('papel') in _PAPEL_PDF else ''
+        bloque = [sec(f'MEZCLA {i}  —  {_esc(m["nombre"]).upper()}{papel}')]
         info = [[Paragraph('Agua', sty('label')), Paragraph(_agua_txt(m), sty()),
                  Paragraph('Resultado', sty('label')), _badge_res(m['resultado_final'], 4.2 * cm)]]
         if m.get('volumenes'):

@@ -21,10 +21,13 @@ bp = Blueprint('comparativos', __name__)
 
 CAMPOS_MEZCLA = ['nombre', 'descripcion', 'tipo_agua', 'ph', 'dureza', 'temperatura', 'conductividad',
                  'espuma', 'precipitado', 'separacion_fases', 'redispersion', 'obs_microscopio',
-                 'resultado_final', 'volumenes']
+                 'resultado_final', 'volumenes', 'papel']
 _NUMERICOS = {'ph', 'dureza', 'temperatura', 'conductividad'}
 OBS_VISUALES = observaciones.ETIQUETAS
 RESULTADOS = ['Estable', 'Inestable', 'Estable con observaciones', 'Requiere más ensayos']
+PAPELES = {'testigo': 'Testigo', 'sugerida': 'Opción sugerida'}
+# De peor a mejor, para elegir la sugerida cuando no se marcó ninguna.
+_NIVEL = {'inestable': 0, 'requiere más ensayos': 1, 'estable con observaciones': 2, 'estable': 3}
 TIPOS_AGUA = ['Estándar laboratorio', 'Agua de pozo', 'Agua de red', 'Agua destilada',
               'Agua de lluvia', 'Agua dura', 'Agua blanda', 'Otra']
 
@@ -83,6 +86,30 @@ def cargar_mezclas(db, eid):
     for f in fotos:
         (por_id[f['id_mezcla']]['fotos'] if f['id_mezcla'] in por_id else generales).append(f)
     return mezclas, generales
+
+
+def _nombre_prod(d):
+    return ' '.join(str(d['nombre_comercial'] or '').upper().split())
+
+
+def testigo_y_sugerida(mezclas):
+    """(testigo, sugerida, agregados, quitados) de un comparativo.
+    testigo: la mezcla marcada como testigo (o None). sugerida: la marcada como
+    sugerida; si no hay y sí hay testigo, la de mejor resultado entre las otras.
+    agregados/quitados: nombres de productos que están en una y no en la otra."""
+    testigo = next((m for m in mezclas if m.get('papel') == 'testigo'), None)
+    sugerida = next((m for m in mezclas if m.get('papel') == 'sugerida'), None)
+    if testigo and not sugerida:
+        otras = [m for m in mezclas if m is not testigo and (m.get('resultado_final') or '').strip()]
+        if otras:
+            sugerida = max(otras, key=lambda m: _NIVEL.get(m['resultado_final'].strip().lower(), -1))
+    agregados, quitados = [], []
+    if testigo and sugerida:
+        a = [_nombre_prod(d) for d in testigo.get('detalles', [])]
+        b = [_nombre_prod(d) for d in sugerida.get('detalles', [])]
+        agregados = [n for n in b if n and n not in a]
+        quitados = [n for n in a if n and n not in b]
+    return testigo, sugerida, agregados, quitados
 
 
 def _ensayo(db, eid):
@@ -150,10 +177,17 @@ def _guardar_mezclas(db, eid, form):
         'SELECT id_mezcla FROM mezclas_ensayo WHERE id_ensayo=?', (eid,)).fetchall()}
     vistas = set()
     por_clave = {}   # clave del formulario → id_mezcla (para subir las fotos a su mezcla)
+    papeles_usados = set()
+    i_papel = CAMPOS_MEZCLA.index('papel')
     for orden, k in enumerate(form.getlist('mezcla_key[]'), start=1):
         vals = [_valor(form, k, c) for c in CAMPOS_MEZCLA]
         if not vals[0]:
             vals[0] = f'Mezcla {orden}'
+        # un solo testigo y una sola sugerida por ensayo
+        if vals[i_papel] not in PAPELES or vals[i_papel] in papeles_usados:
+            vals[i_papel] = None
+        else:
+            papeles_usados.add(vals[i_papel])
         idm = form.get(f'm{k}_id_mezcla')
         idm = int(idm) if idm and idm.isdigit() and int(idm) in existentes else None
         if idm:
@@ -217,8 +251,10 @@ def editar(db, eid):
 
 def detalle(db, e):
     mezclas, generales = cargar_mezclas(db, e['id_ensayo'])
+    t, s, agregados, quitados = testigo_y_sugerida(mezclas)
     return render_template('ensayo_comparativo_detalle.html', e=e, mezclas=mezclas,
-                           fotos_generales=generales, obs_visuales=OBS_VISUALES)
+                           fotos_generales=generales, obs_visuales=OBS_VISUALES,
+                           testigo=t, sugerida=s, agregados=agregados, quitados=quitados, papeles=PAPELES)
 
 
 # ──────────────────────────────────────────────────────────
@@ -256,9 +292,9 @@ def duplicar(id):
         prod = db.execute(f'SELECT {snap_sel} FROM productos WHERE id_producto=?', (d['id_producto'],)).fetchone()
         snap = tuple(prod) if prod else tuple(d[s] for s, _ in SNAP_COLS)
         db.execute(f'INSERT INTO detalle_mezcla (id_ensayo,id_mezcla,orden_carga,id_producto,dosis,unidad,'
-                   f'observacion,{snap_ins}) VALUES (?,?,?,?,?,?,?,{",".join("?" * len(SNAP_COLS))})',
+                   f'observacion,agregado_lab,{snap_ins}) VALUES (?,?,?,?,?,?,?,?,{",".join("?" * len(SNAP_COLS))})',
                    (nuevo_id, mapa.get(d['id_mezcla']), d['orden_carga'], d['id_producto'], d['dosis'],
-                    d['unidad'], d['observacion']) + snap)
+                    d['unidad'], d['observacion'], d['agregado_lab']) + snap)
     db.commit()
     flash(f'Ensayo duplicado como N° {nuevo_id:04d} (sin fotos). Revisá los datos y guardá.', 'success')
     return redirect(url_for('ensayo_editar', id=nuevo_id))

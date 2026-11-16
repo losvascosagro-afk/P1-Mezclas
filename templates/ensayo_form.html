@@ -132,6 +132,7 @@
                 <th style="width:90px">Dosis</th>
                 <th style="width:70px">Unidad</th>
                 <th style="width:150px">Observación</th>
+                <th style="width:105px" title="Cliente = venía en la mezcla original. Laboratorio = lo agregamos para corregirla.">Origen</th>
                 <th style="width:40px"></th>
               </tr>
             </thead>
@@ -153,6 +154,10 @@
                   </select>
                 </td>
                 <td><input type="text" name="det_obs[]" class="form-control form-control-sm" value="{{ d.observacion or '' }}"></td>
+                <td><select name="det_lab[]" class="form-select form-select-sm">
+                  <option value="">Cliente</option>
+                  <option value="1" {% if d.agregado_lab == '1' %}selected{% endif %}>Laboratorio</option>
+                </select></td>
                 <td><button type="button" class="btn btn-sm btn-outline-danger" onclick="removeRow(this)"><i class="fa-solid fa-xmark"></i></button></td>
               </tr>
               {% endfor %}
@@ -205,13 +210,24 @@
       <div class="card-header-custom"><i class="fa-solid fa-star me-2"></i>Resultado Final</div>
       <div class="p-4">
         <div class="mb-3">
-          <label class="form-label fw-semibold">Resultado</label>
-          <select name="resultado_final" class="form-select">
+          <label class="form-label fw-semibold">Testigo (cómo llega)</label>
+          <select name="resultado_testigo" id="resultadoTestigo" class="form-select">
+            <option value="">— Sin dato —</option>
+            {% for r in ['Estable','Inestable','Estable con observaciones','Requiere más ensayos'] %}
+              <option value="{{ r }}" {% if e and e.resultado_testigo == r %}selected{% endif %}>{{ r }}</option>
+            {% endfor %}
+          </select>
+          <div class="form-text">La mezcla tal como la manda el cliente, sin cambios ni agregados.</div>
+        </div>
+        <div class="mb-3">
+          <label class="form-label fw-semibold">Resultado final (lo que devolvemos)</label>
+          <select name="resultado_final" id="resultadoFinal" class="form-select">
             <option value="">— Sin resultado —</option>
             {% for r in ['Estable','Inestable','Estable con observaciones','Requiere más ensayos'] %}
               <option value="{{ r }}" {% if e and e.resultado_final == r %}selected{% endif %}>{{ r }}</option>
             {% endfor %}
           </select>
+          <div class="form-text">Después de las correcciones. Si no se cambió nada, es igual al testigo.</div>
         </div>
         <div class="mb-3">
           <label class="form-label fw-semibold">Recomendación</label>
@@ -263,6 +279,10 @@
       </select>
     </td>
     <td><input type="text" name="det_obs[]" class="form-control form-control-sm" placeholder="Opcional"></td>
+    <td><select name="det_lab[]" class="form-select form-select-sm">
+      <option value="">Cliente</option>
+      <option value="1">Laboratorio</option>
+    </select></td>
     <td><button type="button" class="btn btn-sm btn-outline-danger" onclick="removeRow(this)"><i class="fa-solid fa-xmark"></i></button></td>
   </tr>
 </template>
@@ -414,6 +434,12 @@ function removeRow(btn) {
     tr.querySelector('input[name="orden_carga[]"]').value = i + 1;
   });
 }
+
+// Si el resultado final todavía está vacío, toma el del testigo (caso "no se cambió nada").
+document.getElementById('resultadoTestigo').addEventListener('change', function () {
+  const fin = document.getElementById('resultadoFinal');
+  if (!fin.value) fin.value = this.value;
+});
 
 window.addEventListener('DOMContentLoaded', () => {
   if (document.getElementById('productBody').children.length === 0) {

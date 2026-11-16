@@ -50,6 +50,95 @@
   {% for r in ORDEN if m.res.get(r) %}<span><i style="background:{{ COLOR[r] }}"></i>{{ r }}</span>{% endfor %}
 </div>
 
+<!-- ═══ RECIBIDO VS. DEVUELTO (testigo) ═══ -->
+{% set t = m.testigo %}
+{% set CORTO = {'Estable': 'Estable', 'Estable con observaciones': 'Con obs.', 'Inestable': 'Inestable',
+                'Requiere más ensayos': 'Más ensayos', 'Sin resultado': 'Sin res.'} %}
+<h6 class="met-titulo"><i class="fa-solid fa-right-left me-2"></i>Cómo llegan vs. cómo las devolvemos</h6>
+{% if not t.n %}
+<div class="card-custom p-3 mb-3 text-muted small">Todavía no hay ensayos con el <b>testigo</b> cargado en este período.
+  El testigo es el resultado de la mezcla tal como la manda el cliente, antes de cambios o agregados; en los ensayos simples se carga arriba del resultado final, y en los comparativos marcando una mezcla como <b>Testigo</b> (se compara con la <b>Opción sugerida</b>).</div>
+{% else %}
+<div class="row g-3 mb-3">
+  <div class="col-6 col-lg-3"><div class="stat-card border-blue h-100"><div class="stat-icon bg-blue"><i class="fa-solid fa-vial-circle-check"></i></div>
+    <div class="stat-info"><div class="stat-num">{{ t.n }}</div><div class="stat-label">Mezclas con testigo</div>
+    <div class="small text-muted">{{ t.pct_de_total }}% de las mezclas del período</div></div></div></div>
+  <div class="col-6 col-lg-3"><div class="stat-card border-red h-100"><div class="stat-icon bg-red"><i class="fa-solid fa-inbox"></i></div>
+    <div class="stat-info"><div class="stat-num text-red">{{ t.pct_no_estable_llega }}%</div><div class="stat-label">Llegan no estables</div>
+    <div class="small text-muted">{{ t.pct_llega.get('Inestable', 0) }}% llegan inestables</div></div></div></div>
+  <div class="col-6 col-lg-3"><div class="stat-card border-green h-100"><div class="stat-icon bg-green"><i class="fa-solid fa-arrow-trend-up"></i></div>
+    <div class="stat-info"><div class="stat-num text-green">{{ t.mejoradas }}</div><div class="stat-label">Mezclas que mejoramos</div>
+    <div class="small text-muted">{{ t.pct_mejoradas }}% de las que tienen testigo</div></div></div></div>
+  <div class="col-6 col-lg-3"><div class="stat-card border-purple h-100"><div class="stat-icon bg-purple"><i class="fa-solid fa-life-ring"></i></div>
+    <div class="stat-info"><div class="stat-num">{{ t.rescatadas }}{% if t.inestables_llegan %} <small class="text-muted fs-6">de {{ t.inestables_llegan }}</small>{% endif %}</div>
+    <div class="stat-label">Inestables que dejamos estables</div>
+    <div class="small text-muted">{% if t.inestables_llegan %}{{ t.pct_rescatadas }}% de las que llegaron inestables{% else %}Ninguna llegó inestable{% endif %}</div></div></div></div>
+</div>
+
+<div class="row g-3 mb-3">
+  <div class="col-lg-7 col-xl-5">
+    <div class="card-custom h-100">
+      <div class="card-header-custom"><i class="fa-solid fa-right-left me-2"></i>Recibido vs. devuelto</div>
+      <div class="p-3">
+        <div class="met-fila"><div class="met-fila-lbl">Cómo llegan</div>
+          <div class="flex-grow-1">{{ barra_resultados(t.llega, t.n) }}</div>
+          <div class="met-fila-num">{{ t.pct_llega.get('Estable', 0) }}% est.</div></div>
+        <div class="met-fila"><div class="met-fila-lbl">Cómo salen</div>
+          <div class="flex-grow-1">{{ barra_resultados(t.sale, t.n) }}</div>
+          <div class="met-fila-num">{{ t.pct_sale.get('Estable', 0) }}% est.</div></div>
+        <div class="table-responsive mt-3">
+          <table class="table table-sm mb-0 met-tabla">
+            <thead><tr><th class="small">Llegó ↓ / Salió →</th>{% for c in t.cols_cruce %}<th class="text-end small" title="{{ c }}">{{ CORTO[c] }}</th>{% endfor %}</tr></thead>
+            <tbody>
+            {% for f in t.filas_cruce %}
+              <tr><td class="fw-semibold small" title="{{ f }}">{{ CORTO[f] }}</td>
+                {% for c in t.cols_cruce %}{% set n = t.cruce.get(f ~ '|' ~ c, 0) %}
+                <td class="text-end {% if n and f == c %}text-muted{% elif n %}fw-semibold{% endif %}">{{ n or '·' }}</td>{% endfor %}</tr>
+            {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        <div class="small text-muted mt-2">Cada fila es cómo llegó la mezcla y cada columna cómo la devolvimos. La diagonal (en gris) son las que quedaron igual.
+          {{ t.corregidas }} mezclas ({{ t.pct_corregidas }}%) llevaron algún producto agregado por el laboratorio.</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-lg-5 col-xl-3">
+    <div class="card-custom h-100">
+      <div class="card-header-custom"><i class="fa-solid fa-kit-medical me-2"></i>Productos que agregamos</div>
+      <div class="p-3">
+        {% for c in t.correctores %}
+        <div class="met-fila">
+          <div class="met-fila-lbl text-truncate" title="{{ c.nombre }}">{{ c.nombre }}</div>
+          <div class="met-fila-num">{{ c.veces }} <small class="text-muted">· mejoró {{ c.mejoro }}</small></div>
+        </div>
+        {% else %}<div class="text-muted small">Ningún producto marcado como agregado por el laboratorio.</div>{% endfor %}
+        <div class="small text-muted mt-2">"Mejoró" = la mezcla salió mejor de lo que llegó. Puede haber ayudado también el orden de carga u otro cambio.</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-lg-12 col-xl-4">
+    <div class="card-custom h-100">
+      <div class="card-header-custom" style="background:linear-gradient(90deg,#8e1b1b,#C62828)"><i class="fa-solid fa-triangle-exclamation me-2"></i>Productos que llegan con problemas</div>
+      {% if t.productos %}
+      <div class="table-responsive">
+        <table class="table table-sm mb-0 met-tabla">
+          <thead><tr><th>Producto</th><th class="text-end">Mezclas</th><th class="text-end">No est.</th></tr></thead>
+          <tbody>
+          {% for p in t.productos %}
+            <tr><td class="fw-semibold">{{ p.nombre }}</td><td class="text-end">{{ p.veces }}</td>
+              <td class="text-end">{{ p.problemas }} {{ pct_badge(p.pct_problemas, t.pct_no_estable_llega) }}</td></tr>
+          {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}<div class="p-3 text-muted small">Ningún producto con {{ min_apariciones }} o más mezclas con testigo supera el promedio ({{ t.pct_no_estable_llega }}%).</div>{% endif %}
+      <div class="small text-muted p-2 px-3">Según el testigo y sólo con los productos que mandó el cliente. Con {{ min_apariciones }} o más mezclas.</div>
+    </div>
+  </div>
+</div>
+{% endif %}
+
 <div class="row g-3 mb-3">
   <!-- Por mes -->
   <div class="col-lg-7">
@@ -242,7 +331,7 @@
 </div>
 
 <div class="row g-3 mb-3">
-  <div class="col-lg-8">
+  <div class="col-12">
     <div class="card-custom h-100">
       <div class="card-header-custom"><i class="fa-solid fa-ranking-star me-2"></i>Ranking de empresas que más consultan</div>
       <div class="table-responsive met-scroll">
@@ -254,7 +343,7 @@
             <tr>
               <td class="text-muted">{{ loop.index }}</td>
               <td><a href="{{ url_for('cliente_detalle', id=c.id) }}" class="fw-semibold text-decoration-none">{{ c.nombre }}</a>
-                {% if c.zona %}<div class="text-muted" style="font-size:10px">{{ c.zona }}</div>{% endif %}</td>
+</td>
               <td class="text-end fw-semibold">{{ c.consultas }}</td>
               <td><div class="met-bar"><span style="width:{{ 100 * c.consultas / m.max_consultas }}%;background:#6a1b9a"></span></div></td>
               <td class="text-end">{{ c.mezclas }}</td>
@@ -267,32 +356,6 @@
         </table>
       </div>
       <div class="small text-muted p-2 px-3">Consulta = un ensayo (un comparativo cuenta como una consulta aunque tenga varias mezclas). Ordenado por consultas y después por mezclas.</div>
-    </div>
-  </div>
-  <div class="col-lg-4">
-    <div class="card-custom mb-3">
-      <div class="card-header-custom"><i class="fa-solid fa-map-location-dot me-2"></i>Mezclas por localidad</div>
-      <div class="p-3">
-        {% for nombre, n in m.localidades %}
-        <div class="met-fila">
-          <div class="met-fila-lbl text-truncate" title="{{ nombre }}">{{ nombre }}</div>
-          <div class="flex-grow-1"><div class="met-bar"><span style="width:{{ 100 * n / m.max_loc }}%;background:#6a1b9a"></span></div></div>
-          <div class="met-fila-num">{{ n }}</div>
-        </div>
-        {% else %}<div class="text-muted small">Sin localidades cargadas.</div>{% endfor %}
-      </div>
-    </div>
-    <div class="card-custom">
-      <div class="card-header-custom"><i class="fa-solid fa-map me-2"></i>Mezclas por provincia</div>
-      <div class="p-3">
-        {% for nombre, n in m.provincias %}
-        <div class="met-fila">
-          <div class="met-fila-lbl text-truncate" title="{{ nombre }}">{{ nombre }}</div>
-          <div class="flex-grow-1"><div class="met-bar"><span style="width:{{ 100 * n / m.total }}%;background:#6a1b9a"></span></div></div>
-          <div class="met-fila-num">{{ n }} <small class="text-muted">· {{ (100 * n / m.total)|round|int }}%</small></div>
-        </div>
-        {% endfor %}
-      </div>
     </div>
   </div>
 </div>

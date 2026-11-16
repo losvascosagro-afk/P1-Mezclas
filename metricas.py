@@ -57,48 +57,77 @@ def _mezclas(db, desde=None, hasta=None):
         cond, params = ' AND e.fecha >= ? AND e.fecha < ?', [desde, hasta]
     simples = db.execute(f'''
         SELECT e.id_ensayo, NULL, e.fecha, e.id_cliente, c.razon_social, e.resultado_final, {', '.join('e.' + c for c, _ in OBS)},
-               c.localidad, c.provincia
+               e.resultado_testigo
         FROM ensayos e LEFT JOIN clientes c ON c.id_cliente = e.id_cliente
         WHERE COALESCE(e.tipo, '') <> 'comparativo'{cond}''', params).fetchall()
     comparadas = db.execute(f'''
         SELECT e.id_ensayo, m.id_mezcla, e.fecha, e.id_cliente, c.razon_social, m.resultado_final, {', '.join('m.' + c for c, _ in OBS)},
-               c.localidad, c.provincia
+               NULL, m.papel
         FROM mezclas_ensayo m JOIN ensayos e ON e.id_ensayo = m.id_ensayo
         LEFT JOIN clientes c ON c.id_cliente = e.id_cliente
         WHERE e.tipo = 'comparativo'{cond}''', params).fetchall()
 
     productos = defaultdict(list)   # (id_ensayo, id_mezcla o None) → productos
-    for r in db.execute('''SELECT id_ensayo, id_mezcla, snap_nombre, snap_categoria, snap_formulacion, snap_empresa
+    for r in db.execute('''SELECT id_ensayo, id_mezcla, snap_nombre, snap_categoria, snap_formulacion, snap_empresa,
+                                  agregado_lab
                            FROM detalle_mezcla ORDER BY id_ensayo, orden_carga''').fetchall():
         productos[(r[0], r[1])].append({
             'nombre': (r[2] or '').strip() or '(sin nombre)',
             'categoria': (r[3] or '').strip().upper() or 'SIN CATEGORÍA',
             'formulacion': _formulacion(r[4]),
             'empresa': _norm(r[5]) or 'SIN DATO',
+            'lab': r[6] == '1',   # lo agregó el laboratorio para corregir
         })
 
     out = []
     for r in list(simples) + list(comparadas):
+        prods = productos.get((r[0], r[1]), [])
         out.append({
             'id_ensayo': r[0], 'fecha': str(r[2] or ''), 'id_cliente': r[3],
             'cliente': (r[4] or '').strip() or '(sin cliente)',
             'resultado': _resultado(r[5]),
             'obs': {c: _grado(r[6 + i]) for i, (c, _) in enumerate(OBS)},
-            'productos': productos.get((r[0], r[1]), []),
-            'localidad': _norm(r[10]), 'provincia': _provincia(r[11]),
+            'productos': prods,
+            # testigo = cómo llegó la mezcla; None = sin ese dato (ensayos viejos)
+            'testigo': _resultado(r[10]) if (r[10] or '').strip() else None,
+            # lo que agregó el laboratorio y los productos tal como los mandó el cliente
+            'agregados': {p['nombre'].upper() for p in prods if p['lab']},
+            'origen': [p for p in prods if not p['lab']],
+            'papel': r[11] if len(r) > 11 else None,
         })
+    _parear_comparativos(out)
     return out
+
+
+def _parear_comparativos(mezclas):
+    """En cada comparativo con una mezcla marcada como testigo, la opción sugerida
+    (la marcada, o si no la de mejor resultado) pasa a ser 'lo que devolvemos':
+    toma el resultado del testigo, sus productos de origen y lo que se agregó."""
+    por_ensayo = defaultdict(list)
+    for m in mezclas:
+        if m['papel']:
+            por_ensayo[m['id_ensayo']].append(m)
+    for eid, marcadas in por_ensayo.items():
+        testigo = next((m for m in marcadas if m['papel'] == 'testigo'), None)
+        if not testigo:
+            continue
+        sugerida = next((m for m in marcadas if m['papel'] == 'sugerida'), None)
+        if not sugerida:
+            otras = [m for m in mezclas if m['id_ensayo'] == eid and m is not testigo
+                     and m['resultado'] != 'Sin resultado']
+            if not otras:
+                continue
+            sugerida = max(otras, key=lambda m: _NIVEL.get(m['resultado'], -1))
+        de_origen = {p['nombre'].upper() for p in testigo['productos']}
+        sugerida['testigo'] = testigo['resultado']
+        sugerida['origen'] = testigo['productos']
+        sugerida['agregados'] = {p['nombre'].upper() for p in sugerida['productos']} - de_origen
 
 
 def _norm(v):
     """Mayúscula, sin tildes ni espacios de más: 'Atanor' y 'ATANOR' cuentan juntas."""
     v = unicodedata.normalize('NFKD', str(v or '')).encode('ascii', 'ignore').decode()
     return ' '.join(v.upper().split())
-
-
-def _provincia(v):
-    v = _norm(v)
-    return {'CABA': 'CABA', 'CAPITAL FEDERAL': 'CABA', 'CIUDAD DE BUENOS AIRES': 'CABA'}.get(v, v)
 
 
 def _formulacion(v):
@@ -140,7 +169,7 @@ def _por_cliente(mezclas, primeras):
         fechas = sorted(m['fecha'][:10] for m in ms if m['fecha'])
         estables = sum(1 for m in ms if m['resultado'] == 'Estable')
         filas.append({
-            'id': cid, 'nombre': ms[0]['cliente'], 'zona': ms[0]['localidad'] or ms[0]['provincia'],
+            'id': cid, 'nombre': ms[0]['cliente'],
             'consultas': len({m['id_ensayo'] for m in ms}),
             'dias': len(set(fechas)), 'mezclas': len(ms),
             'pct_estable': _pct(estables, len(ms)), 'no_estables': len(ms) - estables,
@@ -149,6 +178,56 @@ def _por_cliente(mezclas, primeras):
         })
     filas.sort(key=lambda f: (-f['consultas'], -f['mezclas'], f['nombre']))
     return filas
+
+
+# Para decir si una mezcla mejoró: de peor a mejor.
+_NIVEL = {'Inestable': 0, 'Requiere más ensayos': 1, 'Estable con observaciones': 2, 'Estable': 3}
+
+
+def _testigo(mezclas):
+    """Recibido vs. devuelto: sólo las mezclas con testigo cargado."""
+    con = [m for m in mezclas if m['testigo']]
+    n = len(con)
+    if not n:
+        return {'n': 0}
+    llega = Counter(m['testigo'] for m in con)
+    sale = Counter(m['resultado'] for m in con)
+    cruce = Counter((m['testigo'], m['resultado']) for m in con)
+    niv = lambda r: _NIVEL.get(r, -1)
+    mejoradas = [m for m in con if niv(m['resultado']) > niv(m['testigo'])]
+    rescatadas = [m for m in con if m['testigo'] == 'Inestable' and m['resultado'] in ('Estable', 'Estable con observaciones')]
+    corregidas = [m for m in con if m['agregados']]
+
+    # Productos que agregó el laboratorio: cuántas veces y en cuántas la mezcla mejoró
+    usos, mejoro = Counter(), Counter()
+    for m in con:
+        for nombre in m['agregados']:
+            usos[nombre] += 1
+            if niv(m['resultado']) > niv(m['testigo']):
+                mejoro[nombre] += 1
+    correctores = [{'nombre': k, 'veces': v, 'mejoro': mejoro[k], 'pct': _pct(mejoro[k], v)}
+                   for k, v in usos.most_common(10)]
+
+    # Productos del cliente según cómo llegó la mezcla (sin lo que agregó el lab)
+    origen = [dict(m, resultado=m['testigo'], productos=m['origen']) for m in con]
+    pct_llega = _pct(n - llega['Estable'], n)
+    productos = [p for p in _ranking(origen, lambda m: {p['nombre'].upper() for p in m['productos']})
+                 if p['veces'] >= MIN_APARICIONES and p['pct_problemas'] > pct_llega]
+    productos.sort(key=lambda p: (-p['pct_problemas'], -p['veces']))
+
+    orden = [r for r in RESULTADOS + ['Sin resultado'] if llega[r] or sale[r]]
+    return {
+        'n': n, 'llega': dict(llega), 'sale': dict(sale),
+        'pct_llega': {r: _pct(llega[r], n) for r in orden}, 'pct_sale': {r: _pct(sale[r], n) for r in orden},
+        'orden': orden, 'cruce': {f'{a}|{b}': c for (a, b), c in cruce.items()},
+        'filas_cruce': [r for r in orden if llega[r]], 'cols_cruce': [r for r in orden if sale[r]],
+        'mejoradas': len(mejoradas), 'pct_mejoradas': _pct(len(mejoradas), n),
+        'rescatadas': len(rescatadas), 'inestables_llegan': llega['Inestable'],
+        'pct_rescatadas': _pct(len(rescatadas), llega['Inestable']),
+        'corregidas': len(corregidas), 'pct_corregidas': _pct(len(corregidas), n),
+        'correctores': correctores, 'productos': productos[:15], 'pct_no_estable_llega': pct_llega,
+        'pct_de_total': _pct(n, len(mezclas)),
+    }
 
 
 def calcular(mezclas, primeras=None, desde=None):
@@ -209,8 +288,6 @@ def calcular(mezclas, primeras=None, desde=None):
     clientes = _por_cliente(mezclas, primeras or {})
     nuevos = [c for c in clientes if desde and c['cliente_desde'] and c['cliente_desde'] >= desde]
     volvieron = [c for c in clientes if c['dias'] > 1]
-    provincias = Counter(m['provincia'] or 'SIN DATO' for m in mezclas).most_common()
-    localidades = Counter(m['localidad'] for m in mezclas if m['localidad']).most_common(10)
     fabricantes = _ranking(mezclas, lambda m: {p['empresa'] for p in m['productos']})
 
     return {
@@ -231,9 +308,8 @@ def calcular(mezclas, primeras=None, desde=None):
         'nuevos': len(nuevos), 'volvieron': len(volvieron),
         'pct_volvieron': _pct(len(volvieron), len(clientes)),
         'prom_mezclas_cliente': round(total / len(clientes), 1) if clientes else 0,
-        'provincias': provincias, 'localidades': localidades,
-        'max_loc': localidades[0][1] if localidades else 0,
         'fabricantes': fabricantes[:15],
+        'testigo': _testigo(mezclas),
     }
 
 

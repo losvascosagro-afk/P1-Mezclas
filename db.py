@@ -332,6 +332,13 @@ _COLS_COMPARATIVO = [
     ('detalle_mezcla', 'id_mezcla', 'INTEGER'),
     ('fotos_ensayo', 'id_mezcla', 'INTEGER'),
     ('mezclas_ensayo', 'volumenes', 'TEXT'),   # volúmenes de caldo propios de la mezcla: "50,12,20"
+    # Testigo: cómo se comporta la mezcla tal como llega del cliente, antes de que
+    # el laboratorio la corrija. resultado_final pasa a ser lo que se devuelve.
+    # Ensayos viejos: NULL = sin dato (no se deduce nada).
+    ('ensayos', 'resultado_testigo', 'TEXT'),
+    ('detalle_mezcla', 'agregado_lab', 'TEXT'),   # '1' = producto que sumó el laboratorio para corregir
+    # En comparativos: 'testigo' = la mezcla como la manda el cliente; 'sugerida' = la que recomendamos.
+    ('mezclas_ensayo', 'papel', 'TEXT'),
 ]
 
 _SQL_SNAPSHOT_BACKFILL = (

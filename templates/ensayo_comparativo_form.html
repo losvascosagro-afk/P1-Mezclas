@@ -66,7 +66,8 @@
       <i class="fa-solid fa-plus me-1"></i>Agregar mezcla
     </button>
   </div>
-  <p class="text-muted small mb-3">Tip: cargá la primera mezcla completa y usá <b>Duplicar</b> para armar las demás cambiando sólo lo que difiere (por ejemplo el adyuvante). Las fotos no se duplican: cada mezcla lleva las suyas.</p>
+  <p class="text-muted small mb-3">Tip: cargá la primera mezcla completa y usá <b>Duplicar</b> para armar las demás cambiando sólo lo que difiere (por ejemplo el adyuvante). Las fotos no se duplican: cada mezcla lleva las suyas.<br>
+    Si la primera es la mezcla del cliente sin cambios, marcala como <b>Testigo</b>, y marcá como <b>Opción sugerida</b> la que le recomendamos: así el informe y las métricas muestran cómo llegó y cómo la devolvemos.</p>
   <div id="mezclas"></div>
 
   <!-- CONCLUSIÓN -->
@@ -95,6 +96,12 @@
       <span class="badge bg-light text-dark mezcla-num">Mezcla 1</span>
       <input type="text" name="m__K___nombre" class="form-control form-control-sm flex-grow-1" style="max-width:340px"
              placeholder="Nombre: Harrier Bio, Candidato 1...">
+      <select name="m__K___papel" class="form-select form-select-sm papel" style="max-width:250px"
+              title="Testigo = la mezcla tal como la manda el cliente. Opción sugerida = la que le recomendamos.">
+        <option value="">Mezcla común</option>
+        <option value="testigo">Testigo (como la manda el cliente)</option>
+        <option value="sugerida">Opción sugerida</option>
+      </select>
       <div class="ms-auto d-flex gap-1">
         <button type="button" class="btn btn-sm btn-light" title="Subir" onclick="moverMezcla(this,-1)"><i class="fa-solid fa-arrow-up"></i></button>
         <button type="button" class="btn btn-sm btn-light" title="Bajar" onclick="moverMezcla(this,1)"><i class="fa-solid fa-arrow-down"></i></button>
@@ -195,7 +202,7 @@
 {% block scripts %}
 <script>
 const MEZCLAS_INICIALES = {{ mezclas_json|tojson }};
-const CAMPOS = ['nombre','descripcion','tipo_agua','ph','dureza','temperatura','conductividad','volumenes','obs_microscopio','resultado_final'];
+const CAMPOS = ['nombre','descripcion','tipo_agua','ph','dureza','temperatura','conductividad','volumenes','obs_microscopio','resultado_final','papel'];
 const OBS = {{ obs_visuales|map('first')|list|tojson }};
 let _k = 0;
 
@@ -206,6 +213,11 @@ function nuevaCard() {
   const wrap = document.createElement('div');
   wrap.innerHTML = html.trim();
   const card = wrap.firstElementChild;
+  // Un solo testigo y una sola sugerida: al elegirlo en una mezcla, se quita de las otras.
+  card.querySelector('.papel').addEventListener('change', function () {
+    if (!this.value) return;
+    document.querySelectorAll('.mezcla-card .papel').forEach(s => { if (s !== this && s.value === this.value) s.value = ''; });
+  });
   card.querySelector('.agua-tipo').addEventListener('change', function () {
     if (this.value === 'Estándar laboratorio') {
       const set = (sel, v) => { const el = card.querySelector(sel); if (!el.value) el.value = v; };
@@ -267,6 +279,7 @@ function duplicarMezcla(btn) {
   const card = btn.closest('.mezcla-card');
   const d = leerMezcla(card);
   d.id_mezcla = '';
+  d.papel = '';   // la copia no hereda el papel de testigo o sugerida
   d.nombre = d.nombre ? d.nombre + ' (copia)' : '';
   const nueva = agregarMezcla(d, card);
   const nombre = campo(nueva, 'nombre');

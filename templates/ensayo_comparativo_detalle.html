@@ -24,6 +24,11 @@
   {% else %}<span class="text-muted small">Sin resultado</span>{% endif %}
 {%- endmacro %}
 
+{% macro papel_badge(m) -%}
+  {% if m.papel == 'testigo' %}<span class="badge ms-1" style="background:#546E7A">Testigo</span>
+  {% elif m.papel == 'sugerida' %}<span class="badge ms-1" style="background:#1D7A6E">Opción sugerida</span>{% endif %}
+{%- endmacro %}
+
 {% macro agua(m) -%}
   {{ m.tipo_agua or '—' }}{% if m.ph is not none %} · pH {{ m.ph|num }}{% endif %}{% if m.dureza is not none %} · {{ m.dureza|num }} mg/L CaCO₃{% endif %}{% if m.temperatura is not none %} · {{ m.temperatura|num }} °C{% endif %}{% if m.conductividad is not none %} · {{ m.conductividad|num }} µS/cm{% endif %}
 {%- endmacro %}
@@ -86,6 +91,27 @@
       </div>
     </div>
 
+    {% if testigo and sugerida %}
+    <!-- Testigo vs. sugerida -->
+    <div class="card-custom mb-4">
+      <div class="card-header-custom"><i class="fa-solid fa-right-left me-2"></i>Cómo llegó vs. opción sugerida</div>
+      <div class="p-3">
+        <div class="row g-3">
+          <div class="col-md-6"><div class="small text-muted mb-1">Testigo (como la manda el cliente)</div>
+            <div class="fw-semibold mb-1">{{ testigo.nombre }}</div>{{ badge_resultado(testigo.resultado_final) }}</div>
+          <div class="col-md-6"><div class="small text-muted mb-1">Opción sugerida{% if sugerida.papel != 'sugerida' %} <i>(la de mejor resultado; no se marcó ninguna)</i>{% endif %}</div>
+            <div class="fw-semibold mb-1">{{ sugerida.nombre }}</div>{{ badge_resultado(sugerida.resultado_final) }}</div>
+        </div>
+        {% if agregados or quitados %}
+        <div class="small mt-3">
+          {% if agregados %}<div><b>Agrega:</b> {{ agregados|join(', ') }}</div>{% endif %}
+          {% if quitados %}<div><b>Quita:</b> {{ quitados|join(', ') }}</div>{% endif %}
+        </div>
+        {% endif %}
+      </div>
+    </div>
+    {% endif %}
+
     <!-- Resumen -->
     <div class="card-custom mb-4">
       <div class="card-header-custom"><i class="fa-solid fa-table me-2"></i>Resumen comparativo</div>
@@ -99,7 +125,7 @@
           <tbody>
           {% for m in mezclas %}
             <tr>
-              <td><a href="#mezcla{{ m.id_mezcla }}" class="fw-semibold text-decoration-none">{{ m.nombre }}</a></td>
+              <td><a href="#mezcla{{ m.id_mezcla }}" class="fw-semibold text-decoration-none">{{ m.nombre }}</a>{{ papel_badge(m) }}</td>
               {% if con_vol %}<td class="text-nowrap">{{ m.volumenes|vols or '—' }}</td>{% endif %}
               <td><small class="text-muted">{{ agua(m) }}</small></td>
               {% for c, label in obs_visuales %}
@@ -126,7 +152,7 @@
     {% for m in mezclas %}
     <div class="card-custom mb-4" id="mezcla{{ m.id_mezcla }}">
       <div class="card-header-custom d-flex justify-content-between align-items-center flex-wrap gap-2">
-        <span><span class="badge bg-light text-dark me-2">Mezcla {{ loop.index }}</span>{{ m.nombre }}</span>
+        <span><span class="badge bg-light text-dark me-2">Mezcla {{ loop.index }}</span>{{ m.nombre }}{{ papel_badge(m) }}</span>
         {{ badge_resultado(m.resultado_final) }}
       </div>
       <div class="p-3">

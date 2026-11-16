@@ -15,6 +15,7 @@ from reportlab.lib.utils import ImageReader
 
 from mayus import Paragraph, TextoLibre
 from db import get_db, close_db, init_db, BACKEND, BASE_DIR, SNAP_COLS
+import colores_pdf
 import observaciones
 
 # En Vercel el filesystem es efímero; usamos /tmp para uploads.
@@ -36,6 +37,9 @@ app = Flask(__name__)
 app.secret_key = os.environ.get('SECRET_KEY', 'mezclas_lab_2026_key')
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config['MAX_CONTENT_LENGTH'] = 32 * 1024 * 1024  # 32MB max
+# Un dato vacío (None) se muestra vacío, no como el texto "None": si no, al
+# editar y guardar un ensayo, ese "None" quedaba grabado en el campo.
+app.jinja_env.finalize = lambda v: '' if v is None else v
 
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
@@ -567,8 +571,8 @@ def ensayo_nuevo():
         _insert_sql = (
             'INSERT INTO ensayos (fecha,id_cliente,objetivo,obs_mezcla,tipo_agua,ph,'
             'dureza,temperatura,volumenes,tiempos_obs,resultado_final,'
-            'recomendacion,espuma,precipitado,separacion_fases,redispersion,obs_microscopio)'
-            ' VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)'
+            'recomendacion,espuma,precipitado,separacion_fases,redispersion,obs_microscopio,resultado_testigo)'
+            ' VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)'
         )
         if BACKEND == 'postgres':
             _insert_sql += ' RETURNING id_ensayo'
@@ -590,7 +594,8 @@ def ensayo_nuevo():
              request.form.get('precipitado') or 'No',
              request.form.get('separacion_fases') or 'No',
              request.form.get('redispersion') or observaciones.POR_DEFECTO['redispersion'],
-             request.form.get('obs_microscopio') or None))
+             request.form.get('obs_microscopio') or None,
+             request.form.get('resultado_testigo') or None))
         eid = cur.lastrowid
         _save_detalles(db, eid, request.form)
         db.commit()
@@ -645,7 +650,7 @@ def ensayo_editar(id):
             'UPDATE ensayos SET fecha=?,id_cliente=?,objetivo=?,obs_mezcla=?,tipo_agua=?,ph=?,'
             'dureza=?,temperatura=?,volumenes=?,tiempos_obs=?,'
             'resultado_final=?,recomendacion=?,espuma=?,precipitado=?,'
-            'separacion_fases=?,redispersion=?,obs_microscopio=? WHERE id_ensayo=?',
+            'separacion_fases=?,redispersion=?,obs_microscopio=?,resultado_testigo=? WHERE id_ensayo=?',
             (request.form.get('fecha'),
              request.form.get('id_cliente') or None,
              request.form.get('objetivo') or None,
@@ -662,7 +667,8 @@ def ensayo_editar(id):
              request.form.get('precipitado') or 'No',
              request.form.get('separacion_fases') or 'No',
              request.form.get('redispersion') or observaciones.POR_DEFECTO['redispersion'],
-             request.form.get('obs_microscopio') or None, id))
+             request.form.get('obs_microscopio') or None,
+             request.form.get('resultado_testigo') or None, id))
         previos = {r['id_producto']: r for r in db.execute(
             'SELECT * FROM detalle_mezcla WHERE id_ensayo=?', (id,)).fetchall()}
         db.execute('DELETE FROM detalle_mezcla WHERE id_ensayo=?', (id,))
@@ -718,6 +724,7 @@ def _save_detalles(db, eid, form, previos=None, prefijo='', id_mezcla=None):
     doss = form.getlist(prefijo + 'dosis[]')
     unis = form.getlist(prefijo + 'unidad[]')
     obss = form.getlist(prefijo + 'det_obs[]')
+    labs = form.getlist(prefijo + 'det_lab[]')   # '1' = lo agregó el laboratorio ('' = venía del cliente)
     for i, pid in enumerate(pids):
         if pid:
             pid = int(pid)
@@ -729,13 +736,14 @@ def _save_detalles(db, eid, form, previos=None, prefijo='', id_mezcla=None):
                 snap = tuple(row) if row else (None,) * len(SNAP_COLS)
             db.execute(
                 'INSERT INTO detalle_mezcla (id_ensayo,id_mezcla,orden_carga,id_producto,dosis,unidad,observacion,'
-                f'{_SNAP_INSERT}) VALUES (?,?,?,?,?,?,?,{",".join("?" * len(SNAP_COLS))})',
+                f'agregado_lab,{_SNAP_INSERT}) VALUES (?,?,?,?,?,?,?,?,{",".join("?" * len(SNAP_COLS))})',
                 (eid, id_mezcla,
                  int(ords[i]) if i < len(ords) and ords[i] else i + 1,
                  pid,
                  _float_or_none(doss[i] if i < len(doss) else None),
                  unis[i] if i < len(unis) and unis[i] else 'L',
-                 obss[i] if i < len(obss) and obss[i] else None) + snap)
+                 obss[i] if i < len(obss) and obss[i] else None,
+                 '1' if i < len(labs) and labs[i] == '1' else None) + snap)
 
 
 # ──────────────────────────────────────────────────────────
@@ -892,8 +900,19 @@ def _build_pdf(e, detalles, fotos):
         return img
 
     def sec(text, bg=None):
-        bg = bg or C_TEAL
-        t = Table([[Paragraph(text, sty('label', textColor=C_WHITE, fontSize=9, leftIndent=6))]], colWidths=[17.4*cm])
+        acento = None if bg else colores_pdf.ACENTO
+        bg = bg or colors.HexColor(colores_pdf.SECCION)
+        txt = Paragraph(text, sty('label', textColor=C_WHITE, fontSize=9, leftIndent=6))
+        if acento:   # franja de color a la izquierda del título
+            t = Table([['', txt]], colWidths=[0.25*cm, 17.15*cm])
+            t.setStyle(TableStyle([
+                ('BACKGROUND', (0,0),(0,-1), colors.HexColor(acento)),
+                ('BACKGROUND', (1,0),(1,-1), bg),
+                ('TOPPADDING', (0,0),(-1,-1), 5),
+                ('BOTTOMPADDING', (0,0),(-1,-1), 5),
+            ]))
+            return t
+        t = Table([[txt]], colWidths=[17.4*cm])
         t.setStyle(TableStyle([
             ('BACKGROUND', (0,0),(-1,-1), bg),
             ('TOPPADDING', (0,0),(-1,-1), 5),
@@ -1052,6 +1071,14 @@ def _build_pdf(e, detalles, fotos):
                 Paragraph((d['unidad'] or 'L').upper(), sc),
             ])
             prod_row_indices.append(len(mrows) - 1)
+            if d['agregado_lab'] == '1':
+                mrows.append([
+                    Paragraph('', sc),
+                    Paragraph('<i><font color="#1D7A6E">Agregado por el laboratorio para corregir la mezcla</font></i>',
+                              sty('body', fontSize=7, leading=9, textColor=colors.HexColor('#555555'))),
+                    '', '', '', '', '', '',
+                ])
+                obs_row_indices.add(len(mrows) - 1)
             if d['observacion'] and str(d['observacion']).strip():
                 mrows.append([
                     Paragraph('', sc),
@@ -1116,15 +1143,23 @@ def _build_pdf(e, detalles, fotos):
     story += [KeepTogether([sec('OBSERVACIONES VISUALES'), ov]), Spacer(1, 7)]
 
     # ── CONCLUSIÓN ──
-    conc = Table([
+    testigo = str(e['resultado_testigo'] or '').strip()
+    filas_conc = [
         [Paragraph('Resultado Final:', sty('label')),
          Paragraph(f'<font color="white"><b>  {resultado.upper() or "—"}  </b></font>',
                    sty('center', textColor=C_WHITE, fontName='Outfit-Bold', fontSize=10))],
         [Paragraph('Recomendación:', sty('label')),
          TextoLibre(e['recomendacion'] or '—', sty('obs'))],
-    ], colWidths=[3.5*cm, 13.9*cm])
+    ]
+    if testigo:
+        t_estable = 'inestable' not in testigo.lower() and 'estable' in testigo.lower()
+        filas_conc.insert(0, [Paragraph('Testigo (como llegó):', sty('label')),
+                              Paragraph(f'<font color="{"#1D7A6E" if t_estable else "#C62828"}"><b>{testigo.upper()}</b></font>',
+                                        sty('center', fontSize=10))])
+    fila_res = 1 if testigo else 0
+    conc = Table(filas_conc, colWidths=[3.5*cm, 13.9*cm])
     conc.setStyle(TableStyle([
-        ('BACKGROUND', (1,0),(1,0), C_RESULT),
+        ('BACKGROUND', (1,fila_res),(1,fila_res), C_RESULT),
         ('TOPPADDING', (0,0),(-1,-1), 7), ('BOTTOMPADDING', (0,0),(-1,-1), 7),
         ('LEFTPADDING', (0,0),(-1,-1), 8), ('RIGHTPADDING', (0,0),(-1,-1), 8),
         ('BOX', (0,0),(-1,-1), 0.5, C_BORDER),
