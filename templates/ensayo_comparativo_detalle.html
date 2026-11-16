@@ -91,23 +91,21 @@
       </div>
     </div>
 
-    {% if testigo and sugerida %}
-    <!-- Testigo vs. sugerida -->
+    {% if testigo and sugeridas %}
+    <!-- Testigo vs. opciones sugeridas -->
     <div class="card-custom mb-4">
-      <div class="card-header-custom"><i class="fa-solid fa-right-left me-2"></i>Cómo llegó vs. opción sugerida</div>
+      <div class="card-header-custom"><i class="fa-solid fa-right-left me-2"></i>Cómo llegó vs. {{ 'opciones sugeridas' if sugeridas|length > 1 else 'opción sugerida' }}</div>
       <div class="p-3">
-        <div class="row g-3">
-          <div class="col-md-6"><div class="small text-muted mb-1">Testigo (como la manda el cliente)</div>
-            <div class="fw-semibold mb-1">{{ testigo.nombre }}</div>{{ badge_resultado(testigo.resultado_final) }}</div>
-          <div class="col-md-6"><div class="small text-muted mb-1">Opción sugerida{% if sugerida.papel != 'sugerida' %} <i>(la de mejor resultado; no se marcó ninguna)</i>{% endif %}</div>
-            <div class="fw-semibold mb-1">{{ sugerida.nombre }}</div>{{ badge_resultado(sugerida.resultado_final) }}</div>
+        <div class="small text-muted mb-1">Testigo (como la manda el cliente)</div>
+        <div class="mb-3"><span class="fw-semibold me-2">{{ testigo.nombre }}</span>{{ badge_resultado(testigo.resultado_final) }}</div>
+        {% for s in sugeridas %}
+        <div class="border-top pt-2 mt-2">
+          <div class="small text-muted mb-1"><i class="fa-solid fa-arrow-right me-1"></i>Opción sugerida{% if sugeridas|length > 1 %} {{ loop.index }}{% endif %}{% if not s.marcada %} <i>(la de mejor resultado; no se marcó ninguna)</i>{% endif %}</div>
+          <div><span class="fw-semibold me-2">{{ s.mezcla.nombre }}</span>{{ badge_resultado(s.mezcla.resultado_final) }}</div>
+          {% if s.agregados %}<div class="small mt-1"><b>Agrega:</b> {{ s.agregados|join(', ') }}</div>{% endif %}
+          {% if s.quitados %}<div class="small"><b>Quita:</b> {{ s.quitados|join(', ') }}</div>{% endif %}
         </div>
-        {% if agregados or quitados %}
-        <div class="small mt-3">
-          {% if agregados %}<div><b>Agrega:</b> {{ agregados|join(', ') }}</div>{% endif %}
-          {% if quitados %}<div><b>Quita:</b> {{ quitados|join(', ') }}</div>{% endif %}
-        </div>
-        {% endif %}
+        {% endfor %}
       </div>
     </div>
     {% endif %}

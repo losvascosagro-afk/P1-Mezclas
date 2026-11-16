@@ -67,7 +67,7 @@
     </button>
   </div>
   <p class="text-muted small mb-3">Tip: cargá la primera mezcla completa y usá <b>Duplicar</b> para armar las demás cambiando sólo lo que difiere (por ejemplo el adyuvante). Las fotos no se duplican: cada mezcla lleva las suyas.<br>
-    Si la primera es la mezcla del cliente sin cambios, marcala como <b>Testigo</b>, y marcá como <b>Opción sugerida</b> la que le recomendamos: así el informe y las métricas muestran cómo llegó y cómo la devolvemos.</p>
+    Si la primera es la mezcla del cliente sin cambios, marcala como <b>Testigo</b>, y marcá como <b>Opción sugerida</b> las que le recomendamos (pueden ser varias): así el informe y las métricas muestran cómo llegó y cómo la devolvemos.</p>
   <div id="mezclas"></div>
 
   <!-- CONCLUSIÓN -->
@@ -213,9 +213,9 @@ function nuevaCard() {
   const wrap = document.createElement('div');
   wrap.innerHTML = html.trim();
   const card = wrap.firstElementChild;
-  // Un solo testigo y una sola sugerida: al elegirlo en una mezcla, se quita de las otras.
+  // Un solo testigo: al elegirlo en una mezcla, se quita de las otras. Sugeridas puede haber varias.
   card.querySelector('.papel').addEventListener('change', function () {
-    if (!this.value) return;
+    if (this.value !== 'testigo') return;
     document.querySelectorAll('.mezcla-card .papel').forEach(s => { if (s !== this && s.value === this.value) s.value = ''; });
   });
   card.querySelector('.agua-tipo').addEventListener('change', function () {
@@ -279,7 +279,7 @@ function duplicarMezcla(btn) {
   const card = btn.closest('.mezcla-card');
   const d = leerMezcla(card);
   d.id_mezcla = '';
-  d.papel = '';   // la copia no hereda el papel de testigo o sugerida
+  d.papel = '';   // la copia arranca como mezcla común
   d.nombre = d.nombre ? d.nombre + ' (copia)' : '';
   const nueva = agregarMezcla(d, card);
   const nombre = campo(nueva, 'nombre');

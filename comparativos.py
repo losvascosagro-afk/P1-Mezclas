@@ -92,24 +92,28 @@ def _nombre_prod(d):
     return ' '.join(str(d['nombre_comercial'] or '').upper().split())
 
 
-def testigo_y_sugerida(mezclas):
-    """(testigo, sugerida, agregados, quitados) de un comparativo.
-    testigo: la mezcla marcada como testigo (o None). sugerida: la marcada como
-    sugerida; si no hay y sí hay testigo, la de mejor resultado entre las otras.
-    agregados/quitados: nombres de productos que están en una y no en la otra."""
+def testigo_y_sugeridas(mezclas):
+    """(testigo, sugeridas) de un comparativo.
+    testigo: la mezcla marcada como testigo (o None).
+    sugeridas: lista de dicts {mezcla, agregados, quitados, marcada}, una por cada
+    mezcla marcada como opción sugerida (puede haber varias). Si no se marcó
+    ninguna y sí hay testigo, la de mejor resultado entre las otras (marcada=False).
+    agregados/quitados: productos que están en la sugerida y no en el testigo, y al revés."""
     testigo = next((m for m in mezclas if m.get('papel') == 'testigo'), None)
-    sugerida = next((m for m in mezclas if m.get('papel') == 'sugerida'), None)
-    if testigo and not sugerida:
+    elegidas = [m for m in mezclas if m.get('papel') == 'sugerida']
+    marcada = bool(elegidas)
+    if testigo and not elegidas:
         otras = [m for m in mezclas if m is not testigo and (m.get('resultado_final') or '').strip()]
         if otras:
-            sugerida = max(otras, key=lambda m: _NIVEL.get(m['resultado_final'].strip().lower(), -1))
-    agregados, quitados = [], []
-    if testigo and sugerida:
-        a = [_nombre_prod(d) for d in testigo.get('detalles', [])]
-        b = [_nombre_prod(d) for d in sugerida.get('detalles', [])]
-        agregados = [n for n in b if n and n not in a]
-        quitados = [n for n in a if n and n not in b]
-    return testigo, sugerida, agregados, quitados
+            elegidas = [max(otras, key=lambda m: _NIVEL.get(m['resultado_final'].strip().lower(), -1))]
+    a = [_nombre_prod(d) for d in testigo.get('detalles', [])] if testigo else []
+    sugeridas = []
+    for m in elegidas:
+        b = [_nombre_prod(d) for d in m.get('detalles', [])]
+        sugeridas.append({'mezcla': m, 'marcada': marcada,
+                          'agregados': [n for n in b if n and n not in a] if testigo else [],
+                          'quitados': [n for n in a if n and n not in b]})
+    return testigo, sugeridas
 
 
 def _ensayo(db, eid):
@@ -183,8 +187,8 @@ def _guardar_mezclas(db, eid, form):
         vals = [_valor(form, k, c) for c in CAMPOS_MEZCLA]
         if not vals[0]:
             vals[0] = f'Mezcla {orden}'
-        # un solo testigo y una sola sugerida por ensayo
-        if vals[i_papel] not in PAPELES or vals[i_papel] in papeles_usados:
+        # un solo testigo por ensayo; opciones sugeridas puede haber varias
+        if vals[i_papel] not in PAPELES or (vals[i_papel] == 'testigo' and 'testigo' in papeles_usados):
             vals[i_papel] = None
         else:
             papeles_usados.add(vals[i_papel])
@@ -251,10 +255,10 @@ def editar(db, eid):
 
 def detalle(db, e):
     mezclas, generales = cargar_mezclas(db, e['id_ensayo'])
-    t, s, agregados, quitados = testigo_y_sugerida(mezclas)
+    t, sugeridas = testigo_y_sugeridas(mezclas)
     return render_template('ensayo_comparativo_detalle.html', e=e, mezclas=mezclas,
                            fotos_generales=generales, obs_visuales=OBS_VISUALES,
-                           testigo=t, sugerida=s, agregados=agregados, quitados=quitados, papeles=PAPELES)
+                           testigo=t, sugeridas=sugeridas, papeles=PAPELES)
 
 
 # ──────────────────────────────────────────────────────────

@@ -100,9 +100,11 @@ def _mezclas(db, desde=None, hasta=None):
 
 
 def _parear_comparativos(mezclas):
-    """En cada comparativo con una mezcla marcada como testigo, la opción sugerida
-    (la marcada, o si no la de mejor resultado) pasa a ser 'lo que devolvemos':
-    toma el resultado del testigo, sus productos de origen y lo que se agregó."""
+    """Cada comparativo con una mezcla marcada como testigo cuenta como UN caso de
+    'cómo llegó vs. cómo la devolvemos'. Lo devuelto es la mejor de las opciones
+    sugeridas (puede haber varias; si no se marcó ninguna, la de mejor resultado
+    entre las otras). Ese caso toma el resultado del testigo, sus productos de
+    origen y lo que se agregó en cualquiera de las sugeridas."""
     por_ensayo = defaultdict(list)
     for m in mezclas:
         if m['papel']:
@@ -111,17 +113,18 @@ def _parear_comparativos(mezclas):
         testigo = next((m for m in marcadas if m['papel'] == 'testigo'), None)
         if not testigo:
             continue
-        sugerida = next((m for m in marcadas if m['papel'] == 'sugerida'), None)
-        if not sugerida:
-            otras = [m for m in mezclas if m['id_ensayo'] == eid and m is not testigo
-                     and m['resultado'] != 'Sin resultado']
-            if not otras:
+        sugeridas = [m for m in marcadas if m['papel'] == 'sugerida']
+        if not sugeridas:
+            sugeridas = [m for m in mezclas if m['id_ensayo'] == eid and m is not testigo
+                         and m['resultado'] != 'Sin resultado']
+            if not sugeridas:
                 continue
-            sugerida = max(otras, key=lambda m: _NIVEL.get(m['resultado'], -1))
+            sugeridas = [max(sugeridas, key=lambda m: _NIVEL.get(m['resultado'], -1))]
+        mejor = max(sugeridas, key=lambda m: _NIVEL.get(m['resultado'], -1))
         de_origen = {p['nombre'].upper() for p in testigo['productos']}
-        sugerida['testigo'] = testigo['resultado']
-        sugerida['origen'] = testigo['productos']
-        sugerida['agregados'] = {p['nombre'].upper() for p in sugerida['productos']} - de_origen
+        mejor['testigo'] = testigo['resultado']
+        mejor['origen'] = testigo['productos']
+        mejor['agregados'] = {p['nombre'].upper() for m in sugeridas for p in m['productos']} - de_origen
 
 
 def _norm(v):

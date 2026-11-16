@@ -251,34 +251,47 @@ def _papel_txt(m):
 
 
 def _testigo_vs_sugerida(mezclas):
-    """Bloque 'cómo llegó vs. opción sugerida', o [] si no hay testigo marcado."""
-    from comparativos import testigo_y_sugerida
-    t, s, agregados, quitados = testigo_y_sugerida(mezclas)
-    if not (t and s):
+    """Bloque 'cómo llegó vs. opción/opciones sugeridas', o [] si no hay testigo marcado."""
+    from comparativos import testigo_y_sugeridas
+    t, sugeridas = testigo_y_sugeridas(mezclas)
+    if not (t and sugeridas):
         return []
+    gris = colors.HexColor('#555555')
+
     def col(m, titulo):
-        return [Paragraph(titulo, sty('label', fontSize=8, textColor=colors.HexColor('#555555'))), Spacer(1, 2),
+        return [Paragraph(titulo, sty('label', fontSize=8, textColor=gris)), Spacer(1, 2),
                 Paragraph(f'<b>{_esc(m["nombre"]).upper()}</b>', sty('body', fontSize=9.5, leading=12)), Spacer(1, 3),
                 _badge_res(m['resultado_final'], 5.5 * cm)]
     flecha = Paragraph('<font size="16" color="#1D7A6E"><b>→</b></font>', sty('center', leading=18))
-    t_tit = 'TESTIGO · COMO LA MANDA EL CLIENTE'
-    s_tit = 'OPCIÓN SUGERIDA' if s.get('papel') == 'sugerida' else 'OPCIÓN SUGERIDA (MEJOR RESULTADO)'
-    filas = [[col(t, t_tit), flecha, col(s, s_tit)]]
-    cambios = []
-    if agregados:
-        cambios.append(f'<b>Agrega:</b> {_esc(", ".join(agregados))}')
-    if quitados:
-        cambios.append(f'<b>Quita:</b> {_esc(", ".join(quitados))}')
-    if cambios:
-        filas.append([Paragraph('<br/>'.join(cambios), sty('body', fontSize=8.5, leading=11)), '', ''])
+    varias = len(sugeridas) > 1
+    filas, st = [], [('BOX', (0, 0), (-1, -1), 0.5, C_BORDER),
+                     ('TOPPADDING', (0, 0), (-1, -1), 7), ('BOTTOMPADDING', (0, 0), (-1, -1), 7),
+                     ('LEFTPADDING', (0, 0), (-1, -1), 10), ('RIGHTPADDING', (0, 0), (-1, -1), 10)]
+    for n, s in enumerate(sugeridas, start=1):
+        titulo = f'OPCIÓN SUGERIDA {n}' if varias else 'OPCIÓN SUGERIDA'
+        if not s['marcada']:
+            titulo += ' (MEJOR RESULTADO)'
+        # el testigo va sólo en la primera fila; en las siguientes queda la celda vacía
+        izq = col(t, 'TESTIGO · COMO LA MANDA EL CLIENTE') if n == 1 else ''
+        fila = len(filas)
+        filas.append([izq, flecha, col(s['mezcla'], titulo)])
+        st.append(('VALIGN', (0, fila), (-1, fila), 'MIDDLE'))
+        if n > 1:
+            st.append(('LINEABOVE', (1, fila), (-1, fila), 0.4, C_BORDER))
+        cambios = []
+        if s['agregados']:
+            cambios.append(f'<b>Agrega:</b> {_esc(", ".join(s["agregados"]))}')
+        if s['quitados']:
+            cambios.append(f'<b>Quita:</b> {_esc(", ".join(s["quitados"]))}')
+        if cambios:
+            filas.append(['', '', Paragraph('<br/>'.join(cambios), sty('body', fontSize=8.5, leading=11))])
+            st.append(('TOPPADDING', (0, len(filas) - 1), (-1, len(filas) - 1), 0))
+    if varias:   # el testigo ocupa toda la columna izquierda
+        st += [('SPAN', (0, 0), (0, len(filas) - 1)), ('VALIGN', (0, 0), (0, -1), 'MIDDLE')]
     tb = Table(filas, colWidths=[7.9 * cm, 1.6 * cm, 7.9 * cm])
-    st = [('VALIGN', (0, 0), (-1, 0), 'MIDDLE'), ('BOX', (0, 0), (-1, -1), 0.5, C_BORDER),
-          ('TOPPADDING', (0, 0), (-1, -1), 7), ('BOTTOMPADDING', (0, 0), (-1, -1), 7),
-          ('LEFTPADDING', (0, 0), (-1, -1), 10), ('RIGHTPADDING', (0, 0), (-1, -1), 10)]
-    if cambios:
-        st += [('SPAN', (0, 1), (2, 1)), ('LINEABOVE', (0, 1), (-1, 1), 0.4, C_BORDER)]
     tb.setStyle(TableStyle(st))
-    return [KeepTogether([sec('CÓMO LLEGÓ VS. OPCIÓN SUGERIDA'), tb]), Spacer(1, 7)]
+    rotulo = 'CÓMO LLEGÓ VS. OPCIONES SUGERIDAS' if varias else 'CÓMO LLEGÓ VS. OPCIÓN SUGERIDA'
+    return [KeepTogether([sec(rotulo), tb]), Spacer(1, 7)]
 
 
 def construir(e, mezclas, fotos_generales, upload_folder):
